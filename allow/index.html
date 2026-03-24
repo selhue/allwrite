@@ -9,9 +9,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-     :root { --bg-dark: #0f172a; --card-dark: #1e293b; --accent: #eab308; --accent-shadow: #a16207; --error: #ef4444; --text-main: #f8fafc; }body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Nunito', sans-serif; user-select: none; margin: 0; overflow: hidden; height: 100vh; }
-        
+  <app>
+      <style>
+     :root { --bg-dark: #0f172a; --card-dark: #1e293b; --accent: #eab308; --accent-shadow: #a16207; --error: #ef4444; --text-main: #f8fafc; }body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Nunito', sans-serif; user-select: none; margin: 0; overflow: hidden; 
+      }
+        body {
+            height: 100dvh;
+        }
         /* Splash Styles */
         #splash { position: fixed; inset: 0; background-color: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; transition: all 0.8s ease; }
         .logo-box { background: var(--accent); width: 80px; height: 80px; border-radius: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 #6f631e; animation: bounce 2s infinite; }
@@ -35,7 +39,7 @@
         .game-card.selected { border-color: var(--accent); background-color: #4d4e06; transform: translateY(2px); box-shadow: 0 2px 0 #020617; }
 
         /* Dock/Footer */
-        .dock { background: rgba(30, 41, 59, 0.8); backdrop-blur: 10px; border-radius: 30px; margin: 15px; padding: 10px; display: flex; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .dock { background: rgba(30, 41, 59, 0.8); backdrop-blur: 10px; border-radius: 30px; margin: 15px; margin:auto; padding: 10px; display: flex; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .footer-btn { background-color: var(--accent); color: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 0 #656516; font-weight: 900; text-transform: uppercase; flex-grow: 1; transition: 0.2s; }
         .footer-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #5c6516; }
         .footer-btn:disabled { background: #334155; box-shadow: 0 4px 0 #1e293b; color: #64748b; }
@@ -44,14 +48,14 @@
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .confetti { position: absolute; width: 10px; height: 10px; top: -10px; z-index: 50; animation: fall 3s linear forwards; }
-        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        @keyframes fall { to { transform: translateY(100dvh) rotate(720deg); opacity: 0; } }
     </style>
 </head>
 <body class="flex flex-col">
 
     <div id="splash">
         <div class="logo-box mb-6"><i class="fa-solid fa-bolt text-4xl text-white"></i></div>
-        <h1 class="text-3xl font-black mb-6">AllWrite PRO</h1>
+        <h1 class="text-3xl font-black mb-6">AllWrite</h1>
     </div>
 
     <div id="homeScreen" class="hidden">
@@ -246,6 +250,7 @@
             }
         }
     </script>
+  </app>
 
     <security>
         <script>
