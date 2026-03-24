@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AllWrite | Pixel Spell</title>
+    <meta name="description" content="Enabling next filipino generation in writing and learning english.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2064%2064'%3E%0A%3Ccircle%20cx%3D'32'%20cy%3D'32'%20r%3D'32'%20fill%3D'%23e1c066'%2F%3E%0A%3Ctext%20x%3D'32'%20y%3D'46'%20font-size%3D'38'%20font-weight%3D'700'%20text-anchor%3D'middle'%20fill%3D'%23ffffff'%20font-family%3D'Arial'%20letter-spacing%3D'-1'%3Eaw%3C%2Ftext%3E%0A%3C%2Fsvg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+     :root { --bg-dark: #0f172a; --card-dark: #1e293b; --accent: #eab308; --accent-shadow: #a16207; --error: #ef4444; --text-main: #f8fafc; }body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Nunito', sans-serif; user-select: none; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* Splash Styles */
+        #splash { position: fixed; inset: 0; background-color: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; transition: all 0.8s ease; }
+        .logo-box { background: var(--accent); width: 80px; height: 80px; border-radius: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 #6f631e; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* Home/Map Styles */
+        #homeScreen { position: fixed; inset: 0; display: flex; flex-direction: column; z-index: 50; }
+        .map-container { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding-bottom: 100px; }
+        .level-node { width: 70px; height: 70px; background: #334155; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 900; box-shadow: 0 6px 0 #020617; position: relative; transition: 0.2s; }
+        .level-node.active { background: var(--accent); box-shadow: 0 6px 0 #655816; color: white; transform: scale(1.1); }
+        .level-node.locked { opacity: 0.5; filter: grayscale(1); }
+        .path-line { width: 4px; height: 30px; background: #334155; }
+
+        /* Game Styles */
+        .progress-container { background-color: #334155; height: 10px; border-radius: 99px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #d9de4a, #c5b222); height: 100%; width: 0%; transition: width 0.5s ease; }
+        .pixel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #020617; padding: 20px; border-radius: 15px; width: fit-content; margin: 0 auto; }
+        .pixel-cube { width: 45px; height: 45px; background: #334155; border-radius: 8px; transition: all 0.2s; cursor: pointer; box-shadow: 0 4px 0 #1e293b; }
+        .pixel-cube.revealed { background: var(--pixel-color, #c5aa22); transform: scale(0.9) translateY(2px); box-shadow: none; }
+        .game-card { background-color: var(--card-dark); border-radius: 18px; padding: 12px; box-shadow: 0 5px 0 #020617; cursor: pointer; text-align: center; font-weight: 900; border: 2px solid transparent; }
+        .game-card.selected { border-color: var(--accent); background-color: #4d4e06; transform: translateY(2px); box-shadow: 0 2px 0 #020617; }
+
+        /* Dock/Footer */
+        .dock { background: rgba(30, 41, 59, 0.8); backdrop-blur: 10px; border-radius: 30px; margin: 15px; padding: 10px; display: flex; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .footer-btn { background-color: var(--accent); color: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 0 #656516; font-weight: 900; text-transform: uppercase; flex-grow: 1; transition: 0.2s; }
+        .footer-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #5c6516; }
+        .footer-btn:disabled { background: #334155; box-shadow: 0 4px 0 #1e293b; color: #64748b; }
+        
+        .hidden { display: none !important; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .confetti { position: absolute; width: 10px; height: 10px; top: -10px; z-index: 50; animation: fall 3s linear forwards; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="splash">
+        <div class="logo-box mb-6"><i class="fa-solid fa-bolt text-4xl text-white"></i></div>
+        <h1 class="text-3xl font-black mb-6">AllWrite PRO</h1>
+    </div>
+
+    <div id="homeScreen" class="hidden">
+        <header class="p-6 flex justify-between items-center w-full max-w-md mx-auto">
+            <h2 class="text-xl font-black">QUEST MAP</h2>
+            <div class="font-black text-yellow-400">⭐ <span id="homeStars">0</span></div>
+        </header>
+        <div class="map-container" id="levelMap">
+            </div>
+        <div class="p-6">
+            <div class="dock max-w-md mx-auto">
+                <button onclick="startGame()" class="footer-btn w-full">Continue Journey</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameUI" class="hidden flex flex-col h-full">
+        <header class="p-6 max-w-md mx-auto w-full flex items-center gap-4">
+            <div class="h-[10px] flex-grow progress-container"><div id="progressBar" class="progress-fill"></div></div>
+            <div class="font-black text-yellow-400">⭐ <span id="stars">0</span></div>
+        </header>
+        <main id="gameContainer" class="flex-grow flex flex-col items-center px-6 overflow-y-auto pb-32 w-full max-w-md mx-auto"></main>
+        <footer class="fixed bottom-0 left-0 w-full p-6">
+            <div class="max-w-md mx-auto dock">
+                <button onclick="exitToHome()" class="nav-btn bg-slate-700 text-white p-4 rounded-2xl"><i class="fa-solid fa-house"></i></button>
+                <button id="mainBtn" disabled onclick="handleAction()" class="footer-btn">Check</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const LETTER_ART = {
+            'H': [0,3,4,7,8,11,12,15,5,6], 'I': [1,2,5,6,9,10,13,14],
+            'N': [0,3,4,5,7,8,10,11,12,15], 'O': [1,2,4,7,8,11,13,14],
+            'G': [1,2,3,4,8,9,11,12,13,14]
+        };
+
+        const LEVELS = [
+            { type: 'spell', word: 'Hi!', sub: ['H', 'I'], color: '#4ade80' },
+            { type: 'typing', word: 'Salamat', answer: 'thanks' },
+            { type: 'spell', word: 'Hindi', sub: ['N', 'O'], color: '#f87171' },
+            { type: 'spell', word: 'Alis', sub: ['G', 'O'], color: '#60a5fa' }
+        ];
+
+        let state = { levelIdx: 0, subIdx: 0, stars: 0, currentGuess: "", isAudio: false };
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Auto-show Splash then Home
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash').classList.add('hidden');
+                    showHome();
+                }, 800);
+            }, 2000);
+        };
+
+        function showHome() {
+            document.getElementById('homeScreen').classList.remove('hidden');
+            document.getElementById('gameUI').classList.add('hidden');
+            renderMap();
+        }
+
+        function renderMap() {
+            const map = document.getElementById('levelMap');
+            map.innerHTML = "";
+            LEVELS.forEach((lvl, i) => {
+                const node = document.createElement('div');
+                node.className = `level-node ${i === state.levelIdx ? 'active' : (i < state.levelIdx ? 'active' : 'locked')}`;
+                node.innerHTML = i < state.levelIdx ? '<i class="fa-solid fa-check"></i>' : (i + 1);
+                map.prepend(node); // Draw bottom to top
+                if (i < LEVELS.length - 1) {
+                    const line = document.createElement('div');
+                    line.className = 'path-line';
+                    map.prepend(line);
+                }
+            });
+            document.getElementById('homeStars').innerText = state.stars;
+        }
+
+        function startGame() {
+            state.isAudio = true;
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('gameUI').classList.remove('hidden');
+            loadLevel();
+        }
+
+        function exitToHome() {
+            showHome();
+        }
+
+        function loadLevel() {
+            const lvl = LEVELS[state.levelIdx];
+            const container = document.getElementById('gameContainer');
+            const btn = document.getElementById('mainBtn');
+            btn.disabled = true;
+            btn.classList.remove('bg-red-500');
+            state.currentGuess = "";
+
+            document.getElementById('progressBar').style.width = `${((state.levelIdx) / LEVELS.length) * 100}%`;
+            let html = `<div id="lvlTitle" class="text-center mb-6"><h2 class="text-4xl font-black">${lvl.word}</h2></div>`;
+
+            if (lvl.type === 'spell') {
+                const char = lvl.sub[state.subIdx];
+                html += `<div class="flex justify-between w-full px-2 mb-2"><p class="text-slate-400 font-bold uppercase text-[10px]">Letter ${state.subIdx + 1}/${lvl.sub.length}</p></div>
+                         <div class="pixel-grid mb-8" style="--pixel-color: ${lvl.color}">`;
+                for(let i=0; i<16; i++) html += `<div onclick="tapPixel(this, ${LETTER_ART[char].includes(i)})" class="pixel-cube"></div>`;
+                html += `</div><div class="grid grid-cols-4 gap-2 w-full">${['H','I','N','O','G','A','B','S'].map(l => `<div onclick="selectGuess(this, '${l}')" class="game-card text-sm">${l}</div>`).join('')}</div>`;
+                btn.innerText = "Cast Letter";
+            } else {
+                html += `<input type="text" id="typeInp" oninput="state.currentGuess=this.value.toLowerCase().trim(); document.getElementById('mainBtn').disabled=false" placeholder="English meaning..." class="w-full bg-slate-800 border-2 border-slate-700 p-5 rounded-2xl text-center text-xl font-bold outline-none focus:border-accent">`;
+                btn.innerText = "Check Answer";
+            }
+            container.innerHTML = html;
+        }
+
+        function selectGuess(el, val) {
+            document.querySelectorAll('.game-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            state.currentGuess = val;
+            document.getElementById('mainBtn').disabled = false;
+        }
+
+        function tapPixel(el, isArt) {
+            if(el.classList.contains('revealed')) return;
+            el.classList.add('revealed');
+            if(!isArt) el.style.opacity = "0.1";
+            playBeep(isArt ? 600 : 200);
+        }
+
+        function handleAction() {
+            const lvl = LEVELS[state.levelIdx];
+            let isCorrect = (lvl.type === 'spell') ? (state.currentGuess === lvl.sub[state.subIdx]) : (state.currentGuess === lvl.answer);
+
+            if (isCorrect) {
+                if (lvl.type === 'spell' && state.subIdx < lvl.sub.length - 1) {
+                    state.subIdx++;
+                    loadLevel();
+                } else {
+                    completeLevel();
+                }
+            } else {
+                failAction();
+            }
+        }
+
+        function completeLevel() {
+            state.stars += 10;
+            state.levelIdx++;
+            state.subIdx = 0;
+            playBeep(800);
+            if (state.levelIdx < LEVELS.length) {
+                loadLevel();
+            } else {
+                spawnConfetti();
+                document.getElementById('gameContainer').innerHTML = "<h2 class='text-3xl font-black text-center mt-20 animate-bounce'>MASTERED!</h2>";
+                document.getElementById('mainBtn').innerText = "Finish";
+                document.getElementById('mainBtn').onclick = exitToHome;
+            }
+        }
+
+        function failAction() {
+            const btn = document.getElementById('mainBtn');
+            btn.classList.add('bg-red-500', 'shake');
+            playBeep(100);
+            setTimeout(() => {
+                btn.classList.remove('bg-red-500', 'shake');
+                loadLevel();
+            }, 600);
+        }
+
+        function playBeep(f) {
+            if(!state.isAudio) return;
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function spawnConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                conf.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(conf);
+                setTimeout(() => conf.remove(), 3000);
+            }
+        }
+    </script>
+
+    <security>
+        <script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+document.addEventListener('keydown', e => {
+if (
+e.key === 'F12' ||
+(e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
+(e.ctrlKey && e.key === 'U')
+) e.preventDefault();
+});
+
+let lastW = window.outerWidth, lastH = window.outerHeight;
+setInterval(() => {
+const dw = Math.abs(window.outerWidth - lastW);
+const dh = Math.abs(window.outerHeight - lastH);
+const diffW = window.outerWidth - window.innerWidth;
+const diffH = window.outerHeight - window.innerHeight;
+
+if ((dw <= 5 && dw > 0) || (dh <= 5 && dh > 0)) {
+if (diffW > 100 || diffH > 100) {
+debugger;
+}
+}
+
+lastW = window.outerWidth;
+lastH = window.outerHeight;
+}, 1000);
+</script>
+</security>
+</body>
+</html>
