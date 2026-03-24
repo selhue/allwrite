@@ -40,46 +40,90 @@
 </style>
 <body class="flex flex-col">
 
-    <app>
+<app>
+    <!-- CDN preloads -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
         :root { --bg-dark: #0f172a; --card-dark: #1e293b; --accent: #eab308; --accent-shadow: #a16207; --error: #ef4444; --text-main: #f8fafc; }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Nunito', sans-serif; user-select: none; margin: 0; overflow: hidden; height: 100dvh; }
+
+        /* ── overlays ── */
         #splash, .overlay-screen { position: fixed; inset: 0; background-color: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; transition: all 0.5s ease; text-align: center; padding: 20px; }
         .logo-box { background: var(--accent); width: 80px; height: 80px; border-radius: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 #6f631e; animation: bounce 2s infinite; }
-        #homeScreen { position: fixed; inset: 0; display: flex; flex-direction: column; z-index: 50; overflow-y: auto; padding-bottom: 120px; }
-         #homeScreen header{
-position: sticky; top: 0px;
-         }
+
+        /* ── screens ── */
+        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; z-index: 50; overflow-y: auto; padding-bottom: 90px; }
+        .screen header { position: sticky; top: 0; background: var(--bg-dark); z-index: 10; }
+
+        /* ── map ── */
         .map-container { display: flex; flex-direction: column; align-items: center; padding: 40px 0; gap: 15px; }
-        .level-node { width: 65px; height: 65px; background: #334155; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 900; box-shadow: 0 6px 0 #020617; position: relative; transition: 0.2s; cursor: pointer; }
+        .level-node { width: 65px; height: 65px; background: #334155; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 900; box-shadow: 0 6px 0 #020617; transition: 0.2s; cursor: pointer; }
         .level-node.active { background: var(--accent); box-shadow: 0 6px 0 #655816; color: white; transform: scale(1.1); }
-        .level-node.locked { opacity: 0.4; filter: grayscale(1);   display: none; cursor: default; }
+        .level-node.locked { display: none; }
+
+        /* ── progress ── */
         .progress-container { background-color: #334155; height: 10px; border-radius: 99px; overflow: hidden; }
         .progress-fill { background: linear-gradient(90deg, #d9de4a, #c5b222); height: 100%; width: 0%; transition: width 0.5s ease; }
+
+        /* ── pixel grid ── */
         .pixel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: #020617; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto 10px; border: 2px solid #1e293b; }
         .pixel-cube { width: 28px; height: 28px; background: #1e293b; border-radius: 6px; transition: 0.3s; }
         .pixel-cube.active { background: var(--pixel-color, #eab308); }
+
+        /* ── keyboard ── */
         .keyboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 360px; margin-top: auto; padding-bottom: 5px; }
         .key-btn { background-color: var(--card-dark); border-radius: 12px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #020617; cursor: pointer; font-weight: 900; color: white; transition: 0.1s; font-size: 1.1rem; }
         .key-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #020617; }
         .key-btn.action { background-color: #475569; font-size: 0.75rem; text-transform: uppercase; }
+
+        /* ── input display ── */
         .input-display { background: #020617; padding: 10px; border-radius: 15px; width: 100%; text-align: center; font-size: 1.6rem; font-weight: 900; min-height: 55px; color: var(--accent); border: 2px solid #1e293b; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; letter-spacing: 3px; }
-        .dock { background: rgba(30,41,59,0.9); backdrop-filter: blur(10px); border-radius: 25px; margin: auto; padding: 10px; display: flex; gap: 10px; position: fixed; bottom: 15px; left: 15px; right: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; }
+
+        /* ── dock (game UI only) ── */
+        .dock { background: rgba(30,41,59,0.9); backdrop-filter: blur(10px); border-radius: 25px; padding: 10px; display: flex; gap: 10px; position: fixed; bottom: 80px; left: 15px; right: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; max-width: calc(448px); margin: 0 auto; }
         .footer-btn, .start-btn { background-color: var(--accent); color: white; height: 50px; border-radius: 15px; box-shadow: 0 4px 0 #656516; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .footer-btn:disabled { background: #334155; box-shadow: 0 4px 0 #1e293b; color: #64748b; }
         .footer-btn { flex-grow: 1; }
         .start-btn { width: 200px; margin-top: 20px; }
+
+        /* ── bottom tab nav ── */
+        #tabNav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: rgba(15,23,42,0.97); backdrop-filter: blur(12px); border-top: 1px solid #1e293b; display: flex; justify-content: space-around; align-items: center; z-index: 150; }
+        .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: #475569; transition: 0.2s; padding: 6px 0; background: none; border: none; }
+        .tab-btn i { font-size: 1.2rem; }
+        .tab-btn span { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Nunito', sans-serif; }
+        .tab-btn.active { color: var(--accent); }
+
+        /* ── quest screen ── */
+        .quest-card { background: var(--card-dark); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; margin: 0 16px 12px; }
+        .quest-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+        .quest-bar-bg { background: #0f172a; border-radius: 99px; height: 8px; overflow: hidden; margin-top: 6px; }
+        .quest-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #d9de4a, #c5b222); transition: width 0.5s; }
+
+        /* ── booklet screen ── */
+        .booklet-card { background: var(--card-dark); border-radius: 16px; padding: 14px 16px; margin: 0 16px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .booklet-tag { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 2px; }
+        .booklet-word { font-size: 1.1rem; font-weight: 900; color: var(--text-main); }
+        .booklet-hint { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        .booklet-type { font-size: 0.7rem; font-weight: 900; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; }
+
+        /* ── utils ── */
         .hidden { display: none !important; }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
     </style>
 
+    <!-- splash -->
     <div id="splash">
         <div class="logo-box mb-6"><i class="fa-solid fa-bolt text-4xl text-white"></i></div>
         <h1 class="text-3xl font-black mb-6">AllWrite</h1>
     </div>
 
+    <!-- lesson intro overlay -->
     <div id="lessonIntro" class="overlay-screen hidden">
         <h3 id="introTag" class="text-yellow-400 font-black mb-2 uppercase tracking-widest text-sm"></h3>
         <h2 id="introTitle" class="text-3xl font-black mb-4"></h2>
@@ -87,62 +131,78 @@ position: sticky; top: 0px;
         <button onmousedown="startGame()" class="start-btn">Start Lesson</button>
     </div>
 
-    <div id="homeScreen" class="hidden">
+    <!-- ── TAB: LEVELS (home) ── -->
+    <div id="homeScreen" class="screen hidden">
         <header class="p-6 flex justify-between items-center w-full max-w-md mx-auto">
             <h2 class="text-xl font-black uppercase tracking-widest">Levels</h2>
             <div class="font-black text-yellow-400 bg-slate-800 px-4 py-1 rounded-full">⭐ <span id="homeStars">0</span></div>
         </header>
         <div class="map-container" id="levelMap"></div>
-        <div class="dock max-w-md"><button onmousedown="prepareNextLevel()" class="footer-btn">Continue Journey</button></div>
+        <!-- continue button sits above tab nav -->
+        <div style="position:fixed;bottom:75px;left:15px;right:15px;z-index:99;max-width:448px;margin:0 auto;">
+            <button onmousedown="prepareNextLevel()" class="footer-btn w-full" style="height:50px;border-radius:15px;box-shadow:0 4px 0 #656516;">Continue Journey</button>
+        </div>
     </div>
 
-    <div id="gameUI" class="hidden flex flex-col h-full">
+    <!-- ── TAB: QUEST ── -->
+    <div id="questScreen" class="screen hidden">
+        <header class="p-6 flex justify-between items-center w-full max-w-md mx-auto">
+            <h2 class="text-xl font-black uppercase tracking-widest">Quests</h2>
+            <div class="font-black text-yellow-400 bg-slate-800 px-4 py-1 rounded-full">⭐ <span id="questStars">0</span></div>
+        </header>
+        <div id="questList" class="w-full max-w-md mx-auto pb-4"></div>
+    </div>
+
+    <!-- ── TAB: BOOKLET ── -->
+    <div id="bookletScreen" class="screen hidden">
+        <header class="p-6 flex justify-between items-center w-full max-w-md mx-auto">
+            <h2 class="text-xl font-black uppercase tracking-widest">Booklet</h2>
+            <span class="text-slate-500 text-sm font-bold" id="bookletCount"></span>
+        </header>
+        <div id="bookletList" class="w-full max-w-md mx-auto pb-4"></div>
+    </div>
+
+    <!-- ── GAME UI ── -->
+    <div id="gameUI" class="hidden" style="position:fixed;inset:0;display:flex;flex-direction:column;z-index:60;">
         <header class="p-4 max-w-md mx-auto w-full flex items-center gap-4">
             <div class="h-[8px] flex-grow progress-container"><div id="progressBar" class="progress-fill"></div></div>
             <div class="font-black text-yellow-400 text-sm">⭐ <span id="stars">0</span></div>
         </header>
-        <main id="gameContainer" class="flex-grow flex flex-col items-center px-6 pb-32 w-full max-w-md mx-auto"></main>
-        <div class="dock max-w-md">
-            <button onmousedown="showHome()" class="bg-slate-700 text-white px-5 rounded-xl border-none h-[50px]"><i class="fa-solid fa-house"></i></button>
+        <main id="gameContainer" class="flex-grow flex flex-col items-center px-6 pb-40 w-full max-w-md mx-auto overflow-y-auto"></main>
+        <div class="dock">
+            <button onmousedown="exitGame()" class="bg-slate-700 text-white px-5 rounded-xl border-none h-[50px]"><i class="fa-solid fa-house"></i></button>
             <button id="mainBtn" disabled onmousedown="handleAction()" class="footer-btn">Submit</button>
         </div>
     </div>
 
-      <scroller>
-        <script>
-            function scrollToBottom() {
-  window.scrollTo({
-    top: document.body.scrollHeight,
-    behavior: "smooth" // remove if you want instant jump
-  });
-}
+    <!-- ── BOTTOM TAB NAV ── -->
+    <div id="tabNav" class="hidden">
+        <button class="tab-btn active" id="tab-levels" onmousedown="switchTab('levels')">
+            <i class="fa-solid fa-map"></i>
+            <span>Levels</span>
+        </button>
+        <button class="tab-btn" id="tab-quest" onmousedown="switchTab('quest')">
+            <i class="fa-solid fa-scroll"></i>
+            <span>Quest</span>
+        </button>
+        <button class="tab-btn" id="tab-booklet" onmousedown="switchTab('booklet')">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Booklet</span>
+        </button>
+    </div>
 
-// Run on page load
-window.addEventListener("load", () => {
-  scrollToBottom();
-});
-
-// Also run if hash changes (optional)
-window.addEventListener("hashchange", () => {
-  if (window.location.hash === "#homeScreen") {
-    scrollToBottom();
-  }
-});
-        </script>
-    </scroller>
     <script>
+        function scrollToBottom() {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        }
+
         // ── LETTER ART ───────────────────────────────────────────────
         const LETTER_ART = {
-            'H': [0,3,4,7,8,11,12,15,5,6],
-            'I': [1,2,5,6,9,10,13,14],
-            'N': [0,3,4,5,7,8,10,11,12,15],
-            'O': [1,2,4,7,8,11,13,14],
-            'G': [1,2,3,4,8,9,11,12,13,14],
-            'A': [1,2,4,7,8,9,11,12,15],
-            'L': [0,4,8,12,13,14,15],
-            'E': [0,1,2,3,4,8,9,12,13,14,15],
-            'S': [1,2,3,4,5,8,9,10,11,12,13,14],
-            'D': [0,1,2,4,7,8,11,12,13,14],
+            'H': [0,3,4,7,8,11,12,15,5,6], 'I': [1,2,5,6,9,10,13,14],
+            'N': [0,3,4,5,7,8,10,11,12,15], 'O': [1,2,4,7,8,11,13,14],
+            'G': [1,2,3,4,8,9,11,12,13,14], 'A': [1,2,4,7,8,9,11,12,15],
+            'L': [0,4,8,12,13,14,15], 'E': [0,1,2,3,4,8,9,12,13,14,15],
+            'S': [1,2,3,4,5,8,9,10,11,12,13,14], 'D': [0,1,2,4,7,8,11,12,13,14],
             'T': [0,1,2,3,5,9,13]
         };
 
@@ -150,147 +210,147 @@ window.addEventListener("hashchange", () => {
         const LESSONS = [
             { id:"L1",  title:"Greetings",              desc:"Basic ways to say hello and goodbye.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'H', answer:'H',        color:'#4ade80', hint:'First letter of Hello' },
-                { type:'typing',  word:'Kumusta',          answer:'HELLO',                   hint:'Common Filipino greeting' },
-                { type:'letter',  word:'Guess letters',    answer:'HI',                      hint:'Short casual greeting' },
-                { type:'scramble',word:'Unscramble',       answer:'GOODBYE',                 hint:'Paalam in Eng' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'H', answer:'H',      color:'#4ade80', hint:'First letter of Hello' },
+                { type:'typing',  word:'Kumusta',          answer:'HELLO',                 hint:'Common Filipino greeting' },
+                { type:'letter',  word:'Guess letters',    answer:'HI',                    hint:'Short casual greeting' },
+                { type:'scramble',word:'Unscramble',       answer:'GOODBYE',               hint:'Paalam in English' }
               ]},
             { id:"L2",  title:"Agreement",              desc:"Words and phrases that mean yes or correct.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'O', answer:'O',        color:'#60a5fa', hint:'First letter of Oo (yes)' },
-                { type:'typing',  word:'Opo',              answer:'YES',                     hint:'Polite Tagalog for yes' },
-                { type:'letter',  word:'Guess letters',    answer:'OO',                      hint:'Informal Tagalog yes' },
-                { type:'scramble',word:'Unscramble',       answer:'CORRECT',                 hint:'Tama in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'O', answer:'O',      color:'#60a5fa', hint:'First letter of Oo (yes)' },
+                { type:'typing',  word:'Opo',              answer:'YES',                   hint:'Polite Tagalog for yes' },
+                { type:'letter',  word:'Guess letters',    answer:'OO',                    hint:'Informal Tagalog yes' },
+                { type:'scramble',word:'Unscramble',       answer:'CORRECT',               hint:'Tama in English' }
               ]},
             { id:"L3",  title:"Numbers 1-5",            desc:"Learn to count from one to five.",
               levels:[
-                { type:'typing',  word:'Isa',              answer:'ONE',                     hint:'Unang numero' },
-                { type:'typing',  word:'Dalawa',           answer:'TWO',                     hint:'Ikalawang numero' },
-                { type:'letter',  word:'Guess letters',    answer:'THREE',                   hint:'Tatlo in English' },
-                { type:'scramble',word:'Unscramble',       answer:'FOUR',                    hint:'Apat in English' }
+                { type:'typing',  word:'Isa',              answer:'ONE',                   hint:'Unang numero' },
+                { type:'typing',  word:'Dalawa',           answer:'TWO',                   hint:'Ikalawang numero' },
+                { type:'letter',  word:'Guess letters',    answer:'THREE',                 hint:'Tatlo in English' },
+                { type:'scramble',word:'Unscramble',       answer:'FOUR',                  hint:'Apat in English' }
               ]},
             { id:"L4",  title:"Colors",                 desc:"Common color words.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'G', answer:'G',        color:'#4ade80', hint:'First letter of Green' },
-                { type:'typing',  word:'Pula',             answer:'RED',                     hint:'Kulay ng dugo' },
-                { type:'letter',  word:'Guess letters',    answer:'BLUE',                    hint:'Asul in English' },
-                { type:'scramble',word:'Unscramble',       answer:'YELLOW',                  hint:'Dilaw in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'G', answer:'G',      color:'#4ade80', hint:'First letter of Green' },
+                { type:'typing',  word:'Pula',             answer:'RED',                   hint:'Kulay ng dugo' },
+                { type:'letter',  word:'Guess letters',    answer:'BLUE',                  hint:'Asul in English' },
+                { type:'scramble',word:'Unscramble',       answer:'YELLOW',                hint:'Dilaw in English' }
               ]},
             { id:"L5",  title:"Family Members",         desc:"Words for people in your family.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'A', answer:'A',        color:'#f472b6', hint:'First letter of Ama (father)' },
-                { type:'typing',  word:'Ina',              answer:'MOTHER',                  hint:'Ina or Nanay' },
-                { type:'letter',  word:'Guess letters',    answer:'FATHER',                  hint:'Tatay in English' },
-                { type:'scramble',word:'Unscramble',       answer:'SISTER',                  hint:'Ate or Kapatid na babae' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'A', answer:'A',      color:'#f472b6', hint:'First letter of Ama (father)' },
+                { type:'typing',  word:'Ina',              answer:'MOTHER',                hint:'Ina or Nanay' },
+                { type:'letter',  word:'Guess letters',    answer:'FATHER',                hint:'Tatay in English' },
+                { type:'scramble',word:'Unscramble',       answer:'SISTER',                hint:'Ate or Kapatid na babae' }
               ]},
             { id:"L6",  title:"Food and Drinks",        desc:"Everyday words for eating and drinking.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'E', answer:'E',        color:'#fb923c', hint:'First letter of Eat' },
-                { type:'typing',  word:'Tubig',            answer:'WATER',                   hint:'Inumin' },
-                { type:'letter',  word:'Guess letters',    answer:'RICE',                    hint:'Kanin in English' },
-                { type:'scramble',word:'Unscramble',       answer:'HUNGRY',                  hint:'Gutom in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'E', answer:'E',      color:'#fb923c', hint:'First letter of Eat' },
+                { type:'typing',  word:'Tubig',            answer:'WATER',                 hint:'Inumin' },
+                { type:'letter',  word:'Guess letters',    answer:'RICE',                  hint:'Kanin in English' },
+                { type:'scramble',word:'Unscramble',       answer:'HUNGRY',                hint:'Gutom in English' }
               ]},
             { id:"L7",  title:"Body Parts",             desc:"Words for parts of the human body.",
               levels:[
-                { type:'typing',  word:'Ulo',              answer:'HEAD',                    hint:'Pinakamataas na bahagi ng katawan' },
-                { type:'letter',  word:'Guess letters',    answer:'HAND',                    hint:'Kamay in English' },
-                { type:'scramble',word:'Unscramble',       answer:'EYES',                    hint:'Mata in English' },
-                { type:'typing',  word:'Paa',              answer:'FOOT',                    hint:'Bahagi ng katawan sa ibaba' }
+                { type:'typing',  word:'Ulo',              answer:'HEAD',                  hint:'Pinakamataas na bahagi ng katawan' },
+                { type:'letter',  word:'Guess letters',    answer:'HAND',                  hint:'Kamay in English' },
+                { type:'scramble',word:'Unscramble',       answer:'EYES',                  hint:'Mata in English' },
+                { type:'typing',  word:'Paa',              answer:'FOOT',                  hint:'Bahagi ng katawan sa ibaba' }
               ]},
             { id:"L8",  title:"Days of the Week",       desc:"All seven days in English.",
               levels:[
-                { type:'typing',  word:'Lunes',            answer:'MONDAY',                  hint:'Unang araw ng linggo sa trabaho' },
-                { type:'typing',  word:'Biyernes',         answer:'FRIDAY',                  hint:'Huling araw ng pasukan' },
-                { type:'scramble',word:'Unscramble',       answer:'SUNDAY',                  hint:'Linggo in English' },
-                { type:'letter',  word:'Guess letters',    answer:'SATURDAY',                hint:'Sabado in English' }
+                { type:'typing',  word:'Lunes',            answer:'MONDAY',                hint:'Unang araw ng linggo sa trabaho' },
+                { type:'typing',  word:'Biyernes',         answer:'FRIDAY',                hint:'Huling araw ng pasukan' },
+                { type:'scramble',word:'Unscramble',       answer:'SUNDAY',                hint:'Linggo in English' },
+                { type:'letter',  word:'Guess letters',    answer:'SATURDAY',              hint:'Sabado in English' }
               ]},
             { id:"L9",  title:"Animals",                desc:"Common animal names.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'D', answer:'D',        color:'#a78bfa', hint:'First letter of Dog' },
-                { type:'typing',  word:'Pusa',             answer:'CAT',                     hint:'Sikat na alagang hayop' },
-                { type:'letter',  word:'Guess letters',    answer:'BIRD',                    hint:'Ibon in English' },
-                { type:'scramble',word:'Unscramble',       answer:'FISH',                    hint:'Isda in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'D', answer:'D',      color:'#a78bfa', hint:'First letter of Dog' },
+                { type:'typing',  word:'Pusa',             answer:'CAT',                   hint:'Sikat na alagang hayop' },
+                { type:'letter',  word:'Guess letters',    answer:'BIRD',                  hint:'Ibon in English' },
+                { type:'scramble',word:'Unscramble',       answer:'FISH',                  hint:'Isda in English' }
               ]},
             { id:"L10", title:"School Supplies",        desc:"Things you use in school.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'L', answer:'L',        color:'#34d399', hint:'First letter of Libro (book)' },
-                { type:'typing',  word:'Lapis',            answer:'PENCIL',                  hint:'Ginagamit sa pagsusulat' },
-                { type:'letter',  word:'Guess letters',    answer:'ERASER',                  hint:'Pambura in English' },
-                { type:'scramble',word:'Unscramble',       answer:'NOTEBOOK',                hint:'Kuwaderno in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'L', answer:'L',      color:'#34d399', hint:'First letter of Libro (book)' },
+                { type:'typing',  word:'Lapis',            answer:'PENCIL',                hint:'Ginagamit sa pagsusulat' },
+                { type:'letter',  word:'Guess letters',    answer:'ERASER',                hint:'Pambura in English' },
+                { type:'scramble',word:'Unscramble',       answer:'NOTEBOOK',              hint:'Kuwaderno in English' }
               ]},
             { id:"L11", title:"Emotions",               desc:"Words that describe how you feel.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'H', answer:'H',        color:'#fbbf24', hint:'First letter of Happy' },
-                { type:'typing',  word:'Malungkot',        answer:'SAD',                     hint:'Pakiramdam kapag may problema' },
-                { type:'letter',  word:'Guess letters',    answer:'ANGRY',                   hint:'Galit in English' },
-                { type:'scramble',word:'Unscramble',       answer:'SCARED',                  hint:'Takot in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'H', answer:'H',      color:'#fbbf24', hint:'First letter of Happy' },
+                { type:'typing',  word:'Malungkot',        answer:'SAD',                   hint:'Pakiramdam kapag may problema' },
+                { type:'letter',  word:'Guess letters',    answer:'ANGRY',                 hint:'Galit in English' },
+                { type:'scramble',word:'Unscramble',       answer:'SCARED',                hint:'Takot in English' }
               ]},
             { id:"L12", title:"Directions",             desc:"Words used for giving directions.",
               levels:[
-                { type:'typing',  word:'Kaliwa',           answer:'LEFT',                    hint:'Direksyon' },
-                { type:'typing',  word:'Kanan',            answer:'RIGHT',                   hint:'Direksyon' },
-                { type:'letter',  word:'Guess letters',    answer:'STRAIGHT',                hint:'Diretso in English' },
-                { type:'scramble',word:'Unscramble',       answer:'NORTH',                   hint:'Hilaga in English' }
+                { type:'typing',  word:'Kaliwa',           answer:'LEFT',                  hint:'Direksyon' },
+                { type:'typing',  word:'Kanan',            answer:'RIGHT',                 hint:'Direksyon' },
+                { type:'letter',  word:'Guess letters',    answer:'STRAIGHT',              hint:'Diretso in English' },
+                { type:'scramble',word:'Unscramble',       answer:'NORTH',                 hint:'Hilaga in English' }
               ]},
             { id:"L13", title:"Weather",                desc:"Words to describe the weather.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'S', answer:'S',        color:'#38bdf8', hint:'First letter of Storm' },
-                { type:'typing',  word:'Ulan',             answer:'RAIN',                    hint:'Madalas sa Pilipinas' },
-                { type:'letter',  word:'Guess letters',    answer:'SUNNY',                   hint:'Maliwanag at mainit na panahon' },
-                { type:'scramble',word:'Unscramble',       answer:'CLOUDY',                  hint:'Makulimlim in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'S', answer:'S',      color:'#38bdf8', hint:'First letter of Storm' },
+                { type:'typing',  word:'Ulan',             answer:'RAIN',                  hint:'Madalas sa Pilipinas' },
+                { type:'letter',  word:'Guess letters',    answer:'SUNNY',                 hint:'Maliwanag at mainit na panahon' },
+                { type:'scramble',word:'Unscramble',       answer:'CLOUDY',                hint:'Makulimlim in English' }
               ]},
             { id:"L14", title:"Jobs and Professions",   desc:"Common career and job titles.",
               levels:[
-                { type:'typing',  word:'Guro',             answer:'TEACHER',                 hint:'Nagtuturo sa paaralan' },
-                { type:'typing',  word:'Doktor',           answer:'DOCTOR',                  hint:'Naglilingkod sa ospital' },
-                { type:'letter',  word:'Guess letters',    answer:'NURSE',                   hint:'Nars in English' },
-                { type:'scramble',word:'Unscramble',       answer:'ENGINEER',                hint:'Inhinyero in English' }
+                { type:'typing',  word:'Guro',             answer:'TEACHER',               hint:'Nagtuturo sa paaralan' },
+                { type:'typing',  word:'Doktor',           answer:'DOCTOR',                hint:'Naglilingkod sa ospital' },
+                { type:'letter',  word:'Guess letters',    answer:'NURSE',                 hint:'Nars in English' },
+                { type:'scramble',word:'Unscramble',       answer:'ENGINEER',              hint:'Inhinyero in English' }
               ]},
             { id:"L15", title:"Time Expressions",       desc:"Words related to time and schedule.",
               levels:[
-                { type:'typing',  word:'Umaga',            answer:'MORNING',                 hint:'Simula ng araw' },
-                { type:'typing',  word:'Gabi',             answer:'NIGHT',                   hint:'Katapusan ng araw' },
-                { type:'letter',  word:'Guess letters',    answer:'NOON',                    hint:'Tanghali in English' },
-                { type:'scramble',word:'Unscramble',       answer:'TOMORROW',                hint:'Bukas in English' }
+                { type:'typing',  word:'Umaga',            answer:'MORNING',               hint:'Simula ng araw' },
+                { type:'typing',  word:'Gabi',             answer:'NIGHT',                 hint:'Katapusan ng araw' },
+                { type:'letter',  word:'Guess letters',    answer:'NOON',                  hint:'Tanghali in English' },
+                { type:'scramble',word:'Unscramble',       answer:'TOMORROW',              hint:'Bukas in English' }
               ]},
             { id:"L16", title:"Personality Adjectives", desc:"Words that describe a person's character.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'S', answer:'S',        color:'#e879f9', hint:'First letter of Smart' },
-                { type:'typing',  word:'Matapang',         answer:'BRAVE',                   hint:'Hindi natatakot' },
-                { type:'letter',  word:'Guess letters',    answer:'HUMBLE',                  hint:'Mapagkumbaba in English' },
-                { type:'scramble',word:'Unscramble',       answer:'GENEROUS',                hint:'Mapagbigay in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'S', answer:'S',      color:'#e879f9', hint:'First letter of Smart' },
+                { type:'typing',  word:'Matapang',         answer:'BRAVE',                 hint:'Hindi natatakot' },
+                { type:'letter',  word:'Guess letters',    answer:'HUMBLE',                hint:'Mapagkumbaba in English' },
+                { type:'scramble',word:'Unscramble',       answer:'GENEROUS',              hint:'Mapagbigay in English' }
               ]},
             { id:"L17", title:"Technology Words",       desc:"Common tech vocabulary in English.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'N', answer:'N',        color:'#2dd4bf', hint:'First letter of Network' },
-                { type:'typing',  word:'Tagapagserbisyo',  answer:'SERVER',                  hint:'Nag-iimbak ng data online' },
-                { type:'letter',  word:'Guess letters',    answer:'UPLOAD',                  hint:'Mag-upload ng file' },
-                { type:'scramble',word:'Unscramble',       answer:'PASSWORD',                hint:'Lihim na code sa login' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'N', answer:'N',      color:'#2dd4bf', hint:'First letter of Network' },
+                { type:'typing',  word:'Tagapagserbisyo',  answer:'SERVER',                hint:'Nag-iimbak ng data online' },
+                { type:'letter',  word:'Guess letters',    answer:'UPLOAD',                hint:'Mag-upload ng file' },
+                { type:'scramble',word:'Unscramble',       answer:'PASSWORD',              hint:'Lihim na code sa login' }
               ]},
             { id:"L18", title:"Action Verbs",           desc:"Common verbs used in everyday English.",
               levels:[
-                { type:'typing',  word:'Tumakbo',          answer:'RUN',                     hint:'Mabilis na kilos ng paa' },
-                { type:'typing',  word:'Kumain',           answer:'EAT',                     hint:'Kumain ng pagkain' },
-                { type:'letter',  word:'Guess letters',    answer:'WRITE',                   hint:'Sumulat ng salita' },
-                { type:'scramble',word:'Unscramble',       answer:'LISTEN',                  hint:'Makinig sa guro' }
+                { type:'typing',  word:'Tumakbo',          answer:'RUN',                   hint:'Mabilis na kilos ng paa' },
+                { type:'typing',  word:'Kumain',           answer:'EAT',                   hint:'Kumain ng pagkain' },
+                { type:'letter',  word:'Guess letters',    answer:'WRITE',                 hint:'Sumulat ng salita' },
+                { type:'scramble',word:'Unscramble',       answer:'LISTEN',                hint:'Makinig sa guro' }
               ]},
             { id:"L19", title:"Academic Words",         desc:"Vocabulary used in school and studies.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'A', answer:'A',        color:'#f97316', hint:'First letter of Assignment' },
-                { type:'typing',  word:'Pagsusulit',       answer:'EXAM',                    hint:'Sinusulit ng mga estudyante' },
-                { type:'letter',  word:'Guess letters',    answer:'THESIS',                  hint:'Pananaliksik sa kolehiyo' },
-                { type:'scramble',word:'Unscramble',       answer:'RESEARCH',                hint:'Pag-aaral nang malalim' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'A', answer:'A',      color:'#f97316', hint:'First letter of Assignment' },
+                { type:'typing',  word:'Pagsusulit',       answer:'EXAM',                  hint:'Sinusulit ng mga estudyante' },
+                { type:'letter',  word:'Guess letters',    answer:'THESIS',                hint:'Pananaliksik sa kolehiyo' },
+                { type:'scramble',word:'Unscramble',       answer:'RESEARCH',              hint:'Pag-aaral nang malalim' }
               ]},
             { id:"L20", title:"Filipino Values",        desc:"English words for Filipino core values.",
               levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'T', answer:'T',        color:'#f43f5e', hint:'First letter of Togetherness' },
-                { type:'typing',  word:'Bayanihan',        answer:'UNITY',                   hint:'Lahat nagtutulungan' },
-                { type:'letter',  word:'Guess letters',    answer:'RESPECT',                 hint:'Respeto in English' },
-                { type:'scramble',word:'Unscramble',       answer:'GRATITUDE',               hint:'Pasasalamat in English' }
+                { type:'pixel',   word:'Guess the pixel', artTarget:'T', answer:'T',      color:'#f43f5e', hint:'First letter of Togetherness' },
+                { type:'typing',  word:'Bayanihan',        answer:'UNITY',                 hint:'Lahat nagtutulungan' },
+                { type:'letter',  word:'Guess letters',    answer:'RESPECT',               hint:'Respeto in English' },
+                { type:'scramble',word:'Unscramble',       answer:'GRATITUDE',             hint:'Pasasalamat in English' }
               ]}
         ];
 
-        // ── BUILD FLAT DATA WITH LESSON REFERENCE ────────────────────
+        // ── flat data ─────────────────────────────────────────────────
         const DATA = [];
         LESSONS.forEach(lesson => {
             lesson.levels.forEach((lvl, i) => {
@@ -298,20 +358,42 @@ window.addEventListener("hashchange", () => {
             });
         });
 
-        let state = { levelIdx: 0, stars: 0, currentInput: "" };
+        let state = { levelIdx: 0, stars: 0, currentInput: "", activeTab: 'levels' };
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash').classList.add('hidden');
-                showHome();
+                document.getElementById('tabNav').classList.remove('hidden');
+                switchTab('levels');
             }, 800);
         };
 
+        // ── tab nav ───────────────────────────────────────────────────
+        function switchTab(tab) {
+            state.activeTab = tab;
+            ['homeScreen','questScreen','bookletScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['tab-levels','tab-quest','tab-booklet'].forEach(id => document.getElementById(id).classList.remove('active'));
+
+            if (tab === 'levels') {
+                document.getElementById('homeScreen').classList.remove('hidden');
+                document.getElementById('tab-levels').classList.add('active');
+                renderMap();
+            } else if (tab === 'quest') {
+                document.getElementById('questScreen').classList.remove('hidden');
+                document.getElementById('tab-quest').classList.add('active');
+                renderQuests();
+            } else if (tab === 'booklet') {
+                document.getElementById('bookletScreen').classList.remove('hidden');
+                document.getElementById('tab-booklet').classList.add('active');
+                renderBooklet();
+            }
+        }
+
+        // ── levels / map ──────────────────────────────────────────────
         function renderMap() {
             const map = document.getElementById('levelMap');
             map.innerHTML = "";
-            // render top-to-bottom: latest unlocked at top
             for (let i = DATA.length - 1; i >= 0; i--) {
                 const node = document.createElement('div');
                 const unlocked = i <= state.levelIdx;
@@ -322,28 +404,81 @@ window.addEventListener("hashchange", () => {
                 map.appendChild(node);
             }
             document.getElementById('homeStars').innerText = state.stars;
-             scrollToBottom();
+            scrollToBottom();
         }
 
         function showHome() {
-            document.getElementById('homeScreen').classList.remove('hidden');
             document.getElementById('gameUI').classList.add('hidden');
             document.getElementById('lessonIntro').classList.add('hidden');
-            renderMap();
+            document.getElementById('tabNav').classList.remove('hidden');
+            switchTab('levels');
         }
 
+        function exitGame() { showHome(); }
+
+        // ── quests ────────────────────────────────────────────────────
+        const QUESTS = [
+            { icon:'fa-star',          color:'#eab308', bg:'#422006', label:'First Step',      desc:'Complete your first level',         target: 1,  key:'levelsComplete' },
+            { icon:'fa-fire',          color:'#f97316', bg:'#431407', label:'On a Roll',        desc:'Complete 10 levels',                target: 10, key:'levelsComplete' },
+            { icon:'fa-trophy',        color:'#a78bfa', bg:'#2e1065', label:'Half Way',         desc:'Complete 40 levels',                target: 40, key:'levelsComplete' },
+            { icon:'fa-crown',         color:'#fbbf24', bg:'#451a03', label:'Champion',         desc:'Complete all 80 levels',            target: 80, key:'levelsComplete' },
+            { icon:'fa-bolt',          color:'#38bdf8', bg:'#0c4a6e', label:'Star Collector',   desc:'Earn 100 stars',                    target: 100, key:'stars' },
+            { icon:'fa-medal',         color:'#4ade80', bg:'#052e16', label:'Star Master',      desc:'Earn 500 stars',                    target: 500, key:'stars' },
+        ];
+
+        function renderQuests() {
+            const list = document.getElementById('questList');
+            document.getElementById('questStars').innerText = state.stars;
+            const levelsComplete = state.levelIdx;
+            list.innerHTML = QUESTS.map(q => {
+                const val = q.key === 'stars' ? state.stars : levelsComplete;
+                const pct = Math.min(100, Math.round((val / q.target) * 100));
+                const done = pct >= 100;
+                return `<div class="quest-card">
+                    <div class="quest-icon" style="background:${q.bg};color:${q.color}"><i class="fa-solid ${q.icon}"></i></div>
+                    <div style="flex:1">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="font-weight:900;font-size:0.95rem">${q.label}</span>
+                            <span style="font-size:0.7rem;font-weight:900;color:${done ? '#4ade80' : '#64748b'}">${done ? '✓ Done' : val+'/'+q.target}</span>
+                        </div>
+                        <div style="font-size:0.72rem;color:#64748b;margin-top:1px">${q.desc}</div>
+                        <div class="quest-bar-bg"><div class="quest-bar-fill" style="width:${pct}%"></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── booklet ───────────────────────────────────────────────────
+        const TYPE_COLORS = { pixel:'#a78bfa', typing:'#38bdf8', letter:'#4ade80', scramble:'#fb923c' };
+
+        function renderBooklet() {
+            const list = document.getElementById('bookletList');
+            // only show levels the player has already seen (completed)
+            const seen = DATA.slice(0, Math.max(1, state.levelIdx));
+            document.getElementById('bookletCount').innerText = seen.length + ' words';
+            list.innerHTML = seen.map(lvl => `
+                <div class="booklet-card">
+                    <div>
+                        <div class="booklet-tag">${lvl.lessonId} · ${lvl.lessonTitle}</div>
+                        <div class="booklet-word">${lvl.word} → <span style="color:var(--accent)">${lvl.answer}</span></div>
+                        <div class="booklet-hint">${lvl.hint}</div>
+                    </div>
+                    <span class="booklet-type" style="background:${TYPE_COLORS[lvl.type]}22;color:${TYPE_COLORS[lvl.type]}">${lvl.type}</span>
+                </div>`).join('');
+        }
+
+        // ── lesson intro & game ───────────────────────────────────────
         function showLessonIntro(idx) {
             const lvl = DATA[idx];
             document.getElementById('introTag').innerText = lvl.lessonId;
             document.getElementById('introTitle').innerText = lvl.lessonTitle;
             document.getElementById('introDesc').innerText = lvl.lessonDesc;
             document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('tabNav').classList.add('hidden');
             document.getElementById('lessonIntro').classList.remove('hidden');
         }
 
-        function prepareNextLevel() {
-            showLessonIntro(state.levelIdx);
-        }
+        function prepareNextLevel() { showLessonIntro(state.levelIdx); }
 
         function startGame() {
             document.getElementById('lessonIntro').classList.add('hidden');
@@ -355,10 +490,8 @@ window.addEventListener("hashchange", () => {
         function loadLevel() {
             const lvl = DATA[state.levelIdx];
             const container = document.getElementById('gameContainer');
-            const btn = document.getElementById('mainBtn');
-            btn.disabled = true;
+            document.getElementById('mainBtn').disabled = true;
             state.currentInput = "";
-
             document.getElementById('progressBar').style.width = `${(state.levelIdx / DATA.length) * 100}%`;
             document.getElementById('stars').innerText = state.stars;
 
@@ -370,16 +503,12 @@ window.addEventListener("hashchange", () => {
             if (lvl.type === 'pixel') {
                 html += `<div class="pixel-grid" style="--pixel-color:${lvl.color}">`;
                 for (let i = 0; i < 16; i++) {
-                    const lit = LETTER_ART[lvl.artTarget]?.includes(i);
-                    html += `<div class="pixel-cube ${lit ? 'active' : ''}"></div>`;
+                    html += `<div class="pixel-cube ${LETTER_ART[lvl.artTarget]?.includes(i) ? 'active' : ''}"></div>`;
                 }
                 html += `</div>`;
             }
 
-            // display: blanks for letter/pixel, empty for typing/scramble
-            let displayVal = (lvl.type === 'letter' || lvl.type === 'pixel')
-                ? '_'.repeat(lvl.answer.length)
-                : '_';
+            let displayVal = (lvl.type === 'letter' || lvl.type === 'pixel') ? '_'.repeat(lvl.answer.length) : '_';
             html += `<div class="input-display" id="disp">${displayVal}</div>`;
             html += renderKeyboard(lvl);
             container.innerHTML = html;
@@ -388,16 +517,14 @@ window.addEventListener("hashchange", () => {
         function renderKeyboard(lvl) {
             const ans = lvl.answer.toUpperCase();
             let keys = [...new Set(ans.split(''))];
-
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const fillerCount = Math.ceil(keys.length * 1.5);
+            const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const fill = Math.ceil(keys.length * 1.5);
             let added = 0;
-            while (added < fillerCount) {
-                let r = alphabet[Math.floor(Math.random() * alphabet.length)];
+            while (added < fill) {
+                let r = alpha[Math.floor(Math.random() * alpha.length)];
                 if (!keys.includes(r)) { keys.push(r); added++; }
             }
             keys.sort(() => Math.random() - 0.5);
-
             let kb = `<div class="keyboard-grid">`;
             keys.forEach(k => kb += `<div onmousedown="pressKey('${k}')" class="key-btn">${k}</div>`);
             kb += `<div onmousedown="pressKey('DEL')" class="key-btn action">Del</div>`;
@@ -409,28 +536,19 @@ window.addEventListener("hashchange", () => {
         function pressKey(k) {
             playBeep(400);
             const lvl = DATA[state.levelIdx];
-
-            if (k === 'DEL') {
-                state.currentInput = state.currentInput.slice(0, -1);
-            } else if (k === 'CLR') {
-                state.currentInput = "";
-            } else {
-                // pixel and letter: cap at answer length
+            if (k === 'DEL') state.currentInput = state.currentInput.slice(0, -1);
+            else if (k === 'CLR') state.currentInput = "";
+            else {
                 if (lvl.type === 'pixel' || lvl.type === 'letter') {
                     if (state.currentInput.length < lvl.answer.length) state.currentInput += k;
                 } else {
-                    // typing and scramble: no cap (allow full word)
                     state.currentInput += k;
                 }
             }
-
             const disp = document.getElementById('disp');
-            if (lvl.type === 'letter') {
-                disp.innerText = state.currentInput.padEnd(lvl.answer.length, '_');
-            } else {
-                disp.innerText = state.currentInput || '_';
-            }
-
+            disp.innerText = lvl.type === 'letter'
+                ? state.currentInput.padEnd(lvl.answer.length, '_')
+                : (state.currentInput || '_');
             document.getElementById('mainBtn').disabled = state.currentInput.length === 0;
         }
 
@@ -441,12 +559,7 @@ window.addEventListener("hashchange", () => {
                 state.levelIdx++;
                 playBeep(800);
                 if (state.levelIdx < DATA.length) {
-                    // show lesson intro if this is the first level of a new lesson
-                    if (DATA[state.levelIdx].isFirstOfLesson) {
-                        showLessonIntro(state.levelIdx);
-                    } else {
-                        loadLevel();
-                    }
+                    DATA[state.levelIdx].isFirstOfLesson ? showLessonIntro(state.levelIdx) : loadLevel();
                 } else {
                     showHome();
                 }
@@ -459,17 +572,14 @@ window.addEventListener("hashchange", () => {
         }
 
         function playBeep(f) {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
             o.frequency.setValueAtTime(f, audioCtx.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             o.connect(g); g.connect(audioCtx.destination);
             o.start(); o.stop(audioCtx.currentTime + 0.1);
         }
     </script>
-  
 </app>
-
     <security>
         <script>
 document.addEventListener('contextmenu', e => e.preventDefault());
