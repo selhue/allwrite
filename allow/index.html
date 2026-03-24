@@ -39,7 +39,14 @@
         .game-card.selected { border-color: var(--accent); background-color: #4d4e06; transform: translateY(2px); box-shadow: 0 2px 0 #020617; }
 
         /* Dock/Footer */
-        .dock { background: rgba(30, 41, 59, 0.8); backdrop-blur: 10px; border-radius: 30px; margin: 15px; margin:auto; padding: 10px; display: flex; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .dock { background: rgba(30, 41, 59, 0.8); 
+            backdrop-blur: 10px; border-radius: 30px; 
+            margin: 15px; margin:auto; padding: 10px; 
+            display: flex; gap: 10px; position: fixed;
+            bottom: 10px;
+            left: 0px;
+            right:0px;
+         box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .footer-btn { background-color: var(--accent); color: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 0 #656516; font-weight: 900; text-transform: uppercase; flex-grow: 1; transition: 0.2s; }
         .footer-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #5c6516; }
         .footer-btn:disabled { background: #334155; box-shadow: 0 4px 0 #1e293b; color: #64748b; }
