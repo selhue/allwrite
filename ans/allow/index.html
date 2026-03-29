@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson Data Table - Dark Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; }
+        .answer-pill { background-color: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+    </style>
+</head>
+<body class="p-6 font-sans text-slate-300">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6 text-white">Answer Key Master List</h1>
+        
+        <div class="overflow-hidden border border-slate-800 rounded-xl shadow-2xl bg-slate-900">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-800/50 border-b border-slate-800">
+                        <tr>
+                            <th class="p-4 text-xs font-bold uppercase text-slate-500">Lesson</th>
+                            <th class="p-4 text-xs font-bold uppercase text-slate-500">Type</th>
+                            <th class="p-4 text-xs font-bold uppercase text-slate-500">Prompt</th>
+                            <th class="p-4 text-xs font-bold uppercase text-slate-500 text-emerald-400">Correct Answer</th>
+                            <th class="p-4 text-xs font-bold uppercase text-slate-500">Hint</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table">
+                        <tr>
+                            <td colspan="5" class="p-12 text-center text-slate-500 animate-pulse">
+                                Fetching lesson data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://allwrite-sh.vercel.app/allow/data.js"></script>
+
+    <script>
+        window.addEventListener('load', () => {
+            const tableBody = document.getElementById('data-table');
+            
+            if (typeof LESSONS !== 'undefined') {
+                tableBody.innerHTML = ''; 
+                
+                LESSONS.forEach(lesson => {
+                    lesson.levels.forEach((level, index) => {
+                        const row = document.createElement('tr');
+                        row.className = "border-b border-slate-800 hover:bg-slate-800/30 transition-colors";
+                        
+                        row.innerHTML = `
+                            <td class="p-4 text-sm font-medium text-slate-200">
+                                ${index === 0 ? `<span class="text-emerald-500 font-bold">${lesson.id}:</span> ${lesson.title}` : ''}
+                            </td>
+                            <td class="p-4 text-xs font-mono text-slate-500 uppercase tracking-wider">${level.type}</td>
+                            <td class="p-4 text-sm text-slate-400">${level.word}</td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 rounded-md text-xs font-bold answer-pill shadow-sm">
+                                    ${level.answer}
+                                </span>
+                            </td>
+                            <td class="p-4 text-xs italic text-slate-500 line-clamp-1 hover:line-clamp-none cursor-help">
+                                ${level.hint}
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-red-400 bg-red-900/10">Unable to load LESSONS source.</td></tr>';
+            }
+        });
+    </script>
+</body>
+</html>
