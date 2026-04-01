@@ -11,20 +11,20 @@
             --primary-yellow: #FFC800;
             --light-yellow: #FFDE6B; 
             --dark-yellow: #E5A500;
-            --text-dark: #4B4B4B;
-            --white: #FFFFFF;
+            --text: #fafaff;
+            --bg: #0f172a;
         }
 
         body {
             margin: 0;
             padding: 0;
             font-family: "DIN Round", "Segoe UI", Roboto, sans-serif;
-            background-color: var(--white);
+            background-color: var(--bg);
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            color: var(--text-dark);
+            color: var(--text);
         }
 
         /* Container using attribute selector */
@@ -61,7 +61,7 @@
         [ui-action="button"] {
             display: inline-block;
             background-color: var(--primary-yellow);
-            color: var(--text-dark);
+            color: var(--text);
             padding: 14px 28px;
             border-radius: 12px;
             text-decoration: none;
