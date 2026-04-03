@@ -136,6 +136,8 @@
         border-bottom: 5px solid var(--border);
         width: 100%;
         font-size: 1.2rem;
+        
+        text-transform: unset !important;
     }
 
     .key-btn:active { border-bottom: 2px solid var(--border) !important; }
@@ -152,6 +154,8 @@
             justify-content: center; 
             box-shadow: 0 4px 0 #020617; 
             cursor: pointer; font-weight: 900; 
+            
+        text-transform: unset !important;
             color: white; transition: 0.1s; 
             font-size: 1.1rem; }
             
@@ -797,52 +801,63 @@ max-width: 250px;
 
 
     <div class="carousel-wrapper" id="courseCarousel">
-        <div class="door-card" onclick="selectLevel(1)"  onmousedown="
+        <div class="door-card"  onmousedown="
     document.getElementById('dp').classList.add('hidden');
     document.getElementById('play').classList.remove('hidden');
-      
+      renderMap('door1')
   ">
             <div class="door">
-                <span class="level-badge">LEVEL 1</span>
+                <span class="level-badge">DOOR 1</span>
                 <i class="fa-solid fa-seedling"></i>
             </div>
-            <span class="name-tag">Basics</span>
+            <span class="name-tag">Spella </span>
         </div>
 
-        <div class="door-card" onclick="selectLevel(2)" onmousedown="
+        <div class="door-card"  onmousedown="
     document.getElementById('dp').classList.add('hidden');
     document.getElementById('play').classList.remove('hidden');
-
+renderMap('door2')
   ">
             <div class="door">
-                <span class="level-badge">LEVEL 2</span>
+                <span class="level-badge">DOOR 2</span>
                 <i class="fa-solid fa-comments"></i>
             </div>
-            <span class="name-tag">Phrases</span>
+            <span class="name-tag">Canix </span>
         </div>
 
-        <div class="door-card" onclick="selectLevel(3)" onmousedown="
+        <div class="door-card" onmousedown="
     document.getElementById('dp').classList.add('hidden');
     document.getElementById('play').classList.remove('hidden');
-   
+   renderMap('door3')
   ">
             <div class="door">
-                <span class="level-badge">LEVEL 3</span>
+                <span class="level-badge">DOOR 3</span>
                 <i class="fa-solid fa-briefcase"></i>
             </div>
-            <span class="name-tag">Work</span>
+            <span class="name-tag">Vocaby</span>
         </div>
 
-        <div class="door-card" onclick="selectLevel(4)" onmousedown="
+        <div class="door-card" onmousedown="
     document.getElementById('dp').classList.add('hidden');
     document.getElementById('play').classList.remove('hidden');
-
+renderMap('door4')
   ">
             <div class="door">
-                <span class="level-badge">LEVEL 4</span>
+                <span class="level-badge">DOOR 4</span>
                 <i class="fa-solid fa-plane"></i>
             </div>
-            <span class="name-tag">Travel</span>
+            <span class="name-tag">Gramix</span>
+        </div>
+         <div class="door-card" onmousedown="
+    document.getElementById('dp').classList.add('hidden');
+    document.getElementById('play').classList.remove('hidden');
+renderMap('door5')
+  ">
+            <div class="door">
+                <span class="level-badge">DOOR 5</span>
+                <i class="fa-solid fa-flag"></i>
+            </div>
+            <span class="name-tag">Finale</span>
         </div>
     </div>
 
@@ -850,11 +865,7 @@ max-width: 250px;
         function moveCarousel(offset) {
             document.getElementById('courseCarousel').scrollBy({ left: offset, behavior: 'smooth' });
         }
-
-        function selectLevel(lvl) {
-            console.log("Selected level: " + lvl);
-        }
-    </script>
+</script>
 
     <div class="lhidden controls">
         <button class="nav-btn" onclick="moveCarousel(-160)">
@@ -899,11 +910,11 @@ max-width: 250px;
         <main id="gameContainer" class="flex-grow flex flex-col items-center px-6 pb-40 w-full max-w-md mx-auto overflow-y-auto"></main>
         <div class="dock">
             <button
-            onmousedown="exitGame()" 
+            onmousedown=" showHome(); " 
             class="bg-slate-700 text-white px-5 rounded-xl border-none h-[50px]
             hom
             "><i class="fa-solid fa-house"></i></button>
-            <button id="mainBtn" disabled onmousedown="handleAction()" class="footer-btn">Next</button>
+            <button id="mainBtn"  onmousedown="handleAction()" class="footer-btn">Next</button>
         </div>
     </div>
     
@@ -959,6 +970,7 @@ max-width: 250px;
 </dock>
 
     <script>
+   
         function scrollToBottom() {
             window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
         }
@@ -973,152 +985,147 @@ max-width: 250px;
             'T': [0,1,2,3,5,9,13]
         };
 
-        // ── LESSONS ──────────────────────────────────────────────────
-        const LESSONS = [
-            { id:"L1",  title:"Greetings",              desc:"Basic ways to say hello and goodbye.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'H', answer:'H',      color:'#4ade80', hint:'First letter of Hello' },
-                { type:'typing',  word:'Kumusta',          answer:'HELLO',                 hint:'Common Filipino greeting' },
-                { type:'letter',  word:'Guess letters',    answer:'HI',                    hint:'Short casual greeting' },
-                { type:'scramble',word:'Unscramble',       answer:'GOODBYE',               hint:'Paalam in English' }
-              ]},
-            { id:"L2",  title:"Agreement",              desc:"Words and phrases that mean yes or correct.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'O', answer:'O',      color:'#60a5fa', hint:'First letter of Oo (yes)' },
-                { type:'typing',  word:'Opo',              answer:'YES',                   hint:'Polite Tagalog for yes' },
-                { type:'letter',  word:'Guess letters',    answer:'OO',                    hint:'Informal Tagalog yes' },
-                { type:'scramble',word:'Unscramble',       answer:'CORRECT',               hint:'Tama in English' }
-              ]},
-            { id:"L3",  title:"Numbers 1-5",            desc:"Learn to count from one to five.",
-              levels:[
-                { type:'typing',  word:'Isa',              answer:'ONE',                   hint:'Unang numero' },
-                { type:'typing',  word:'Dalawa',           answer:'TWO',                   hint:'Ikalawang numero' },
-                { type:'letter',  word:'Guess letters',    answer:'THREE',                 hint:'Tatlo in English' },
-                { type:'scramble',word:'Unscramble',       answer:'FOUR',                  hint:'Apat in English' }
-              ]},
-            { id:"L4",  title:"Colors",                 desc:"Common color words.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'G', answer:'G',      color:'#4ade80', hint:'First letter of Green' },
-                { type:'typing',  word:'Pula',             answer:'RED',                   hint:'Kulay ng dugo' },
-                { type:'letter',  word:'Guess letters',    answer:'BLUE',                  hint:'Asul in English' },
-                { type:'scramble',word:'Unscramble',       answer:'YELLOW',                hint:'Dilaw in English' }
-              ]},
-            { id:"L5",  title:"Family Members",         desc:"Words for people in your family.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'A', answer:'A',      color:'#f472b6', hint:'First letter of Ama (father)' },
-                { type:'typing',  word:'Ina',              answer:'MOTHER',                hint:'Ina or Nanay' },
-                { type:'letter',  word:'Guess letters',    answer:'FATHER',                hint:'Tatay in English' },
-                { type:'scramble',word:'Unscramble',       answer:'SISTER',                hint:'Ate or Kapatid na babae' }
-              ]},
-            { id:"L6",  title:"Food and Drinks",        desc:"Everyday words for eating and drinking.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'E', answer:'E',      color:'#fb923c', hint:'First letter of Eat' },
-                { type:'typing',  word:'Tubig',            answer:'WATER',                 hint:'Inumin' },
-                { type:'letter',  word:'Guess letters',    answer:'RICE',                  hint:'Kanin in English' },
-                { type:'scramble',word:'Unscramble',       answer:'HUNGRY',                hint:'Gutom in English' }
-              ]},
-            { id:"L7",  title:"Body Parts",             desc:"Words for parts of the human body.",
-              levels:[
-                { type:'typing',  word:'Ulo',              answer:'HEAD',                  hint:'Pinakamataas na bahagi ng katawan' },
-                { type:'letter',  word:'Guess letters',    answer:'HAND',                  hint:'Kamay in English' },
-                { type:'scramble',word:'Unscramble',       answer:'EYES',                  hint:'Mata in English' },
-                { type:'typing',  word:'Paa',              answer:'FOOT',                  hint:'Bahagi ng katawan sa ibaba' }
-              ]},
-            { id:"L8",  title:"Days of the Week",       desc:"All seven days in English.",
-              levels:[
-                { type:'typing',  word:'Lunes',            answer:'MONDAY',                hint:'Unang araw ng linggo sa trabaho' },
-                { type:'typing',  word:'Biyernes',         answer:'FRIDAY',                hint:'Huling araw ng pasukan' },
-                { type:'scramble',word:'Unscramble',       answer:'SUNDAY',                hint:'Linggo in English' },
-                { type:'letter',  word:'Guess letters',    answer:'SATURDAY',              hint:'Sabado in English' }
-              ]},
-            { id:"L9",  title:"Animals",                desc:"Common animal names.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'D', answer:'D',      color:'#a78bfa', hint:'First letter of Dog' },
-                { type:'typing',  word:'Pusa',             answer:'CAT',                   hint:'Sikat na alagang hayop' },
-                { type:'letter',  word:'Guess letters',    answer:'BIRD',                  hint:'Ibon in English' },
-                { type:'scramble',word:'Unscramble',       answer:'FISH',                  hint:'Isda in English' }
-              ]},
-            { id:"L10", title:"School Supplies",        desc:"Things you use in school.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'L', answer:'L',      color:'#34d399', hint:'First letter of Libro (book)' },
-                { type:'typing',  word:'Lapis',            answer:'PENCIL',                hint:'Ginagamit sa pagsusulat' },
-                { type:'letter',  word:'Guess letters',    answer:'ERASER',                hint:'Pambura in English' },
-                { type:'scramble',word:'Unscramble',       answer:'NOTEBOOK',              hint:'Kuwaderno in English' }
-              ]},
-            { id:"L11", title:"Emotions",               desc:"Words that describe how you feel.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'H', answer:'H',      color:'#fbbf24', hint:'First letter of Happy' },
-                { type:'typing',  word:'Malungkot',        answer:'SAD',                   hint:'Pakiramdam kapag may problema' },
-                { type:'letter',  word:'Guess letters',    answer:'ANGRY',                 hint:'Galit in English' },
-                { type:'scramble',word:'Unscramble',       answer:'SCARED',                hint:'Takot in English' }
-              ]},
-            { id:"L12", title:"Directions",             desc:"Words used for giving directions.",
-              levels:[
-                { type:'typing',  word:'Kaliwa',           answer:'LEFT',                  hint:'Direksyon' },
-                { type:'typing',  word:'Kanan',            answer:'RIGHT',                 hint:'Direksyon' },
-                { type:'letter',  word:'Guess letters',    answer:'STRAIGHT',              hint:'Diretso in English' },
-                { type:'scramble',word:'Unscramble',       answer:'NORTH',                 hint:'Hilaga in English' }
-              ]},
-            { id:"L13", title:"Weather",                desc:"Words to describe the weather.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'S', answer:'S',      color:'#38bdf8', hint:'First letter of Storm' },
-                { type:'typing',  word:'Ulan',             answer:'RAIN',                  hint:'Madalas sa Pilipinas' },
-                { type:'letter',  word:'Guess letters',    answer:'SUNNY',                 hint:'Maliwanag at mainit na panahon' },
-                { type:'scramble',word:'Unscramble',       answer:'CLOUDY',                hint:'Makulimlim in English' }
-              ]},
-            { id:"L14", title:"Jobs and Professions",   desc:"Common career and job titles.",
-              levels:[
-                { type:'typing',  word:'Guro',             answer:'TEACHER',               hint:'Nagtuturo sa paaralan' },
-                { type:'typing',  word:'Doktor',           answer:'DOCTOR',                hint:'Naglilingkod sa ospital' },
-                { type:'letter',  word:'Guess letters',    answer:'NURSE',                 hint:'Nars in English' },
-                { type:'scramble',word:'Unscramble',       answer:'ENGINEER',              hint:'Inhinyero in English' }
-              ]},
-            { id:"L15", title:"Time Expressions",       desc:"Words related to time and schedule.",
-              levels:[
-                { type:'typing',  word:'Umaga',            answer:'MORNING',               hint:'Simula ng araw' },
-                { type:'typing',  word:'Gabi',             answer:'NIGHT',                 hint:'Katapusan ng araw' },
-                { type:'letter',  word:'Guess letters',    answer:'NOON',                  hint:'Tanghali in English' },
-                { type:'scramble',word:'Unscramble',       answer:'TOMORROW',              hint:'Bukas in English' }
-              ]},
-            { id:"L16", title:"Personality Adjectives", desc:"Words that describe a person's character.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'S', answer:'S',      color:'#e879f9', hint:'First letter of Smart' },
-                { type:'typing',  word:'Matapang',         answer:'BRAVE',                 hint:'Hindi natatakot' },
-                { type:'letter',  word:'Guess letters',    answer:'HUMBLE',                hint:'Mapagkumbaba in English' },
-                { type:'scramble',word:'Unscramble',       answer:'GENEROUS',              hint:'Mapagbigay in English' }
-              ]},
-            { id:"L17", title:"Technology Words",       desc:"Common tech vocabulary in English.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'N', answer:'N',      color:'#2dd4bf', hint:'First letter of Network' },
-                { type:'typing',  word:'Tagapagserbisyo',  answer:'SERVER',                hint:'Nag-iimbak ng data online' },
-                { type:'letter',  word:'Guess letters',    answer:'UPLOAD',                hint:'Mag-upload ng file' },
-                { type:'scramble',word:'Unscramble',       answer:'PASSWORD',              hint:'Lihim na code sa login' }
-              ]},
-            { id:"L18", title:"Action Verbs",           desc:"Common verbs used in everyday English.",
-              levels:[
-                { type:'typing',  word:'Tumakbo',          answer:'RUN',                   hint:'Mabilis na kilos ng paa' },
-                { type:'typing',  word:'Kumain',           answer:'EAT',                   hint:'Kumain ng pagkain' },
-                { type:'letter',  word:'Guess letters',    answer:'WRITE',                 hint:'Sumulat ng salita' },
-                { type:'scramble',word:'Unscramble',       answer:'LISTEN',                hint:'Makinig sa guro' }
-              ]},
-            { id:"L19", title:"Academic Words",         desc:"Vocabulary used in school and studies.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'A', answer:'A',      color:'#f97316', hint:'First letter of Assignment' },
-                { type:'typing',  word:'Pagsusulit',       answer:'EXAM',                  hint:'Sinusulit ng mga estudyante' },
-                { type:'letter',  word:'Guess letters',    answer:'THESIS',                hint:'Pananaliksik sa kolehiyo' },
-                { type:'scramble',word:'Unscramble',       answer:'RESEARCH',              hint:'Pag-aaral nang malalim' }
-              ]},
-            { id:"L20", title:"Filipino Values",        desc:"English words for Filipino core values.",
-              levels:[
-                { type:'pixel',   word:'Guess the pixel', artTarget:'T', answer:'T',      color:'#f43f5e', hint:'First letter of Togetherness' },
-                { type:'typing',  word:'Bayanihan',        answer:'UNITY',                 hint:'Lahat nagtutulungan' },
-                { type:'letter',  word:'Guess letters',    answer:'RESPECT',               hint:'Respeto in English' },
-                { type:'scramble',word:'Unscramble',       answer:'GRATITUDE',             hint:'Pasasalamat in English' }
-              ]}
-        ];
+    
+// ── DOORS ─────────────────────────────────────────────────────
+const LESSONS = [
+  {
+    id: 1,
+    key: 'door1',
+    levels: [
+      { id: 11, title: 'Spelling', details: 'Mastering spelling and capitalization basics.',
+        type: 'word', word: 'Choose the correct spelling:', answer: 'friend',
+        choices: ['friend', 'freind'], hint: 'Which one looks right?' },
 
-        // ── flat data ─────────────────────────────────────────────────
-        const DATA = [];
+      { id: 12, title: 'Spot the Error', details: 'Find the correctly spelled word from Little Red Riding Hood.',
+        type: 'word', word: 'Which word is correctly spelled?', answer: 'Little',
+        choices: ['Little', 'Litle', 'Ridding', 'grandmoter'], hint: 'From the Little Red Riding Hood story' },
+
+      { id: 13, title: 'Capitalization', details: 'Use big letters for names, places, and "I".',
+        type: 'word', word: 'Which rewrite is correct? "i am from cagayan"', answer: 'I am from Cagayan',
+        choices: ['i am from cagayan', 'I am from Cagayan', 'I am from cagayan', 'i am From Cagayan'],
+        hint: 'Names of places are always capitalized' },
+
+      { id: 14, title: 'Editing', details: 'Find and correct spelling and capitalization errors.',
+        type: 'word', word: 'Which sentence is correctly written?',
+        answer: 'My name is Carlo and I live in Cagayan.',
+        choices: ['my name is carlo and i live in cagayan', 'My name is Carlo and I live in Cagayan.',
+          'My Name Is Carlo And I Live In Cagayan.', 'My name is carlo and I live in Cagayan'],
+        hint: 'Check every name and the pronoun I' },
+
+      { id: 15, title: 'Write About Me', details: 'Write sentences about your personal motivation.',
+        type: 'write', word: 'Write 1-3 simple sentences about what motivates you.',
+        answer: 'My family motivates me to learn.', hint: 'Start with a capital letter. End with a period.' }
+    ]
+  },
+
+  {
+    id: 2,
+    key: 'door2',
+    levels: [
+      { id: 21, title: 'Basic Marks', details: 'Identifying the period, question mark, and exclamation mark.',
+        type: 'word', word: 'What is the use of a Period (.)?', answer: 'Ends a sentence',
+        choices: ['Starts a sentence', 'Ends a sentence', 'Shows surprise', 'Asks a question'],
+        hint: 'Think about where you put a period' },
+
+      { id: 22, title: 'Identification', details: 'Choose the sentence with the correct punctuation.',
+        type: 'word', word: 'Which sentence uses the correct punctuation?', answer: 'Where is your bag?',
+        choices: ['Where is your bag.', 'Where is your bag?', 'Where is your bag!', 'where is your bag?'],
+        hint: 'It is a question — what mark do questions need?' },
+
+      { id: 23, title: 'Editing', details: 'Adding correct punctuation marks to sentences.',
+        type: 'word', word: 'Complete: "That was incredible ___"', answer: 'That was incredible!',
+        choices: ['That was incredible.', 'That was incredible?', 'That was incredible!', 'that was incredible!'],
+        hint: 'It expresses strong emotion' },
+
+      { id: 24, title: 'Expressive Writing', details: 'Write a question with proper punctuation.',
+        type: 'write', word: 'Write a question you want to ask.',
+        answer: 'What is your favorite food?', hint: 'Remember to end your question with a question mark.' }
+    ]
+  },
+
+  {
+    id: 3,
+    key: 'door3',
+    levels: [
+      { id: 31, title: 'Familiar Contexts', details: 'Identifying vocabulary from everyday situations.',
+        type: 'word', word: 'Which object would you see in a school?', answer: 'Textbook',
+        choices: ['Frying pan', 'Textbook', 'Hammer', 'Fishing rod'], hint: 'Think about what you use in class' },
+
+      { id: 32, title: 'Word Meanings', details: 'Learning definitions for nouns and professional titles.',
+        type: 'word', word: 'What is a "Farmer"?', answer: 'A person who grows crops',
+        choices: ['A person who fixes machines', 'A person who grows crops', 'A person who teaches students', 'A person who heals the sick'],
+        hint: 'Think about fields and agriculture' },
+
+      { id: 33, title: 'Real Sentences', details: 'Applying new words in the correct context.',
+        type: 'word', word: 'The scientist will ______ the results carefully.', answer: 'examine',
+        choices: ['ignore', 'examine', 'lose', 'forget'], hint: 'It means to look at something closely' },
+
+      { id: 34, title: 'Application', details: 'Create a sentence using a specific word.',
+        type: 'write', word: 'Use the word "Gifted" in a sentence.',
+        answer: 'She is a gifted singer.', hint: 'Gifted means having a natural talent.' }
+    ]
+  },
+
+  {
+    id: 4,
+    key: 'door4',
+    levels: [
+      { id: 41, title: 'Build It Correctly', details: 'Spotting subjects and verbs in a sentence.',
+        type: 'word', word: '"The dog barks loudly." — What is the subject?', answer: 'The dog',
+        choices: ['barks', 'loudly', 'The dog', 'The dog barks'], hint: 'The subject is who or what the sentence is about' },
+
+      { id: 42, title: 'Time to Choose', details: 'Using correct verb forms based on number and tense.',
+        type: 'word', word: 'The girls ______ singing.', answer: 'are',
+        choices: ['is', 'are', 'was', 'am'], hint: '"Girls" is plural — which verb matches?' },
+
+      { id: 43, title: 'Sentence Builder', details: 'Arrange scrambled words into the correct sentence.',
+        type: 'word', word: 'Put in the correct order: [school] [He] [to] [goes]', answer: 'He goes to school.',
+        choices: ['Goes he to school.', 'He goes to school.', 'To school he goes.', 'School he to goes.'],
+        hint: 'Start with the subject, then the verb' },
+
+      { id: 44, title: 'Grammar Checking', details: 'Find and correct common grammar errors.',
+        type: 'word', word: 'Which sentence is grammatically correct?',
+        answer: "Little Red Riding Hood goes to her grandmother's house.",
+        choices: ["Little Red Riding Hood go to her grandmother's house.",
+          "Little Red Riding Hood goes to her grandmother's house.",
+          "Little Red Riding Hood going to her grandmother's house.",
+          "Little Red Riding Hood gone to her grandmother's house."],
+        hint: 'She is singular — which verb form fits?' }
+    ]
+  },
+
+  {
+    id: 5,
+    key: 'door5',
+    levels: [
+      { id: 51, title: 'Start with a Frame', details: 'Using patterns like "I am," "I like," and "I can".',
+        type: 'word', word: 'Complete the frame: "I live in ______"', answer: 'I live in Quezon City.',
+        choices: ['I lives in Quezon City.', 'I live Quezon City.', 'I live in Quezon City.', 'I living in Quezon City.'],
+        hint: 'Which sentence sounds natural and complete?' },
+
+      { id: 52, title: 'Add More', details: 'Expanding simple sentences by adding details.',
+        type: 'word', word: 'Which sentence expands "She runs." with a detail?', answer: 'She runs in the park.',
+        choices: ['She runs.', 'She runs in the park.', 'In the park.', 'Running park she.'],
+        hint: 'Add a Where detail to expand the sentence' },
+
+      { id: 53, title: 'Link Ideas', details: 'Combining sentences using connectors.',
+        type: 'word', word: 'Combine: "I like milk." + "I like juice."', answer: 'I like milk and I like juice.',
+        choices: ['I like milk but I like juice.', 'I like milk I like juice.', 'I like milk and I like juice.', 'I like milk, juice.'],
+        hint: 'Which connector shows they are both true?' },
+
+      { id: 54, title: 'Put It Together', details: 'Write a short set of connected sentences.',
+        type: 'write', word: 'Write 3-5 connected sentences about your family.',
+        answer: 'My family is very important to me.', hint: 'Use and, but, so to connect your ideas.' }
+    ]
+  }
+];
+        </script>
+        
+        <script>
+
+!localStorage.getItem('currentLevel') && localStorage.setItem('currentLevel','door1');
+
+      const DATA = [];
         LESSONS.forEach(lesson => {
             lesson.levels.forEach((lvl, i) => {
                 DATA.push({ ...lvl, lessonId: lesson.id, lessonTitle: lesson.title, lessonDesc: lesson.desc, isFirstOfLesson: i === 0 });
@@ -1128,14 +1135,286 @@ max-width: 250px;
         let state = { levelIdx: 0, stars: 0, currentInput: "", activeTab: 'levels' };
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        window.onload = () => {
+ 
+
+function getProgress(doorKey) {
+  return Number(localStorage.getItem('progress_' + doorKey)) || 0
+}
+
+function saveProgress(doorKey, levelId) {
+  localStorage.setItem('progress_' + doorKey, levelId)
+}
+
+function renderMap(doorKey) {
+  const map = document.getElementById('levelMap')
+  map.innerHTML = ""
+
+  if (doorKey === 'door1') localStorage.setItem('currentLevel', 'door1')
+  if (doorKey === 'door2') localStorage.setItem('currentLevel', 'door2')
+  if (doorKey === 'door3') localStorage.setItem('currentLevel', 'door3')
+  if (doorKey === 'door4') localStorage.setItem('currentLevel', 'door4')
+  if (doorKey === 'door5') localStorage.setItem('currentLevel', 'door5')
+
+  const lesson = LESSONS.find(l => l.key === doorKey)
+  if (!lesson) return
+
+  const savedLevel = getProgress(doorKey) || lesson.levels[0].id
+  state.levelIdx = savedLevel
+
+  lesson.levels.slice().forEach(level => {
+    const node = document.createElement('div')
+
+    // remove first digit
+    const displayId = String(level.id).slice(1)
+
+    const done = level.id < savedLevel
+
+    node.id = level.id
+    node.className = 'level-node active ' + (done ? ' done' : '')
+    node.innerHTML = done ? '✓' : displayId
+
+    node.onmousedown = () => {
+         state.levelIdx = level.id;
+      showLessonIntro(level.id)
+      loadLevel(level.id)
+    }
+
+    map.appendChild(node)
+  })
+}
+function showLessonIntro(idx) {
+  let lvl = null
+
+  for (const door of LESSONS) {
+    lvl = door.levels.find(l => l.id === idx)
+    if (lvl) break
+  }
+
+  if (!lvl) return
+
+  document.getElementById('introTag').innerText = lvl.id
+  document.getElementById('introTitle').innerText = lvl.title
+  document.getElementById('introDesc').innerText = lvl.details
+
+  document.getElementById('homeScreen').classList.add('hidden')
+  document.getElementById('tabNav').classList.add('hidden')
+  document.getElementById('lessonIntro').classList.remove('hidden')
+}
+
+function prepareNextLevel() { showLessonIntro(state.levelIdx); }
+
+function startGame() {
+    document.getElementById('lessonIntro').classList.add('hidden');
+    document.getElementById('homeScreen').classList.add('hidden');
+    document.getElementById('gameUI').classList.remove('hidden');
+    loadLevel(state.levelIdx);
+
+}
+
+function loadLevel(levelId) {
+  let lvl = null
+
+  for (const door of LESSONS) {
+    lvl = door.levels.find(l => l.id === levelId)
+    if (lvl) break
+  }
+
+  if (!lvl) return
+
+  const container = document.getElementById('gameContainer')
+
+  state.currentInput = ""
+  document.getElementById('progressBar').style.width = `${(levelId / 50) * 100}%`
+  document.getElementById('stars').innerText = state.stars
+
+  let html = `<div class="text-center mt-2 mb-4">
+      <h2 class="text-2xl font-black">${lvl.word}</h2>
+      <p style="background:#fafafa; padding:0.1in; border-radius:15px;"
+      class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Hint: ${lvl.hint}</p>
+  </div>`
+
+  if (lvl.type === 'pixel') {
+    html += `<div class="pixel-grid" style="--pixel-color:${lvl.color}">`
+    for (let i = 0; i < 16; i++)
+      html += `<div class="pixel-cube ${LETTER_ART[lvl.artTarget]?.includes(i) ? 'active' : ''}"></div>`
+    html += `</div>`
+    html += `<div class="input-display" id="disp">${'_'.repeat(lvl.answer.length)}</div>`
+    html += renderKeyboard(lvl)
+
+  } else if (lvl.type === 'letter') {
+    html += `<div class="input-display" id="disp">${'_'.repeat(lvl.answer.length)}</div>`
+    html += renderKeyboard(lvl)
+
+  } else if (lvl.type === 'scramble' || lvl.type === 'typing') {
+    html += `<div class="input-display" id="disp">_</div>`
+    html += renderKeyboard(lvl)
+
+  } else if (lvl.type === 'word') {
+    const blanks = lvl.answer.split(' ').map(() => '___').join(' ')
+    html += `<div class="input-display" id="disp" style="font-size:1rem;letter-spacing:2px">${blanks}</div>`
+    html += renderWordChoices(lvl)
+
+  } else if (lvl.type === 'write') {
+    html += `<textarea id="writeInput" placeholder="Write your answer here..."
+        style="width:100%;min-height:90px;background:#1e293b;color:#fff;border-radius:12px;
+        padding:12px;font-size:0.95rem;resize:none;margin-top:8px;border:none;outline:none;
+        font-family:Nunito,sans-serif"
+        oninput="state.currentInput=this.value;document.getElementById('mainBtn').disabled=!this.value.trim()">
+    </textarea>`
+  }
+
+  container.innerHTML = html
+}
+// ── WORD CHOICES ──────────────────────────────────────────────
+function renderWordChoices(lvl) {
+    const choices = [...lvl.choices].sort(() => Math.random() - 0.5);
+    return `<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+        ${choices.map((c, i) => `
+            <div class="key-btn"
+                style="padding:14px 16px;border-radius:14px;font-size:0.88rem;font-weight:700;
+                text-align:left;cursor:pointer;width:100%;display:block"
+                id="wc-${i}"
+                data-val="${c.replace(/"/g,'&quot;')}"
+                onmousedown="pickChoice(this)">
+                ${c}
+            </div>`).join('')}
+    </div>`;
+}
+
+function pickChoice(el) {
+    const val = el.getAttribute('data-val');
+    const lvl = getLevelById(state.levelIdx);
+    const correct = val === lvl.answer;
+
+    const disp = document.getElementById('disp');
+    if (disp) disp.innerText = val;
+
+    document.querySelectorAll('[id^="wc-"]').forEach(btn => {
+        btn.style.pointerEvents = 'none';
+        if (btn.getAttribute('data-val') === lvl.answer) {
+            btn.style.background = '#4ade8033';
+            btn.style.color = '#4ade80';
+            btn.style.borderColor = '#4ade80';
+        }
+    });
+    if (!correct) {
+        el.style.background = '#ef444433';
+        el.style.color = '#ef4444';
+        el.style.borderColor = '#ef4444';
+    }
+
+    playBeep(correct ? 800 : 100);
+    setTimeout(() => {
+        if (correct) {
+            state.stars += 10;
+            advanceLevel();
+        } else {
+            loadLevel(state.levelIdx); // retry same level
+        }
+    }, 700);
+}
+
+function handleAction() {
+    const lvl = getLevelById(state.levelIdx);
+    if (!lvl || lvl.type === 'word') return;
+
+    const correct = lvl.type === 'write'
+        ? state.currentInput.trim().length > 5
+        : state.currentInput === lvl.answer;
+
+    if (correct) {
+        state.stars += 10;
+        playBeep(800);
+        advanceLevel();
+    } else {
+        const btn = document.getElementById('mainBtn');
+        btn.classList.add('shake', 'wrong');
+        btn.innerText = "Again";
+        playBeep(100);
+        setTimeout(() => {
+            btn.classList.remove('shake', 'wrong');
+            btn.innerText = "Next";
+            loadLevel(state.levelIdx); // retry same level
+        }, 400);
+    }
+}
+
+function advanceLevel() {
+    const doorKey = localStorage.getItem('currentLevel');
+    const lesson = LESSONS.find(l => l.key === doorKey);
+    if (!lesson) return showHome();
+
+    const allIds = lesson.levels.map(l => l.id);
+    const currIdx = allIds.indexOf(state.levelIdx);
+    const nextId = allIds[currIdx + 1];
+
+    saveProgress(doorKey, state.levelIdx);
+
+    if (nextId !== undefined) {
+        state.levelIdx = nextId;
+        const nextLvl = getLevelById(nextId);
+        nextLvl.isFirstOfLesson ? showLessonIntro(nextId) : loadLevel(nextId);
+    } else {
+        showHome(); // door complete
+    }
+}
+
+
+// ── KEYBOARD ─────────────────────────────────────────────────
+function renderKeyboard(lvl) {
+    const ans = lvl.answer.toUpperCase();
+    let keys = [...new Set(ans.split(''))];
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const fill = Math.ceil(keys.length * 1.5);
+    let added = 0;
+    while (added < fill) {
+        let r = alpha[Math.floor(Math.random() * alpha.length)];
+        if (!keys.includes(r)) { keys.push(r); added++; }
+    }
+    keys.sort(() => Math.random() - 0.5);
+    let kb = `<div class="keyboard-grid">`;
+    keys.forEach(k => kb += `<div onmousedown="pressKey('${k}')" class="key-btn">${k}</div>`);
+    kb += `<div onmousedown="pressKey('DEL')" class="key-btn action">Del</div>`;
+    kb += `<div onmousedown="pressKey('CLR')" class="key-btn action">Clr</div>`;
+    return kb + `</div>`;
+}
+
+function getLevelById(id) {
+  for (const door of LESSONS) {
+    const found = door.levels.find(l => l.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
+function pressKey(k) {
+    playBeep(400);
+    
+const lvl = getLevelById(state.levelIdx);
+    if (k === 'DEL') state.currentInput = state.currentInput.slice(0, -1);
+    else if (k === 'CLR') state.currentInput = "";
+    else {
+        if (lvl.type === 'pixel' || lvl.type === 'letter') {
+            if (state.currentInput.length < lvl.answer.length) state.currentInput += k;
+        } else {
+            state.currentInput += k;
+        }
+    }
+    const disp = document.getElementById('disp');
+    disp.innerText = lvl.type === 'letter'
+        ? state.currentInput.padEnd(lvl.answer.length, '_')
+        : (state.currentInput || '_');
+    document.getElementById('mainBtn').disabled = state.currentInput.length === 0;
+}
+
+ window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash').classList.add('hidden');
                 document.getElementById('tabNav').classList.remove('hidden');
                 switchTab('levels');
             }, 800);
         };
-
+        
         // ── tab nav ───────────────────────────────────────────────────
         function switchTab(tab) {
             state.activeTab = tab;
@@ -1145,7 +1424,7 @@ max-width: 250px;
             if (tab === 'levels') {
                 document.getElementById('homeScreen').classList.remove('hidden');
                 document.getElementById('tab-levels').classList.add('active');
-                renderMap();
+               renderMap(localStorage.getItem('currentLevel'));
             } else if (tab === 'quest') {
                 document.getElementById('questScreen').classList.remove('hidden');
                 document.getElementById('tab-quest').classList.add('active');
@@ -1157,26 +1436,6 @@ max-width: 250px;
             }
         }
 
-        // ── levels / map ──────────────────────────────────────────────
-        function renderMap() {
-            const map = document.getElementById('levelMap');
-            map.innerHTML = "";
-            for (let i = DATA.length - 1; i >= 0; i--) {
-                const node = document.createElement('div');
-                const unlocked = i <= state.levelIdx;
-                const done = i < state.levelIdx;
-                
-               node.className = `level-node ${
-  done ? 'done' : unlocked ? 'active' : 'locked'
-}`;
- node.innerHTML = done ? '✓' : (i + 1);
-                if (unlocked) node.onmousedown = () => { state.levelIdx = i; showLessonIntro(i); };
-                map.appendChild(node);
-            }
-            document.getElementById('homeStars').innerText = state.stars;
-            scrollToBottom();
-        }
-
         function showHome() {
             document.getElementById('gameUI').classList.add('hidden');
             document.getElementById('lessonIntro').classList.add('hidden');
@@ -1184,7 +1443,7 @@ max-width: 250px;
             switchTab('levels');
         }
 
-        function exitGame() { showHome(); }
+
 
         // ── quests ────────────────────────────────────────────────────
         const QUESTS = [
@@ -1237,116 +1496,6 @@ max-width: 250px;
                 </div>`).join('');
         }
 
-        // ── lesson intro & game ───────────────────────────────────────
-        function showLessonIntro(idx) {
-            const lvl = DATA[idx];
-            document.getElementById('introTag').innerText = lvl.lessonId;
-            document.getElementById('introTitle').innerText = lvl.lessonTitle;
-            document.getElementById('introDesc').innerText = lvl.lessonDesc;
-            document.getElementById('homeScreen').classList.add('hidden');
-            document.getElementById('tabNav').classList.add('hidden');
-            document.getElementById('lessonIntro').classList.remove('hidden');
-        }
-
-        function prepareNextLevel() { showLessonIntro(state.levelIdx); }
-
-        function startGame() {
-            document.getElementById('lessonIntro').classList.add('hidden');
-            document.getElementById('homeScreen').classList.add('hidden');
-            document.getElementById('gameUI').classList.remove('hidden');
-            loadLevel();
-        }
-
-        function loadLevel() {
-            const lvl = DATA[state.levelIdx];
-            const container = document.getElementById('gameContainer');
-            document.getElementById('mainBtn').disabled = true;
-            state.currentInput = "";
-            document.getElementById('progressBar').style.width = `${(state.levelIdx / DATA.length) * 100}%`;
-            document.getElementById('stars').innerText = state.stars;
-
-            let html = `<div class="text-center mt-2 mb-4">
-                <h2 class="text-2xl font-black">${lvl.word}</h2>
-                <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Hint: ${lvl.hint}</p>
-            </div>`;
-
-            if (lvl.type === 'pixel') {
-                html += `<div class="pixel-grid" style="--pixel-color:${lvl.color}">`;
-                for (let i = 0; i < 16; i++) {
-                    html += `<div class="pixel-cube ${LETTER_ART[lvl.artTarget]?.includes(i) ? 'active' : ''}"></div>`;
-                }
-                html += `</div>`;
-            }
-
-            let displayVal = (lvl.type === 'letter' || lvl.type === 'pixel') ? '_'.repeat(lvl.answer.length) : '_';
-            html += `<div class="input-display" id="disp">${displayVal}</div>`;
-            html += renderKeyboard(lvl);
-            container.innerHTML = html;
-        }
-
-        function renderKeyboard(lvl) {
-            const ans = lvl.answer.toUpperCase();
-            let keys = [...new Set(ans.split(''))];
-            const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const fill = Math.ceil(keys.length * 1.5);
-            let added = 0;
-            while (added < fill) {
-                let r = alpha[Math.floor(Math.random() * alpha.length)];
-                if (!keys.includes(r)) { keys.push(r); added++; }
-            }
-            keys.sort(() => Math.random() - 0.5);
-            let kb = `<div class="keyboard-grid">`;
-            keys.forEach(k => kb += `<div onmousedown="pressKey('${k}')" class="key-btn">${k}</div>`);
-            kb += `<div onmousedown="pressKey('DEL')" class="key-btn action">Del</div>`;
-            kb += `<div onmousedown="pressKey('CLR')" class="key-btn action">Clr</div>`;
-            kb += `</div>`;
-            return kb;
-        }
-
-        function pressKey(k) {
-            playBeep(400);
-            const lvl = DATA[state.levelIdx];
-            if (k === 'DEL') state.currentInput = state.currentInput.slice(0, -1);
-            else if (k === 'CLR') state.currentInput = "";
-            else {
-                if (lvl.type === 'pixel' || lvl.type === 'letter') {
-                    if (state.currentInput.length < lvl.answer.length) state.currentInput += k;
-                } else {
-                    state.currentInput += k;
-                }
-            }
-            const disp = document.getElementById('disp');
-            disp.innerText = lvl.type === 'letter'
-                ? state.currentInput.padEnd(lvl.answer.length, '_')
-                : (state.currentInput || '_');
-            document.getElementById('mainBtn').disabled = state.currentInput.length === 0;
-        }
-
-        function handleAction() {
-            const lvl = DATA[state.levelIdx];
-            if (state.currentInput.toUpperCase() === lvl.answer.toUpperCase()) {
-                state.stars += 10;
-                state.levelIdx++;
-                playBeep(800);
-                if (state.levelIdx < DATA.length) {
-                    DATA[state.levelIdx].isFirstOfLesson ? showLessonIntro(state.levelIdx) : loadLevel();
-                } else {
-                    showHome();
-                }
-            } else {
-                const btn = document.getElementById('mainBtn');
-                btn.classList.add('shake');
-                 btn.classList.add('wrong');
-                   btn.innerText="Again"
-                playBeep(100);
-         setTimeout(() => {
-                    btn.classList.remove('shake');
-                    btn.classList.remove('wrong');
-                  
-                        btn.innerText="Next";
-                 }, 400);
-            }
-        }
 
         function playBeep(f) {
             const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -1396,12 +1545,17 @@ lastH = window.outerHeight;
 
 <recheck>
     <script>
-if (
-  localStorage.getItem('portal_done') !== 'true' &&
-  (!localStorage.getItem('user_name') || localStorage.getItem('user_name').trim() === '')
-) {
-  window.location.replace('https://allwrite-sh.vercel.app/dev/allow/start');
-}
+        (function() {
+  const portalDone = localStorage.getItem('portal_done');
+  const userName = localStorage.getItem('user_name');    
+
+  const isPortalDone = portalDone === 'true';
+  const isUserNameEmpty = !userName || userName.trim() === '';
+
+  if (!isPortalDone && isUserNameEmpty) {
+    window.location.replace('https://allwrite-sh.vercel.app/dev/allow/start');
+  }
+})();
     </script>
 </recheck> 
 </body>
