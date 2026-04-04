@@ -1191,7 +1191,7 @@ function showLessonIntro(idx) {
 
   if (!lvl) return
 
-  document.getElementById('introTag').innerText = lvl.id
+  document.getElementById('introTag').innerText = `Door ${String(lvl.id)[0]} - Question ${String(lvl.id)[1]}`
   document.getElementById('introTitle').innerText = lvl.title
   document.getElementById('introDesc').innerText = lvl.details
 
