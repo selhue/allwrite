@@ -1,3 +1,60 @@
+<loop>
+<style>
+body {
+    margin: 0;
+    background: #101010;
+}
+
+loop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+loop .title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 80px;
+    font-weight: 700;
+    color: #FFC800; /* Duolingo Yellow */
+    text-align: center;
+    letter-spacing: -1.5px;
+    /* Elegant soft bounce with subtle scale-in */
+    animation: elegantEntrance 3s cubic-bezier(0.19, 1, 0.22, 1) infinite;
+}
+
+@keyframes elegantEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+        filter: blur(10px);
+    }
+    15% {
+        opacity: 1;
+        transform: translateY(0) scale(1.05);
+        filter: blur(0);
+    }
+    25% {
+        transform: scale(1);
+    }
+    85% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+        filter: blur(5px);
+    }
+}
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap" rel="stylesheet">
+
+<div class="title">All Write</div>
+</loop>
 <script>
 window.onload = function () {
     const link = document.createElement('a');
