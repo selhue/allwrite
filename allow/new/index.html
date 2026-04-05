@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>AllWrite | Pixel Spell</title>
+    <meta name="description" content="Enabling next filipino generation in writing and learning english.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2064%2064'%3E%0A%3Ccircle%20cx%3D'32'%20cy%3D'32'%20r%3D'32'%20fill%3D'%23e1c066'%2F%3E%0A%3Ctext%20x%3D'32'%20y%3D'46'%20font-size%3D'38'%20font-weight%3D'700'%20text-anchor%3D'middle'%20fill%3D'%23ffffff'%20font-family%3D'Arial'%20letter-spacing%3D'-1'%3Eaw%3C%2Ftext%3E%0A%3C%2Fsvg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --duo-yellow: #ffc800; --duo-yellow-border: #ef9600;
+            --duo-green: #58cc02; --duo-green-border: #46a302;
+            --duo-blue: #1cb0f6; --duo-blue-border: #1899d6;
+            --duo-border: #e5e5e5; --duo-text: #ffffff;
+            --duo-gray: #afafaf; --duo-red: #ff4b4b;
+            --duo-red-border: #d33131;
+            --duo-purple: #ce82ff; --duo-purple-border: #a357d6;
+            --bg-space: #0A0A0A;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif; background-color: #000; color: var(--duo-text); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+
+        .app-container { width: 100%; max-width: 720px;  background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.jpg'); background-size: cover; background-position: center; display: flex; flex-direction: column; position: relative; }
+        .bg-dim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 0; }
+
+        header, main { position: relative; z-index: 1; }
+
+        .screen-content { animation: fadeIn 0.4s ease-out forwards; height: 100%; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden { display: none !important; }
+
+        header { padding: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid rgba(255,255,255,0.1); min-height: 80px; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: var(--duo-yellow); text-transform: uppercase; }
+        .lvl-pill { background: var(--duo-yellow); color: white; padding: 8px 16px; border-radius: 14px; font-weight: 800; border-bottom: 4px solid var(--duo-yellow-border); font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+
+        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* PORTAL STYLES */
+        #portal-container { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-space); z-index: 9999; overflow: hidden; transition: opacity 1s; }
+        .interaction-wrapper { position: relative; z-index: 100; width: 90%; max-width: 340px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .perspective-box { position: absolute; perspective: 600px; width: 100vw; height: 100vh; }
+        .warp-scene { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        .fragment { position: absolute; border-radius: 8px; opacity: 0; pointer-events: none; }
+        .fragment.yellow { background: var(--duo-yellow); box-shadow: 0 0 8px var(--duo-yellow); }
+        .fragment.blue { background: var(--duo-blue); box-shadow: 0 0 8px var(--duo-blue); }
+        .fragment.white { background: #FFF; box-shadow: 0 0 8px #FFF; }
+        @keyframes flyPast {
+            0% { transform: translate3d(var(--x), var(--y), -1500px); opacity: 0; }
+            15% { opacity: 0.8; } 85% { opacity: 0.8; }
+            100% { transform: translate3d(var(--mx), var(--my), 600px); opacity: 0; }
+        }
+        #user-input { width: 100%; padding: 20px; border-radius: 16px; border: 3px solid #222; background: rgba(255, 255, 255, 0.05); color: white; font-size: 1.1rem; text-align: center; outline: none; font-family: 'Nunito', sans-serif; }
+        .hidden-under { opacity: 0; transform: translateY(15px); pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .hidden-under.reveal { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .warp-btn { width: 100%; background: linear-gradient(180deg, #ffd700 0%, #ffbf00 100%); color: #333; border: 2px solid #ffde6b; border-bottom: 5px solid var(--duo-yellow-border); padding: 18px; border-radius: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-family: 'Nunito', sans-serif; }
+        .portal-overlay { position: fixed; inset: 0; background: rgb(8, 20, 48); opacity: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .flash { animation: portalWhite 0.8s forwards ease-in; }
+        @keyframes portalWhite { to { opacity: 1; } }
+        .hue-style { font-weight: 700; font-size: 2.2rem; color: #fafafa; opacity: 0; transition: opacity 0.5s; }
+        .allwrite-style { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 2.5em; color: var(--duo-yellow); opacity: 0; transition: opacity 0.5s; }
+        .fade-in { opacity: 1 !important; }
+        .hyper-drive .fragment { animation-duration: 0.4s !important; }
+
+        /* LOBBY & GAME */
+        .snap-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 40px; padding: 40px 100px; scrollbar-width: none; align-items: center; flex: 1; }
+        .snap-carousel::-webkit-scrollbar { display: none; }
+        .door-item { scroll-snap-align: center; flex: 0 0 200px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .door { width: 180px; height: 240px; background: var(--color); border-radius: 24px; border: none; border-bottom: 8px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
+        .door.locked { background: #444 !important; border-bottom-color: #222 !important; cursor: not-allowed; opacity: 0.5; filter: grayscale(1); }
+        .door i { font-size: 4rem; color: white; }
+        .choice-grid { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; margin-top: 20px; }
+        .btn-choice { background: white; color: #4b4b4b; border: 2px solid var(--duo-border); border-bottom-width: 5px; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-align: left; transition: all 0.2s; }
+        .btn-choice.correct { background: var(--duo-green) !important; color: white !important; border-color: var(--duo-green-border) !important; }
+        .btn-choice.wrong { background: var(--duo-red) !important; color: white !important; border-color: var(--duo-red-border) !important; }
+        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 16px; font-weight: 800; text-transform: uppercase; cursor: pointer; background: var(--duo-green); color: white; border-bottom: 5px solid var(--duo-green-border); }
+        .input-box { width: 100%; padding: 18px; border: 2px solid var(--duo-border); border-radius: 16px; font-size: 1.1rem; margin: 20px 0; outline: none; background: white; color: #333; }
+        .overlay-sheet { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; }
+        .bottom-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: white; color: #333; padding: 32px 24px; border-radius: 24px 24px 0 0; z-index: 101; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sheet-open { transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<div id="portal-container">
+    <div class="perspective-box">
+        <div id="warp-scene" class="warp-scene"></div>
+    </div>
+    <div class="interaction-wrapper">
+        <div class="stage">
+            <input type="text" id="user-input" placeholder="What's your name?" autocomplete="off" />
+        </div>
+        <div id="button-stage" class="stage hidden-under">
+            <button id="warp-btn" class="warp-btn">Continue</button>
+        </div>
+    </div>
+    <div id="portal-overlay" class="portal-overlay">
+        <div id="brand-text"></div>
+    </div>
+</div>
+
+<div class="app-container">
+    <div class="bg-dim"></div>
+
+    <header id="app-header" class="hidden">
+        <button id="back-to-home" class="back-btn hidden" style="background:none; border:none; color:white; font-size:1.5rem;" onclick="goHome()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="logo" id="header-logo">All Write</div>
+        <div class="lvl-pill"><i class="fa-solid fa-bolt"></i><span>LVL <span id="lvl-display">1</span></span></div>
+        <button style="background:none; border:none; color:white; font-size:1.5rem;" onclick="toggleSheet()"><i class="fa-solid fa-gear"></i></button>
+    </header>
+
+    <main>
+        <div id="lobby-view" class="screen-content hidden" style="display:flex; flex-direction:column;">
+            <h2 style="text-align: center; font-weight: 800; color: var(--duo-gray); font-size: 0.9rem; letter-spacing: 2px; margin: 20px 0;">SELECT CHAPTER</h2>
+            <div id="door-container" class="snap-carousel"></div>
+        </div>
+
+      <div id="material-view" class="screen-content hidden" style="padding: 24px; overflow-y: auto;">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+        <div id="mat-icon-box" style="width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+            <i class="fa-solid fa-book-open"></i>
+        </div>
+        <div>
+            <h2 id="mat-title" style="font-weight: 800; font-size: 1.4rem;"></h2>
+            <p style="color: var(--duo-gray); font-size: 0.9rem; font-weight: 600;">Learning Materials</p>
+        </div>
+    </div>
+    <div id="material-list" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px;">
+        </div>
+    <button class="btn-main" onclick="startLesson()">Got it! Start Test</button>
+</div>
+
+<div id="intro-view" class="screen-content hidden" style="padding:40px; text-align:center; display: flex; flex-direction: column; justify-content: center;">
+    <div id="intro-icon" style="font-size: 4rem; margin-bottom: 20px;">📖</div>
+    <h2 id="intro-title" style="font-weight: 800; font-size: 1.8rem; margin-bottom: 10px;"></h2>
+    <p id="intro-subtitle" style="color: var(--duo-gray); font-weight: 600; margin-bottom: 40px;"></p>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-main" onclick="openMaterial()">Read Study Guide</button>
+        <button class="btn-main" style="background: none; border: 2px solid rgba(255,255,255,0.2); border-bottom-width: 4px;" onclick="startLesson()">Skip to Test</button>
+    </div>
+</div>
+
+        <div id="game-view" class="screen-content hidden" style="padding:24px; display: flex; flex-direction: column; justify-content: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 id="game-title" style="font-weight: 800; color: var(--duo-blue);"></h3>
+                <span id="game-progress-text" style="font-weight: 800; color: var(--duo-gray);">1/3</span>
+            </div>
+            <p id="game-question" style="font-size: 1.3rem; font-weight: 700; margin-bottom: 15px;"></p>
+            <p id="game-hint" style="color: var(--duo-green); font-size: 0.9rem; font-weight: 700; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; display: inline-block;"></p>
+            <div id="choice-area" class="choice-grid"></div>
+            <div id="write-area" class="hidden">
+                <input type="text" id="game-input" class="input-box" placeholder="Type here...">
+                <button class="btn-main" onclick="checkAnswer(null, this)">Submit Answer</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="sheet-overlay" class="overlay-sheet hidden" onclick="toggleSheet()"></div>
+    <div id="bottom-sheet" class="bottom-sheet">
+        <h3 style="text-align: center; margin-bottom: 20px;">Settings</h3>
+        <button class="btn-main" style="background: var(--duo-red); border-bottom-color: var(--duo-red-border);" onclick="resetGame()">Reset Progress</button>
+    </div>
+</div>
+
+<script>
+    const LESSONS = [ {    
+    id: 1,    key: 'Basics',    icon: 'fa-feather',    color: '#ffc800',    border: '#ef9600',    levels: [     { title: 'Spelling', word: 'Choose the correct spelling:', answer: 'friend', choices: ['friend', 'freind'], type: 'word', hint: 'Which one looks right?' },     { title: 'Spot the Error', word: 'Which word is correctly spelled?', answer: 'Little', choices: ['Little', 'Litle', 'Ridding', 'grandmoter'], type: 'word', hint: 'From the Little Red Riding Hood story' },     { title: 'Capitalization', word: 'Which rewrite is correct? "i am from cagayan"', answer: 'I am from Cagayan', choices: ['i am from cagayan', 'I am from Cagayan', 'I am from cagayan', 'i am From Cagayan'], type: 'word', hint: 'Names of places are always capitalized' },     { title: 'Editing', word: 'Which sentence is correctly written?', answer: 'My name is Carlo and I live in Cagayan.', choices: ['my name is carlo and i live in cagayan', 'My name is Carlo and I live in Cagayan.', 'My Name Is Carlo And I Live In Cagayan.', 'My name is carlo and I live in Cagayan'], type: 'word', hint: 'Check every name and the pronoun I' },     { title: 'Write About Me', word: 'Write 1-3 simple sentence.', answer: 'My family motivates me to learn.', type: 'write', hint: 'Start with a capital letter. End with a period. Include family, My, learn, Tell how they motivate you' }   ] }, {    
+    id: 2,    key: 'Punctuation',    icon: 'fa-scroll',    color: '#58cc02',    border: '#46a302',    levels: [     { title: 'Basic Marks', word: 'What is the use of a Period (.)?', answer: 'Ends a sentence', choices: ['Starts a sentence', 'Ends a sentence', 'Shows surprise', 'Asks a question'], type: 'word', hint: 'Think about where you put a period' },     { title: 'Identification', word: 'Which sentence uses the correct punctuation?', answer: 'Where is your bag?', choices: ['Where is your bag.', 'Where is your bag?', 'Where is your bag!', 'where is your bag?'], type: 'word', hint: 'It is a question — what mark do questions need?' },     { title: 'Editing', word: 'Complete: "That was incredible ___"', answer: 'That was incredible!', choices: ['That was incredible.', 'That was incredible?', 'That was incredible!', 'that was incredible!'], type: 'word', hint: 'It expresses strong emotion' },     { title: 'Expressive Writing', word: 'Write a question you want to ask.', answer: 'What is your favorite food?', type: 'write', hint: 'Remember to end your question with a question mark - Favorite food.' }   ] }, {    
+    id: 3,    key: 'Vocabulary',    icon: 'fa-book',    color: '#ff4b4b',    border: '#d33131',    levels: [     { title: 'Familiar Contexts', word: 'Which object would you see in a school?', answer: 'Textbook', choices: ['Frying pan', 'Textbook', 'Hammer', 'Fishing rod'], type: 'word', hint: 'Think about what you use in class' },     { title: 'Word Meanings', word: 'What is a "Farmer"?', answer: 'A person who grows crops', choices: ['A person who fixes machines', 'A person who grows crops', 'A person who teaches students', 'A person who heals the sick'], type: 'word', hint: 'Think about fields and agriculture' },     { title: 'Real Sentences', word: 'The scientist will ______ the results carefully.', answer: 'examine', choices: ['ignore', 'examine', 'lose', 'forget'], type: 'word', hint: 'It means to look at something closely' },     { title: 'Application', word: 'Use the word "Gifted" in a sentence.', answer: 'She is a gifted singer.', type: 'write', hint: 'Gifted means having a natural talent.' }   ] }, {    
+    id: 4,    key: 'Grammar',    icon: 'fa-pen-nib',    color: '#1cb0f6',    border: '#1899d6',    levels: [     { title: 'Build It Correctly', word: '"The dog barks loudly." — What is the subject?', answer: 'The dog', choices: ['barks', 'loudly', 'The dog', 'The dog barks'], type: 'word', hint: 'The subject is who or what the sentence is about' },     { title: 'Time to Choose', word: 'The girls ______ singing.', answer: 'are', choices: ['is', 'are', 'was', 'am'], type: 'word', hint: '"Girls" is plural — which verb matches?' },     { title: 'Sentence Builder', word: 'Put in the correct order: [school] [He] [to] [goes]', answer: 'He goes to school.', choices: ['Goes he to school.', 'He goes to school.', 'To school he goes.', 'School he to goes.'], type: 'word', hint: 'Start with the subject, then the verb' },     { title: 'Grammar Checking', word: 'Which sentence is grammatically correct?', answer: "Little Red Riding Hood goes to her grandmother's house.", choices: ["Little Red Riding Hood go to her grandmother's house.", "Little Red Riding Hood goes to her grandmother's house.", "Little Red Riding Hood going to her grandmother's house.", "Little Red Riding Hood gone to her grandmother's house."], type: 'word', hint: 'She is singular — which verb form fits?' }   ] }, {    
+    id: 5,    key: 'Mastery',    icon: 'fa-crown',    color: '#ce82ff',    border: '#a357d6',    levels: [     { title: 'Start with a Frame', word: 'Complete the frame: "I live in ______"', answer: 'I live in Quezon City.', choices: ['I lives in Quezon City.', 'I live Quezon City.', 'I live in Quezon City.', 'I living in Quezon City.'], type: 'word', hint: 'Which sentence sounds natural and complete?' },     { title: 'Add More', word: 'Which sentence expands "She runs." with a detail?', answer: 'She runs in the park.', choices: ['She runs.', 'She runs in the park.', 'In the park.', 'Running park she.'], type: 'word', hint: 'Add a Where detail to expand the sentence' },     { title: 'Link Ideas', word: 'Combine: "I like milk." + "I like juice."', answer: 'I like milk and I like juice.', choices: ['I like milk but I like juice.', 'I like milk I like juice.', 'I like milk and I like juice.', 'I like milk, juice.'], type: 'word', hint: 'Which connector shows they are both true?' },     { title: 'Put It Together', word: 'Write 3-5 connected sentences about your family.', answer: 'My family is very important to me.', type: 'write', hint: 'Use and, but, so to connect your ideas.' }   ] }
+];
+
+</script>
+<script>
+    const MATERIALS = {
+    'Basics': [
+        { topic: 'Spelling Rules', info: 'Common words like "friend" often follow the "i before e except after c" rule.' },
+        { topic: 'Proper Names', info: 'Always capitalize the first letter of names (Carlo) and places (Cagayan).' },
+        { topic: 'The Pronoun "I"', info: 'The word "I" is always written as a capital letter when referring to yourself.' }
+    ],
+    'Punctuation': [
+        { topic: 'The Period (.)', info: 'Use a period to end a statement or a complete thought.' },
+        { topic: 'Question Mark (?)', info: 'Place this at the end of every sentence that asks something.' },
+        { topic: 'Exclamation Point (!)', info: 'Use this to show strong feelings like excitement or surprise.' }
+    ],
+    'Vocabulary': [
+        { topic: 'Context Clues', info: 'Look at the words around a new word to guess its meaning (e.g., Scientist -> examine).' },
+        { topic: 'Action Words', info: 'Verbs describe what someone is doing, like "growing" or "healing".' }
+    ],
+    'Grammar': [
+        { topic: 'Subject-Verb Agreement', info: 'Singular subjects (The dog) need singular verbs (barks). Plural subjects (The girls) need plural verbs (are).' },
+        { topic: 'Sentence Structure', info: 'A standard English sentence usually follows: Subject + Verb + Object.' }
+    ],
+    'Mastery': [
+        { topic: 'Sentence Expansion', info: 'Make sentences better by adding "where" or "when" details.' },
+        { topic: 'Connecting Ideas', info: 'Use "and" to join similar ideas, and "but" for different ideas.' }
+    ]
+};
+
+function openMaterial() {
+    const chapKey = LESSONS[state.activeChapter].key;
+    const matList = document.getElementById('material-list');
+    const matTitle = document.getElementById('mat-title');
+    const iconBox = document.getElementById('mat-icon-box');
+    
+    matTitle.innerText = chapKey;
+    iconBox.style.backgroundColor = LESSONS[state.activeChapter].color;
+    matList.innerHTML = '';
+    
+    (MATERIALS[chapKey] || []).forEach(item => {
+        const card = document.createElement('div');
+        card.style.cssText = `background: rgba(255,255,255,0); padding: 18px;; border-left: 5px solid ${LESSONS[state.activeChapter].color};`;
+        card.innerHTML = `
+            <h4 style="color: ${LESSONS[state.activeChapter].color}; margin-bottom: 5px; font-size: 1rem;">${item.topic}</h4>
+            <p style="font-size: 0.95rem; line-height: 1.4; opacity: 0.9;">${item.info}</p>
+        `;
+        matList.appendChild(card);
+    });
+    
+    navigate('material-view');
+}
+    // MONITORING & STORAGE
+    const handler = {
+        set(target, key, value) {
+            console.log(`[STORAGE LOG] ${key} changed to:`, value);
+            localStorage.setItem(`allWrite_${key}`, JSON.stringify(value));
+            target[key] = value;
+            return true;
+        }
+    };
+
+    const storage = new Proxy({
+        progress: JSON.parse(localStorage.getItem('allWrite_progress')) || 1,
+        name: localStorage.getItem('allWrite_name') || '',
+        hyperdriveDone: localStorage.getItem('allWrite_hyperdriveDone') === 'true'
+    }, handler);
+
+
+    let state = { activeChapter: 0, activeLevel: 0 };
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playBeep(f, type="sine") {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + 0.2);
+    }
+
+    // SUBJECTIVE LOGIC
+function checkSubjective(input, targetKeywords) {
+    const userInput = input.trim().toLowerCase();
+    const words = userInput.split(/\s+/);
+    
+    // Basic length check: ensure they wrote at least 3 words
+    if (words.length < 3) return false; 
+
+    // Convert targetKeywords to an array if it's just a string
+    const keywords = Array.isArray(targetKeywords) ? targetKeywords : [targetKeywords];
+
+    // Check if the input contains any of the required keywords/phrases
+    return keywords.some(kw => userInput.includes(kw.toLowerCase()));
+}
+
+    // HYPERDRIVE & ENTRY
+    window.onload = () => {
+        if (storage.hyperdriveDone) {
+            document.getElementById('portal-container').remove();
+            handleLogin();
+        } else {
+            initPortal();
+        }
+    };
+
+function initPortal() {
+    const scene = document.getElementById('warp-scene');
+    const colors = ['yellow', 'blue', 'white'];
+    for (let i = 0; i < 50; i++) {
+        const frag = document.createElement('div');
+        frag.className = `fragment ${colors[Math.floor(Math.random() * colors.length)]}`;
+        const size = Math.random() * 6 + 2;
+        frag.style.width = frag.style.height = `${size}px`;
+        const x = (Math.random() - 0.5) * 1200, y = (Math.random() - 0.5) * 1200;
+        frag.style.setProperty('--x', `${x}px`); frag.style.setProperty('--y', `${y}px`);
+        frag.style.setProperty('--mx', `${x * 4}px`); frag.style.setProperty('--my', `${y * 4}px`);
+        frag.style.left = frag.style.top = '50%';
+        frag.style.animation = `flyPast ${2 + Math.random() * 2}s linear infinite`;
+        scene.appendChild(frag);
+    }
+
+    const portalInput = document.getElementById('user-input');
+    const btnStage = document.getElementById('button-stage');
+    const brandText = document.getElementById('brand-text');
+    const portalOverlay = document.getElementById('portal-overlay');
+
+    portalInput.oninput = (e) => btnStage.classList.toggle('reveal', e.target.value.trim().length > 0);
+    
+    document.getElementById('warp-btn').onclick = () => {
+        storage.name = portalInput.value.trim();
+        storage.hyperdriveDone = true;
+        
+        // Start hyperdrive animation
+        document.getElementById('portal-container').classList.add('hyper-drive');
+        
+        // 1. Flash and Show "HUE"
+        setTimeout(() => {
+            portalOverlay.classList.add('flash');
+            brandText.innerHTML = '<span class="hue-style">HUE</span>';
+            setTimeout(() => brandText.firstChild.classList.add('fade-in'), 100);
+        }, 1500);
+
+        // 2. Switch to "AllWrite"
+        setTimeout(() => {
+            brandText.innerHTML = '<span class="allwrite-style">AllWrite</span>';
+            setTimeout(() => brandText.firstChild.classList.add('fade-in'), 100);
+        }, 3500);
+
+        // 3. Final Exit
+        setTimeout(() => {
+            document.getElementById('portal-container').style.opacity = '0';
+            handleLogin();
+            setTimeout(() => document.getElementById('portal-container').remove(), 1000);
+        }, 5500);
+    };
+}
+    
+
+    function handleLogin() {
+        document.getElementById('app-header').classList.remove('hidden');
+        document.getElementById('lvl-display').innerText = storage.progress;
+        renderDoors(); navigate('lobby-view');
+    }
+
+    function renderDoors() {
+        const container = document.getElementById('door-container');
+        container.innerHTML = '';
+        LESSONS.forEach((chap, index) => {
+            let totalPrev = 0;
+            for(let i=0; i<index; i++) totalPrev += LESSONS[i].levels.length;
+            const isLocked = storage.progress <= totalPrev;
+            const doorDiv = document.createElement('div');
+            doorDiv.className = 'door-item';
+            doorDiv.innerHTML = `<button class="door ${isLocked ? 'locked' : ''}" style="--color:${chap.color}; --border:${chap.border}" onclick="handleDoorClick(${index}, ${isLocked})"><i class="fa-solid ${chap.icon}"></i></button><span class="door-label" style="font-weight:700; color:var(--duo-gray)">${chap.key}</span>`;
+            container.appendChild(doorDiv);
+        });
+    }
+
+    function handleDoorClick(index, locked) {
+        if(locked) { playBeep(150, "square"); return; }
+        state.activeChapter = index; state.activeLevel = 0;
+        document.getElementById('intro-title').innerText = LESSONS[index].key;
+        document.getElementById('intro-subtitle').innerText = "Test your skills.";
+        navigate('intro-view');
+    }
+
+    function startLesson() { navigate('game-view'); loadLevel(); }
+
+    function loadLevel() {
+        const level = LESSONS[state.activeChapter].levels[state.activeLevel];
+        document.getElementById('game-title').innerText = level.title;
+        document.getElementById('game-progress-text').innerText = `${state.activeLevel + 1}/${LESSONS[state.activeChapter].levels.length}`;
+        document.getElementById('game-question').innerText = level.word;
+        document.getElementById('game-hint').innerText = `Hint: ${level.hint}`;
+        
+        const cArea = document.getElementById('choice-area'), wArea = document.getElementById('write-area');
+        if(level.type === 'word') {
+            cArea.classList.remove('hidden'); wArea.classList.add('hidden'); cArea.innerHTML = '';
+            level.choices.forEach(c => {
+                const btn = document.createElement('button'); btn.className = 'btn-choice'; btn.innerText = c;
+                btn.onclick = (e) => checkAnswer(c, e.target); cArea.appendChild(btn);
+            });
+        } else {
+            cArea.classList.add('hidden'); wArea.classList.remove('hidden');
+            document.getElementById('game-input').value = '';
+        }
+    }
+
+    function checkAnswer(userAns, element) {
+        const level = LESSONS[state.activeChapter].levels[state.activeLevel];
+        const input = userAns || document.getElementById('game-input').value;
+        const correct = level.type === 'word' ? input.toLowerCase().trim() === level.answer.toLowerCase() : checkSubjective(input, level.answer);
+
+        if(correct) {
+            playBeep(1000); element?.classList.add('correct');
+            setTimeout(() => {
+                element?.classList.remove('correct');
+                let cur = 0;
+                for(let i=0; i<state.activeChapter; i++) cur += LESSONS[i].levels.length;
+                cur += (state.activeLevel + 1);
+                if(cur >= storage.progress) {
+                    storage.progress = cur + 1;
+                    document.getElementById('lvl-display').innerText = storage.progress;
+                }
+                state.activeLevel++;
+                state.activeLevel < LESSONS[state.activeChapter].levels.length ? loadLevel() : goHome();
+            }, 600);
+        } else {
+            playBeep(200, "square"); element?.classList.add('wrong');
+            setTimeout(() => element?.classList.remove('wrong'), 500);
+        }
+    }
+
+    function navigate(id) {
+        document.querySelectorAll('.screen-content').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        document.getElementById('back-to-home').classList.toggle('hidden', id === 'lobby-view');
+    }
+
+    function goHome() { renderDoors(); navigate('lobby-view'); }
+    function toggleSheet() { document.getElementById('bottom-sheet').classList.toggle('sheet-open'); document.getElementById('sheet-overlay').classList.toggle('hidden'); }
+    function resetGame() { localStorage.clear(); location.reload(); }
+</script>
+ <security>
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+document.addEventListener('keydown', e => {
+if (
+e.key === 'F12' ||
+(e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
+(e.ctrlKey && e.key === 'U') ||
+(e.ctrlKey && e.key === 'S')||
+(e.ctrlKey && e.key === 's')
+) {
+e.preventDefault();
+}
+});
+
+let lastW = window.outerWidth, lastH = window.outerHeight;
+setInterval(() => {
+const dw = Math.abs(window.outerWidth - lastW);
+const dh = Math.abs(window.outerHeight - lastH);
+const diffW = window.outerWidth - window.innerWidth;
+const diffH = window.outerHeight - window.innerHeight;
+
+if ((dw <= 5 && dw > 0) || (dh <= 5 && dh > 0)) {
+if (diffW > 100 || diffH > 100) {
+debugger;
+}
+}
+
+lastW = window.outerWidth;
+lastH = window.outerHeight;
+}, 1000);
+</script>
+</security>
+</body>
+</html>
