@@ -462,17 +462,21 @@ function checkSubjective(input, level) {
 
 // 2. MAIN CHECKER FUNCTION
 function checkAnswer(userAns, element) {
+
     const level = LESSONS[state.activeChapter].levels[state.activeLevel];
     const rawInput = (userAns || document.getElementById('game-input').value).trim();
     
+    // 1. Prevent Spam: Disable clicking on all choice buttons or inputs immediately
+    const cArea = document.getElementById('choice-area');
+    const wArea = document.getElementById('write-area');
+    cArea.style.pointerEvents = 'none';
+    wArea.style.pointerEvents = 'none';
+
     let isCorrect = false;
 
-  if(level.type === 'word' || level.type === 'caps') {
-       
+    if(level.type === 'word' || level.type === 'caps') {
         isCorrect = (rawInput === level.answer);
     } else {
-        // --- DYNAMIC FUZZY MODE ---
-        // Uses the structural logic above
         isCorrect = checkSubjective(rawInput, level);
     }
 
@@ -490,14 +494,17 @@ function checkAnswer(userAns, element) {
             }
             absoluteFinished += (state.activeLevel + 1);
 
-            // Update Global Progress
             if (absoluteFinished >= storage.progress) {
                 storage.progress = absoluteFinished + 1;
                 document.getElementById('lvl-display').innerText = storage.progress;
             }
 
-            // Navigation
             state.activeLevel++;
+            
+            // Re-enable clicks when the next level loads
+            cArea.style.pointerEvents = 'auto';
+            wArea.style.pointerEvents = 'auto';
+
             if (state.activeLevel < LESSONS[state.activeChapter].levels.length) {
                 loadLevel();
             } else {
@@ -511,10 +518,14 @@ function checkAnswer(userAns, element) {
         playBeep(200, "square");
         if (element) {
             element.classList.add('wrong');
-            setTimeout(() => element.classList.remove('wrong'), 500);
+            setTimeout(() => {
+                element.classList.remove('wrong');
+                // Re-enable clicks so they can try again after the "wrong" animation
+                cArea.style.pointerEvents = 'auto';
+                wArea.style.pointerEvents = 'auto';
+            }, 500);
         }
         
-        // Visual feedback for writing tasks
         if (level.type === 'write') {
             const inputField = document.getElementById('game-input');
             if (inputField) {
@@ -526,6 +537,9 @@ function checkAnswer(userAns, element) {
 }
 
 function navigate(id) {
+
+
+
         document.querySelectorAll('.screen-content').forEach(s => s.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
         document.getElementById('back-to-home').classList.toggle('hidden', id === 'lobby-view');
