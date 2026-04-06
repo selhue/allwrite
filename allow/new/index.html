@@ -199,21 +199,46 @@ border-bottom-right-radius: 0;
 
 <script>
     const LESSONS = [ {    
-    id: 1,    key: 'Basics',    icon: 'fa-feather',    color: '#ffc800',    border: '#ef9600',    levels: [     { title: 'Spelling', word: 'Choose the correct spelling:', answer: 'friend', choices: ['friend', 'freind'], type: 'word', hint: 'Which one looks right?' },     { title: 'Spot the Error', word: 'Which word is correctly spelled?', answer: 'Little', choices: ['Little', 'Litle', 'Ridding', 'grandmoter'], type: 'word', hint: 'From the Little Red Riding Hood story' },     
+    id: 1,    key: 'Basics',    icon: 'fa-feather',    color: '#ffc800',    border: '#ef9600',    levels: [     
+    
+    { title: 'Spelling', word: 'Choose the correct spelling:', answer: 'friend', choices: ['friend', 'freind'], type: 'word', hint: 'Which one looks right?' },     
+    { title: 'Spot the Error', word: 'Which word is correctly spelled?', answer: 'Little', choices: ['Little', 'Litle', 'Ridding', 'grandmoter'], type: 'word', hint: 'From the Little Red Riding Hood story' },     
+    
     { title: 'Capitalization', word: 'Which rewrite is correct? "i am from cagayan"', answer: 'I am from Cagayan.', choices: ['i am from cagayan.', 'I am from Cagayan.', 'I am from cagayan.', 'i am From Cagayan.'], type: 'caps', hint: 'Names of places are always capitalized' },     
+    
     { title: 'Editing', word: 'Which sentence is correctly written?', answer: 'My name is Carlo and I live in Cagayan.', choices: ['my name is carlo and i live in cagayan', 'My name is Carlo and I live in Cagayan.', 'My Name Is Carlo And I Live In Cagayan.', 'My name is carlo and I live in Cagayan'], type: 'word', hint: 'Check every name and the pronoun I' },     
-    { title: 'Write About Me', word: 'Write 1-3 simple sentence.', answer: 'My family motivates me to learn.', 
+    
+    { title: 'Write About Me', word: 'Write 1-3 simple sentence.',
+     answer: '.', 
     type: 'write', hint: 'Start with a capital letter. End with a period. Include family, My, learn, Tell how they motivate you' }   ] }, {    
-    id: 2,    key: 'Punctuation',    icon: 'fa-scroll',    color: '#58cc02',    border: '#46a302',    levels: [     { title: 'Basic Marks', word: 'What is the use of a Period (.)?', answer: 'Ends a sentence', choices: ['Starts a sentence', 'Ends a sentence', 'Shows surprise', 'Asks a question'], type: 'word', hint: 'Think about where you put a period' },     { title: 'Identification', word: 'Which sentence uses the correct punctuation?', answer: 'Where is your bag?', choices: ['Where is your bag.', 'Where is your bag?', 'Where is your bag!', 'where is your bag?'], type: 'word', hint: 'It is a question — what mark do questions need?' },     { title: 'Editing', word: 'Complete: "That was incredible ___"', answer: 'That was incredible!', choices: ['That was incredible.', 'That was incredible?', 'That was incredible!', 'that was incredible!'], type: 'word', hint: 'It expresses strong emotion' },     
-    { title: 'Expressive Writing', word: 'Write a question about my favorite food.', answer: 'What is your favorite food?', 
+    id: 2,    key: 'Punctuation',    icon: 'fa-scroll',    color: '#58cc02',    border: '#46a302',    levels: [     
+        { title: 'Basic Marks', word: 'What is the use of a Period (.)?', answer: 'Ends a sentence', choices: ['Starts a sentence', 'Ends a sentence', 'Shows surprise', 'Asks a question'], type: 'word', hint: 'Think about where you put a period' },     
+    { title: 'Identification', word: 'Which sentence uses the correct punctuation?', answer: 'Where is your bag?', choices: ['Where is your bag.', 'Where is your bag?', 'Where is your bag!', 'where is your bag?'], type: 'word', hint: 'It is a question - what mark do questions need?' },     
+    { title: 'Editing', word: 'Complete: "That was incredible ___"', answer: 'That was incredible!', choices: ['That was incredible.', 'That was incredible?', 'That was incredible!', 'that was incredible!'], type: 'word', hint: 'It expresses strong emotion' },     
+    
+    { title: 'Expressive Writing', word: 'Write a question about my favorite food.', 
+    answer: '?', 
     type: 'write', hint: 'Remember to end your question with a question mark - Favorite food.' }   ] }, {    
-    id: 3,    key: 'Vocabulary',    icon: 'fa-book',    color: '#ff4b4b',    border: '#d33131',    levels: [     { title: 'Familiar Contexts', word: 'Which object would you see in a school?', answer: 'Textbook', choices: ['Frying pan', 'Textbook', 'Hammer', 'Fishing rod'], type: 'word', hint: 'Think about what you use in class' },     { title: 'Word Meanings', word: 'What is a "Farmer"?', answer: 'A person who grows crops', choices: ['A person who fixes machines', 'A person who grows crops', 'A person who teaches students', 'A person who heals the sick'], type: 'word', hint: 'Think about fields and agriculture' },     { title: 'Real Sentences', word: 'The scientist will ______ the results carefully.', answer: 'examine', choices: ['ignore', 'examine', 'lose', 'forget'], type: 'word', hint: 'It means to look at something closely' },     { title: 'Application', word: 'Use the word "Gifted" in a sentence.', 
-    answer: 'She is a gifted singer.', 
+    id: 3,    key: 'Vocabulary',    icon: 'fa-book',    color: '#ff4b4b',    border: '#d33131',    levels: [     
+        { title: 'Familiar Contexts', word: 'Which object would you see in a school?', answer: 'Textbook', choices: ['Frying pan', 'Textbook', 'Hammer', 'Fishing rod'], type: 'word', hint: 'Think about what you use in class' },     
+    { title: 'Word Meanings', word: 'What is a "Farmer"?', answer: 'A person who grows crops', choices: ['A person who fixes machines', 'A person who grows crops', 'A person who teaches students', 'A person who heals the sick'], type: 'word', hint: 'Think about fields and agriculture' },     
+    { title: 'Real Sentences', word: 'The scientist will ______ the results carefully.', answer: 'examine', choices: ['ignore', 'examine', 'lose', 'forget'], type: 'word', hint: 'It means to look at something closely' },     
+    
+    { title: 'Application', word: 'Use the word "Gifted" in a sentence.', 
+    answer: '.', 
     type: 'write', hint: 'Tell her how "Gifted" she is on singing.' }   ] }, {    
-    id: 4,    key: 'Grammar',    icon: 'fa-pen-nib',    color: '#1cb0f6',    border: '#1899d6',    levels: [     { title: 'Build It Correctly', word: '"The dog barks loudly." — What is the subject?', answer: 'The dog', choices: ['barks', 'loudly', 'The dog', 'The dog barks'], type: 'word', hint: 'The subject is who or what the sentence is about' },     { title: 'Time to Choose', word: 'The girls ______ singing.', answer: 'are', choices: ['is', 'are', 'was', 'am'], type: 'word', hint: '"Girls" is plural — which verb matches?' },     { title: 'Sentence Builder', word: 'Put in the correct order: [school] [He] [to] [goes]', answer: 'He goes to school.', choices: ['Goes he to school.', 'He goes to school.', 'To school he goes.', 'School he to goes.'], type: 'word', hint: 'Start with the subject, then the verb' },     { title: 'Grammar Checking', word: 'Which sentence is grammatically correct?', answer: "Little Red Riding Hood goes to her grandmother's house.", choices: ["Little Red Riding Hood go to her grandmother's house.", "Little Red Riding Hood goes to her grandmother's house.", "Little Red Riding Hood going to her grandmother's house.", "Little Red Riding Hood gone to her grandmother's house."], type: 'word', hint: 'She is singular — which verb form fits?' }   ] }, {    
-    id: 5,    key: 'Mastery',    icon: 'fa-crown',    color: '#ce82ff',    border: '#a357d6',    levels: [     { title: 'Start with a Frame', word: 'Complete the frame: "I live in ______"', answer: 'I live in Quezon City.', choices: ['I lives in Quezon City.', 'I live Quezon City.', 'I live in Quezon City.', 'I living in Quezon City.'], type: 'word', hint: 'Which sentence sounds natural and complete?' },     { title: 'Add More', word: 'Which sentence expands "She runs." with a detail?', answer: 'She runs in the park.', choices: ['She runs.', 'She runs in the park.', 'In the park.', 'Running park she.'], type: 'word', hint: 'Add a Where detail to expand the sentence' },     { title: 'Link Ideas', word: 'Combine: "I like milk." + "I like juice."', answer: 'I like milk and I like juice.', choices: ['I like milk but I like juice.', 'I like milk I like juice.', 'I like milk and I like juice.', 'I like milk, juice.'], type: 'word', hint: 'Which connector shows they are both true?' },     
+    id: 4,    key: 'Grammar',    icon: 'fa-pen-nib',    color: '#1cb0f6',    border: '#1899d6',    levels: [     
+        { title: 'Build It Correctly', word: '"The dog barks loudly." — What is the subject?', answer: 'The dog', choices: ['barks', 'loudly', 'The dog', 'The dog barks'], type: 'word', hint: 'The subject is who or what the sentence is about' },     
+    { title: 'Time to Choose', word: 'The girls ______ singing.', answer: 'are', choices: ['is', 'are', 'was', 'am'], type: 'word', hint: '"Girls" is plural — which verb matches?' },     
+    { title: 'Sentence Builder', word: 'Put in the correct order: [school] [He] [to] [goes]', answer: 'He goes to school.', choices: ['Goes he to school.', 'He goes to school.', 'To school he goes.', 'School he to goes.'], type: 'word', hint: 'Start with the subject, then the verb' },     
+    { title: 'Grammar Checking', word: 'Which sentence is grammatically correct?', answer: "Little Red Riding Hood goes to her grandmother's house.", choices: ["Little Red Riding Hood go to her grandmother's house.", "Little Red Riding Hood goes to her grandmother's house.", "Little Red Riding Hood going to her grandmother's house.", "Little Red Riding Hood gone to her grandmother's house."], type: 'word', hint: 'She is singular — which verb form fits?' }   ] }, {    
+    id: 5,    key: 'Mastery',    icon: 'fa-crown',    color: '#ce82ff',    border: '#a357d6',    levels: [     
+        { title: 'Start with a Frame', word: 'Complete the frame: "I live in ______"', answer: 'I live in Quezon City.', choices: ['I lives in Quezon City.', 'I live Quezon City.', 'I live in Quezon City.', 'I living in Quezon City.'], type: 'word', hint: 'Which sentence sounds natural and complete?' },     
+    { title: 'Add More', word: 'Which sentence expands "She runs." with a detail?', answer: 'She runs in the park.', choices: ['She runs.', 'She runs in the park.', 'In the park.', 'Running park she.'], type: 'word', hint: 'Add a Where detail to expand the sentence' },     
+    { title: 'Link Ideas', word: 'Combine: "I like milk." + "I like juice."', answer: 'I like milk and I like juice.', choices: ['I like milk but I like juice.', 'I like milk I like juice.', 'I like milk and I like juice.', 'I like milk, juice.'], type: 'word', hint: 'Which connector shows they are both true?' },     
+    
     { title: 'Put It Together', word: 'Write 3-5 connected sentences about your family.', 
-    answer: 'My family is very important to me.', 
+    answer: '.', 
     type: 'write', hint: 'Use and, but, so to connect your ideas.' }   ] }
 ];
 
@@ -413,60 +438,63 @@ function initPortal() {
 // 1. DYNAMIC FUZZY LOGIC (FOR 'WRITE' TYPE)
 function checkSubjective(input, level) {
     const text = input.trim();
-    if (text.length < 2) return false;
+    // Safety check for empty or too short input
+    if (text.length < 1) return false;
 
-    // --- NEW CAPS TYPE LOGIC ---
+    // --- 1. CAPS TYPE LOGIC ---
+    // Focuses only on right capital letters; ignores punctuation differences.
     if (level.type === 'caps') {
-        // Remove punctuation from both to focus ONLY on letters and casing
         const cleanInput = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
         const cleanAnswer = level.answer.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
         return cleanInput === cleanAnswer;
     }
-    const hint = level.hint.toLowerCase();
+
+    // --- 2. WRITE TYPE LOGIC (Mechanical Check) ---
     
-    // --- STRICT GRAMMAR CHECKS ---
+    // Rule A: Must start with a Capital letter (A-Z)
     const startsWithCap = /^[A-Z]/.test(text);
-    const endsWithDot = text.endsWith('.');
-    const endsWithQuestion = text.endsWith('?');
-    const endsWithExclaim = text.endsWith('!');
 
-    // Determine expected punctuation based on hint content
-    let puncValid = false;
-    if (hint.includes("question mark")) {
-        puncValid = endsWithQuestion;
-    } else if (hint.includes("exclamation")) {
-        puncValid = endsWithExclaim;
-    } else {
-        puncValid = endsWithDot; // Default requirement
+    // Rule B: No double spaces (prevents messy/spam typing)
+    const hasBadSpacing = /\s\s+/.test(text);
+
+    // Rule C: Punctuation must match the 'answer' character exactly
+    // If level.answer is '.', it checks for a dot at the end.
+    const expectedPunc = level.answer.trim(); 
+    const endsCorrectly = text.endsWith(expectedPunc);
+
+    // Final Validation: All mechanical rules must pass.
+    return startsWithCap && !hasBadSpacing && endsCorrectly;
+}
+// 2. MAIN CHECKER FUNCTION
+// 1. MECHANICAL STRUCTURE CHECKER
+function checkSubjective(input, level) {
+    const text = input.trim();
+    if (text.length < 1) return false;
+
+    // CAPS MODE: Ignore punctuation, match literal casing
+    if (level.type === 'caps') {
+        const cleanInput = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+        const cleanAnswer = level.answer.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+        return cleanInput === cleanAnswer;
     }
 
-    // --- FUZZY CONTENT CHECKS ---
-    const requiredKeywords = [];
-    if (hint.includes("include")) {
-        // Extract words listed after "include"
-        const wordsAfterInclude = hint.split("include")[1].split(/[.,-]/)[0];
-        wordsAfterInclude.split(",").forEach(w => requiredKeywords.push(w.trim().toLowerCase()));
-    } else {
-        // Fallback: use the last meaningful word of the example answer
-        const cleanAns = level.answer.toLowerCase().replace(/[.?]/g, "");
-        const words = cleanAns.split(" ");
-        if (words.length > 0) requiredKeywords.push(words[words.length - 1]);
-    }
+    // WRITE MODE: Mechanical check
+    const startsWithCap = /^[A-Z]/.test(text); // Strict Capital start
+    const hasBadSpacing = /\s\s+/.test(text); // Detect double-space spam
+    
+    // Check if ends with the specific answer punctuation (e.g., '.', '?')
+    const expectedPunc = level.answer.trim();
+    const endsCorrectly = text.endsWith(expectedPunc);
 
-    const hasKeywords = requiredKeywords.every(kw => 
-        text.toLowerCase().includes(kw)
-    );
-
-    return startsWithCap && puncValid && hasKeywords;
+    return startsWithCap && !hasBadSpacing && endsCorrectly;
 }
 
-// 2. MAIN CHECKER FUNCTION
+// 2. MAIN ANSWER HANDLER
 function checkAnswer(userAns, element) {
-
     const level = LESSONS[state.activeChapter].levels[state.activeLevel];
     const rawInput = (userAns || document.getElementById('game-input').value).trim();
     
-    // 1. Prevent Spam: Disable clicking on all choice buttons or inputs immediately
+    // Prevent Spam/Speedrunning: Disable clicks immediately
     const cArea = document.getElementById('choice-area');
     const wArea = document.getElementById('write-area');
     cArea.style.pointerEvents = 'none';
@@ -474,7 +502,8 @@ function checkAnswer(userAns, element) {
 
     let isCorrect = false;
 
-    if(level.type === 'word' || level.type === 'caps') {
+    // Route logic based on level type
+    if (level.type === 'word' || level.type === 'caps') {
         isCorrect = (rawInput === level.answer);
     } else {
         isCorrect = checkSubjective(rawInput, level);
@@ -487,13 +516,14 @@ function checkAnswer(userAns, element) {
         setTimeout(() => {
             if (element) element.classList.remove('correct');
 
-            // Progress Calculation
+            // Absolute Progress Math
             let absoluteFinished = 0;
             for (let i = 0; i < state.activeChapter; i++) {
                 absoluteFinished += LESSONS[i].levels.length;
             }
             absoluteFinished += (state.activeLevel + 1);
 
+            // Update UI/Storage
             if (absoluteFinished >= storage.progress) {
                 storage.progress = absoluteFinished + 1;
                 document.getElementById('lvl-display').innerText = storage.progress;
@@ -501,7 +531,7 @@ function checkAnswer(userAns, element) {
 
             state.activeLevel++;
             
-            // Re-enable clicks when the next level loads
+            // Re-enable clicks for the next level
             cArea.style.pointerEvents = 'auto';
             wArea.style.pointerEvents = 'auto';
 
@@ -520,12 +550,13 @@ function checkAnswer(userAns, element) {
             element.classList.add('wrong');
             setTimeout(() => {
                 element.classList.remove('wrong');
-                // Re-enable clicks so they can try again after the "wrong" animation
+                // Re-enable clicks so they can try again after animation
                 cArea.style.pointerEvents = 'auto';
                 wArea.style.pointerEvents = 'auto';
             }, 500);
         }
         
+        // Visual indicator for typing mistakes
         if (level.type === 'write') {
             const inputField = document.getElementById('game-input');
             if (inputField) {
@@ -535,7 +566,6 @@ function checkAnswer(userAns, element) {
         }
     }
 }
-
 function navigate(id) {
 
 
