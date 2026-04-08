@@ -678,9 +678,9 @@
 
 <game>
   <script>
-/**
+    /**
  * DUO-ALLWRITE ENGINE
- * Palette-Driven | Gold Theme | Transparent Navs | Spam Protection
+ * Palette-Driven | Gold Theme | Transparent Navs | AFK Sheet
  */
 
 const DUO_PALETTE = {
@@ -698,7 +698,8 @@ const GameEngine = {
   currentDoor: 0,
   currentLevel: 0,
   currentQuestion: 0,
-  isTransitioning: false, // New flag to prevent spamming
+  isTransitioning: false,
+  afkTimer: null,
 
   // --- PROGRESS ---
   getProgress() {
@@ -745,6 +746,43 @@ const GameEngine = {
     await this.fetchData();
     this.renderMap();
     this.updateHomeNav();
+    this.startAFKTracker();
+  },
+
+  // --- AFK LOGIC ---
+  startAFKTracker() {
+    const resetTimer = () => {
+      clearTimeout(this.afkTimer);
+      // Generates a random delay between 3 and 10 seconds
+      const randomDelay = 3000 + (Math.random() * 7000); 
+      this.afkTimer = setTimeout(() => this.showAFKPopup(), randomDelay);
+      };
+
+    window.onload = resetTimer;
+    window.onmousemove = resetTimer;
+    window.onmousedown = resetTimer; 
+    window.ontouchstart = resetTimer; 
+    window.onclick = resetTimer; 
+    window.onkeypress = resetTimer;
+  },
+
+  showAFKPopup() {
+    // Only show if the user is on the map/home screen
+    const isHome = document.querySelector('door-co').style.display !== 'none';
+    if (!isHome) return;
+
+    window.openSheet({
+      title: 'Still there?',
+      body: `
+        <div style="text-align:center; padding:10px;">
+          <div style="font-size:50px; margin-bottom:15px;">🎁</div>
+          <p style="font-weight:700; color:#4b4b4b;">Play the game and get a reward!!</p>
+        </div>
+      `,
+      buttons: [
+        { text: 'I AM READY!', color: "gold", action: () => {} }
+      ]
+    });
   },
 
   addGameUI() {
@@ -839,7 +877,7 @@ const GameEngine = {
   },
 
   changeQuestion(step) {
-    if (this.isTransitioning) return; // Block input during transition
+    if (this.isTransitioning) return; 
     const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
     const newIdx = this.currentQuestion + step;
     const prog = this.getProgress();
@@ -942,13 +980,12 @@ const GameEngine = {
         action: isLocked ? null : () => this.startLesson(i)
       };
     });
-   levelButtons.unshift({
+    levelButtons.unshift({
       label: '← BACK',
       color: DUO_PALETTE.white.bg, shadow: DUO_PALETTE.white.shadow, textColor: DUO_PALETTE.white.text,
       action: () => this.renderMap()
     });
 
- 
     window.renderList('list-co', levelButtons);
   },
 
@@ -956,7 +993,7 @@ const GameEngine = {
     this.currentLevel = levelIdx;
     const prog = this.getProgress();
     this.currentQuestion = (this.currentDoor === prog.door && levelIdx === prog.level) ? (prog.q || 0) : 0;
-    this.isTransitioning = false; // Reset on start
+    this.isTransitioning = false; 
     this.toggleScreen('game');
     this.loadActiveQuestion(true);
   },
@@ -977,7 +1014,7 @@ const GameEngine = {
       options: q.choices || q.options || [],
       answer: q.answer,
       onCorrect: () => {
-        if (this.isTransitioning) return; // Stop spamming onCorrect
+        if (this.isTransitioning) return; 
         this.isTransitioning = true; 
 
         this.play('correct');
@@ -1020,7 +1057,8 @@ const GameEngine = {
   }
 };
 
-GameEngine.init();</script>
+GameEngine.init();
+  </script>
 </game>
 
  <security>
