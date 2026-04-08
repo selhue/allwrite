@@ -495,7 +495,7 @@
           const fb = this.querySelector('#feedback');
           const checkBtn = this.querySelector('#check-btn');
           let ok = false;
-          const match = (u, t) => u.toLowerCase().trim() === t.toLowerCase().trim();
+          const match = (u, t) => u.trim() === t.trim();
 
           if (this.currentData.type === 'reorder') {
             const cur = [...this.querySelectorAll('.word-pill')].map(el => el.textContent);
