@@ -1,4 +1,4 @@
-o<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -118,6 +118,7 @@ o<!DOCTYPE html>
     })();
   </script>
 </list-co>
+
 
 <door-co>
 
@@ -363,187 +364,6 @@ o<!DOCTYPE html>
   </script>
 </shee-t>
 
-<quest-ion>
-  <script>
-    (function() {
-      const playSound = (type) => {
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
-          if (type === 'correct') {
-            osc.frequency.setValueAtTime(523, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
-          } else {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, ctx.currentTime);
-          }
-          osc.start(); osc.stop(ctx.currentTime + 0.2);
-          console.log("Audio Played");
-        } catch(e) { console.log("Audio blocked"); }
-      };
-
-      const style = document.createElement('style');
-      style.textContent = `
-        quest-ion { 
-          display: flex; flex-direction:column; font-family: "din-round", sans-serif; flex:1; 
-          min-width: 30px; margin: 20px auto; color: #4b4b4b; padding: 10px;
-          transition: opacity 0.3s ease-out; 
-        }
-        quest-ion.fade-out { opacity: 0; pointer-events: none; }
-        
-        .q-title { font-size: 22px; font-weight: 800; margin-bottom: 24px; text-align: center; color: #fafaff; }
-        .reorder-zone { display: flex; flex-wrap: wrap; gap: 8px; align-content:center; justify-content: center; padding: 15px; min-height: 90px; border-top: 2px solid #e5e5e5; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
-        .word-pill { height:max-content; padding: 12px 18px; background: white; border: 2px solid #e5e5e5; border-radius: 14px; cursor: grab; font-weight: bold; box-shadow: 0 4px 0 #e5e5e5; color: #4b4b4b; font-size: 16px; transition: transform 0.1s; }
-        .word-pill.dragging { opacity: 0.2; }
-
-        .choice-grid { display: flex; flex-direction: column; gap: 12px; }
-        .q-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px solid #e5e5e5; background: white; font-size: 17px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #e5e5e5; text-align: left; transition: all 0.2s; outline: none; color: #4b4b4b; }
-        
-        .q-btn.correct { background: #d7ffb8 !important; border-color: #58cc02 !important; box-shadow: 0 4px 0 #58cc02 !important; color: #58cc02 !important; }
-        .q-btn.wrong { background: #ffdfe0 !important; border-color: #ff4b4b !important; box-shadow: 0 4px 0 #ff4b4b !important; color: #ff4b4b !important; }
-
-        .input-display { width: 100%; padding: 15px; border: 2px solid #e5e5e5; border-radius: 16px; font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; background: #f7f7f7; min-height: 60px; box-sizing: border-box; color: #1cb0f6; border-bottom: 4px solid #e5e5e5; }
-        .kb-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #e5e5e5; padding: 12px; border-radius: 16px; }
-        .kb-key { padding: 14px 0; background: white; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #afafaf; font-size: 15px; color: #4b4b4b; }
-
-        #check-btn { background: #58cc02; color: white; border-color: #58cc02; box-shadow: 0 5px 0 #46a302; text-align: center; }
-        .feedback { text-align: center; font-weight: 800; margin-top: 20px; font-size: 20px; min-height: 28px; text-transform: uppercase; }
-      `;
-      document.head.appendChild(style);
-
-      class QuestIon extends HTMLElement {
-        connectedCallback() {
-          this.innerHTML = `
-            <div class="q-title" id="q-text"></div>
-            <div id="q-content"></div>
-            <div id="q-actions" style="display:none; margin-top:25px;">
-              <button class="q-btn" id="check-btn">CHECK</button>
-            </div>
-            <div class="feedback" id="feedback"></div>
-          `;
-          this.querySelector('#check-btn').onclick = () => this.validate();
-        }
-
-        loadQuestion(data) {
-          this.classList.remove('fade-out'); // Restore visibility
-          this.currentData = data; 
-          this.userVal = ""; 
-          this.querySelector('#feedback').textContent = '';
-          const content = this.querySelector('#q-content');
-          const actions = this.querySelector('#q-actions');
-          this.querySelector('#q-text').textContent = data.question;
-          content.innerHTML = '';
-          actions.style.display = (data.type === 'reorder' || data.type === 'input') ? 'block' : 'none';
-
-          if (data.type === 'reorder') {
-            const zone = document.createElement('div'); zone.className = 'reorder-zone';
-            data.options.sort(() => Math.random() - 0.5).forEach(opt => {
-              const p = document.createElement('div'); p.className = 'word-pill'; p.draggable = true; p.textContent = opt;
-              p.ondragstart = () => p.classList.add('dragging'); p.ondragend = () => p.classList.remove('dragging');
-              zone.appendChild(p);
-            });
-            zone.ondragover = (e) => {
-              e.preventDefault();
-              const drag = zone.querySelector('.dragging');
-              const sibs = [...zone.querySelectorAll('.word-pill:not(.dragging)')];
-              const next = sibs.find(s => {
-                const b = s.getBoundingClientRect();
-                return e.clientX <= b.left + b.width/2 && e.clientY <= b.top + b.height/2;
-              });
-              zone.insertBefore(drag, next);
-            };
-            content.appendChild(zone);
-          } 
-          else if (data.type === 'choice') {
-            const grid = document.createElement('div'); grid.className = 'choice-grid';
-            data.options.forEach(opt => {
-              const b = document.createElement('button'); b.className = 'q-btn'; b.textContent = opt;
-              b.onclick = () => { this.userVal = opt; this.validate(b); };
-              grid.appendChild(b);
-            });
-            content.appendChild(grid);
-          }
-          else if (data.type === 'input') {
-            const disp = document.createElement('div'); disp.className = 'input-display';
-            const kb = document.createElement('div'); kb.className = 'kb-grid';
-            "QWERTYUIOPASDFGHJKLZXCVBNM".split('').forEach(l => {
-              const k = document.createElement('button'); k.className = 'kb-key'; k.textContent = l;
-              k.onclick = () => { this.userVal += l; disp.textContent = this.userVal; };
-              kb.appendChild(k);
-            });
-            const del = document.createElement('button'); del.className = 'kb-key'; del.textContent = '⌫'; del.style.gridColumn = 'span 2'; del.style.background = '#ffdfe0'; del.style.color = '#ff4b4b';
-            del.onclick = () => { this.userVal = this.userVal.slice(0,-1); disp.textContent = this.userVal; };
-            kb.appendChild(del);
-            content.append(disp, kb);
-          }
-          else if (data.type === 'spin') {
-            content.innerHTML = `<div class="wheel-wrap"><div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); z-index:5; width:24px; height:24px; background:#4b4b4b; clip-path:polygon(50% 100%, 0 0, 100% 0)"></div><svg class="wheel-svg" id="w-svg" viewBox="0 0 32 32"><circle r="16" cx="16" cy="16" fill="transparent" stroke="#58cc02" stroke-width="32" stroke-dasharray="25 100" /><circle r="16" cx="16" cy="16" fill="transparent" stroke="#1cb0f6" stroke-width="32" stroke-dasharray="25 100" stroke-dashoffset="-25" /><circle r="16" cx="16" cy="16" fill="transparent" stroke="#ffc800" stroke-width="32" stroke-dasharray="25 100" stroke-dashoffset="-50" /><circle r="16" cx="16" cy="16" fill="transparent" stroke="#ff4b4b" stroke-width="32" stroke-dasharray="25 100" stroke-dashoffset="-75" /></svg></div>`;
-            const b = document.createElement('button'); b.className = 'q-btn'; b.id = 'check-btn'; b.style.textAlign = 'center'; b.textContent = "SPIN TO WIN";
-            b.onclick = () => {
-              const deg = 3600 + Math.random() * 3600; 
-              content.querySelector('#w-svg').style.transform = `rotate(${deg}deg)`;
-              b.disabled = true;
-              setTimeout(() => { this.validate(); b.disabled = false; }, 4100);
-            };
-            content.appendChild(b);
-          }
-        }
-
-        validate(btn = null) {
-          const fb = this.querySelector('#feedback');
-          const checkBtn = this.querySelector('#check-btn');
-          let ok = false;
-          const match = (u, t) => u.trim() === t.trim();
-
-          if (this.currentData.type === 'reorder') {
-            const cur = [...this.querySelectorAll('.word-pill')].map(el => el.textContent);
-            ok = JSON.stringify(cur) === JSON.stringify(this.currentData.answer);
-          } else if (this.currentData.type === 'choice' || this.currentData.type === 'input') {
-            ok = match(this.userVal, this.currentData.answer);
-          } else if (this.currentData.type === 'spin') { ok = true; }
-
-          playSound(ok ? 'correct' : 'error');
-          fb.textContent = ok ? "Excellent!" : "Not quite right";
-          fb.style.color = ok ? "#58cc02" : "#ff4b4b";
-
-          const target = btn || checkBtn;
-          target.classList.add(ok ? 'correct' : 'wrong');
-
-          if (ok) {
-            setTimeout(() => {
-              this.classList.add('fade-out');
-              if (this.currentData.onCorrect) this.currentData.onCorrect();
-            }, 1000);
-          } else {
-            setTimeout(() => {
-              target.classList.remove('wrong');
-              fb.textContent = "";
-            }, 1000);
-          }
-        }
-      }
-
-      customElements.define('quest-ion', QuestIon);
-
-      // Helper to find the element
-      const getEl = () => document.querySelector('quest-ion');
-
-      // Restored the original function your external code expects
-      window.setQuestion = (d) => getEl()?.loadQuestion(d);
-
-      // Added nextQuest for progression
-      window.nextQuest = (d) => {
-        const el = getEl();
-        if (el) {
-          el.classList.remove('fade-out');
-          el.loadQuestion(d);
-        }
-      };
-    })();
-  </script>
-</quest-ion>
 
 <!--samples>
 
@@ -676,13 +496,242 @@ o<!DOCTYPE html>
   </script>
 </moti-co>
 
+<quest-ion>
+  <script>
+    (function() {
+      const playSound = (type) => {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          if (type === 'correct') {
+            osc.frequency.setValueAtTime(523, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+          } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+          }
+          osc.start(); osc.stop(ctx.currentTime + 0.2);
+        } catch(e) {}
+      };
+
+      const style = document.createElement('style');
+      style.textContent = `
+        quest-ion { display: flex; flex-direction:column; font-family: "din-round", sans-serif; flex:1; min-width: 30px; margin: 20px auto; color: #4b4b4b; padding: 10px; transition: opacity 0.3s ease-out; }
+        quest-ion.fade-out { opacity: 0; pointer-events: none; }
+        .q-title { font-size: 22px; font-weight: 800; margin-bottom: 24px; text-align: center; color: #fafaff; }
+        .reorder-zone { display: flex; flex-wrap: wrap; gap: 8px; align-content:center; justify-content: center; padding: 15px; min-height: 90px; border-top: 2px solid #e5e5e5; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
+        .word-pill { height:max-content; padding: 12px 18px; background: white; border: 2px solid #e5e5e5; border-radius: 14px; cursor: grab; font-weight: bold; box-shadow: 0 4px 0 #e5e5e5; color: #4b4b4b; font-size: 16px; transition: transform 0.1s; }
+        .choice-grid { display: flex; flex-direction: column; gap: 12px; }
+        .q-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px solid #e5e5e5; background: white; font-size: 17px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #e5e5e5; text-align: left; transition: all 0.2s; outline: none; color: #4b4b4b; }
+        .q-btn.correct { background: #d7ffb8 !important; border-color: #58cc02 !important; box-shadow: 0 4px 0 #58cc02 !important; color: #58cc02 !important; }
+        .q-btn.wrong { background: #ffdfe0 !important; border-color: #ff4b4b !important; box-shadow: 0 4px 0 #ff4b4b !important; color: #ff4b4b !important; }
+        .input-display { width: 100%; padding: 15px; border: 2px solid #e5e5e5; border-radius: 16px; font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 12px; background: #f7f7f7; min-height: 60px; box-sizing: border-box; color: #1cb0f6; border-bottom: 4px solid #e5e5e5; word-break: break-word; white-space: pre-wrap; }
+        .kb-container { background: #e5e5e5; padding: 10px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .kb-row { display: flex; justify-content: center; gap: 4px; }
+        .kb-key { flex: 1; min-width: 0; padding: 12px 0; background: white; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #afafaf; font-size: 14px; color: #4b4b4b; }
+        .kb-key:active { transform: translateY(2px); box-shadow: 0 1px 0 #afafaf; }
+        .kb-key.active { background: #1cb0f6; color: white; box-shadow: 0 3px 0 #168ec6; }
+        .kb-key.wide { flex: 1.5; }
+        .kb-key.space { flex: 5; }
+        #check-btn { background: #58cc02; color: white; border-color: #58cc02; box-shadow: 0 5px 0 #46a302; text-align: center; }
+        .feedback { text-align: center; font-weight: 800; margin-top: 20px; font-size: 20px; min-height: 28px; text-transform: uppercase; }
+        .q-hint { font-size: 13px; color: #afafaf; text-align: center; margin-bottom: 10px; font-style: italic; }
+      `;
+      document.head.appendChild(style);
+
+      class QuestIon extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+            <div class="q-title" id="q-text"></div>
+            <div class="q-hint" id="q-hint"></div>
+            <div id="q-content"></div>
+            <div id="q-actions" style="display:none; margin-top:25px;">
+              <button class="q-btn" id="check-btn">CHECK</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+          `;
+          this.querySelector('#check-btn').onclick = () => this.validate();
+          this.isShift = true;
+        }
+
+        loadQuestion(data) {
+          this.classList.remove('fade-out');
+          this.currentData = data;
+          this.userVal = "";
+          this.isShift = true;
+          this.querySelector('#feedback').textContent = '';
+          this.querySelector('#q-hint').textContent = data.hint || '';
+
+          const content = this.querySelector('#q-content');
+          const actions = this.querySelector('#q-actions');
+          this.querySelector('#q-text').textContent = data.question;
+          content.innerHTML = '';
+          actions.style.display = (data.type === 'reorder' || data.type === 'input') ? 'block' : 'none';
+
+          if (data.type === 'reorder') {
+            const zone = document.createElement('div'); zone.className = 'reorder-zone';
+            data.options.sort(() => Math.random() - 0.5).forEach(opt => {
+              const p = document.createElement('div'); p.className = 'word-pill'; p.draggable = true; p.textContent = opt;
+              p.ondragstart = () => p.classList.add('dragging'); p.ondragend = () => p.classList.remove('dragging');
+              zone.appendChild(p);
+            });
+            zone.ondragover = (e) => {
+              e.preventDefault();
+              const drag = zone.querySelector('.dragging');
+              const sibs = [...zone.querySelectorAll('.word-pill:not(.dragging)')];
+              const next = sibs.find(s => { const b = s.getBoundingClientRect(); return e.clientX <= b.left + b.width/2 && e.clientY <= b.top + b.height/2; });
+              zone.insertBefore(drag, next);
+            };
+            content.appendChild(zone);
+          }
+          else if (data.type === 'choice') {
+            const grid = document.createElement('div'); grid.className = 'choice-grid';
+            data.options.forEach(opt => {
+              const b = document.createElement('button'); b.className = 'q-btn'; b.textContent = opt;
+              b.onclick = () => { this.userVal = opt; this.validate(b); };
+              grid.appendChild(b);
+            });
+            content.appendChild(grid);
+          }
+          else if (data.type === 'input') {
+            const disp = document.createElement('div'); disp.className = 'input-display'; disp.id = 'input-disp';
+            disp.textContent = '';
+            const kbContainer = document.createElement('div'); kbContainer.className = 'kb-container';
+
+            const renderKeys = () => {
+              kbContainer.innerHTML = '';
+              const rows = [
+                "QWERTYUIOP".split(''),
+                "ASDFGHJKL".split(''),
+                ["SHIFT", ..."ZXCVBNM".split(''), "BACKSPACE"],
+                [".", "!", "?", ";", ",", ":", '"', "'"],
+                ["CLEAR", "SPACE"]
+              ];
+              rows.forEach(row => {
+                const rowDiv = document.createElement('div'); rowDiv.className = 'kb-row';
+                row.forEach(key => {
+                  const k = document.createElement('button'); k.className = 'kb-key';
+                  if (key === "SHIFT") {
+                    k.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                    if (this.isShift) k.classList.add('active');
+                    k.onclick = () => { this.isShift = !this.isShift; renderKeys(); };
+                  } else if (key === "BACKSPACE") {
+                    k.innerHTML = '<i class="fas fa-backspace"></i>'; k.classList.add('wide');
+                    k.onclick = () => {
+                      this.userVal = this.userVal.slice(0, -1);
+                      if (this.userVal.length === 0) this.isShift = true;
+                      disp.textContent = this.userVal; renderKeys();
+                    };
+                  } else if (key === "SPACE") {
+                    k.textContent = 'SPACE'; k.classList.add('space');
+                    k.onclick = () => {
+                      // prevent double space
+                      if (this.userVal.slice(-1) !== ' ') { this.userVal += ' '; disp.textContent = this.userVal; }
+                    };
+                  } else if (key === "CLEAR") {
+                    k.innerHTML = '<i class="fas fa-trash-can"></i>'; k.classList.add('wide');
+                    k.onclick = () => { this.userVal = ''; this.isShift = true; disp.textContent = ''; renderKeys(); };
+                  } else {
+                    const char = this.isShift ? key : key.toLowerCase();
+                    k.textContent = char;
+                    k.onclick = () => {
+                      this.userVal += char;
+                      disp.textContent = this.userVal;
+                      if ([".", "!", "?", ";"].includes(char)) { this.isShift = true; }
+                      else if (this.isShift) { this.isShift = false; }
+                      renderKeys();
+                    };
+                  }
+                  rowDiv.appendChild(k);
+                });
+                kbContainer.appendChild(rowDiv);
+              });
+            };
+            renderKeys();
+            content.append(disp, kbContainer);
+          }
+        }
+
+        validate(btn = null) {
+          const fb = this.querySelector('#feedback');
+          const checkBtn = this.querySelector('#check-btn');
+          const data = this.currentData;
+          let ok = false;
+          let failMsg = "Not quite right";
+
+          const input = this.userVal.trim();
+          const target = (data.answer || '').trim();
+          const isAny = target === '' || target.toUpperCase() === 'ANY';
+
+          if (data.type === 'reorder') {
+            const cur = [...this.querySelectorAll('.word-pill')].map(el => el.textContent);
+            ok = JSON.stringify(cur) === JSON.stringify(data.answer);
+          }
+          else if (data.type === 'input') {
+            // Basic format checks always apply
+            const isCapitalized = /^[A-Z]/.test(input);
+            const hasPunctuation = /[.!?,;]$/.test(input);
+            const noDoubleSpace = !/  /.test(input);
+            const hasContent = input.length > 0;
+
+            if (!hasContent) { failMsg = "Please write something!"; ok = false; }
+            else if (!isCapitalized) { failMsg = "Start with a capital letter!"; ok = false; }
+            else if (!hasPunctuation) { failMsg = "End with . ! ? or ,"; ok = false; }
+            else if (!noDoubleSpace) { failMsg = "No double spaces!"; ok = false; }
+            else if (isAny) {
+              // ANY: check contains array if provided
+              const mustContain = data.contains || [];
+              const missing = mustContain.filter(word => !input.includes(word));
+              if (missing.length > 0) {
+                failMsg = `Include the word: "${missing[0]}"`;
+                ok = false;
+              } else {
+                ok = true;
+              }
+            }
+            else {
+              // Exact match
+              ok = input === target;
+              if (!ok) failMsg = "Not quite right";
+            }
+          }
+          else {
+            ok = input === target || this.userVal === target;
+          }
+
+          playSound(ok ? 'correct' : 'error');
+          fb.textContent = ok ? "Excellent!" : failMsg;
+          fb.style.color = ok ? "#58cc02" : "#ff4b4b";
+
+          const btnTarget = btn || checkBtn;
+          btnTarget.classList.add(ok ? 'correct' : 'wrong');
+
+          if (ok) {
+            setTimeout(() => {
+              this.classList.add('fade-out');
+              if (data.onCorrect) data.onCorrect();
+            }, 1000);
+          } else {
+            setTimeout(() => { btnTarget.classList.remove('wrong'); fb.textContent = ""; }, 1800);
+          }
+        }
+      }
+
+      customElements.define('quest-ion', QuestIon);
+      window.setQuestion = (d) => document.querySelector('quest-ion')?.loadQuestion(d);
+      window.nextQuest = (d) => {
+        const el = document.querySelector('quest-ion');
+        if (el) { el.classList.remove('fade-out'); el.loadQuestion(d); }
+      };
+    })();
+  </script>
+</quest-ion>
+
+
 <game>
   <script>
-    /**
- * DUO-ALLWRITE ENGINE
- * Palette-Driven | Gold Theme | Transparent Navs | AFK Sheet
- */
-
 const DUO_PALETTE = {
   green:  { bg: '#58cc02', shadow: '#46a302', text: '#ffffff' },
   blue:   { bg: '#1cb0f6', shadow: '#1899d6', text: '#ffffff' },
@@ -693,6 +742,9 @@ const DUO_PALETTE = {
   gray:   { bg: '#afafaf', shadow: '#888888', text: '#ffffff' }
 };
 
+// Keywords that force input type
+const INPUT_TRIGGERS = ["write", "rewrite", "type", "input", "list"];
+
 const GameEngine = {
   data: null,
   currentDoor: 0,
@@ -701,225 +753,118 @@ const GameEngine = {
   isTransitioning: false,
   afkTimer: null,
 
-  // --- PROGRESS ---
-  getProgress() {
-    const saved = localStorage.getItem('allwrite_progress');
-    return saved ? JSON.parse(saved) : { door: 0, level: 0, q: 0 };
-  },
-
-  saveProgress(doorIdx, levelIdx, questionIdx = 0) {
-    const currentProg = this.getProgress();
-    if (doorIdx > currentProg.door || 
-       (doorIdx === currentProg.door && levelIdx > currentProg.level) || 
-       (doorIdx === currentProg.door && levelIdx === currentProg.level && questionIdx > currentProg.q)) {
-      
-      localStorage.setItem('allwrite_progress', JSON.stringify({ 
-        door: doorIdx, 
-        level: levelIdx, 
-        q: questionIdx 
-      }));
-      this.updateHomeNav(); 
-    }
-  },
-
-  play(type) {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      if (type === 'correct') {
-        osc.frequency.setValueAtTime(523, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
-      } else {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.2);
-        gain.gain.value = 0.3;
-      }
-      osc.start(); osc.stop(ctx.currentTime + 0.2);
-    } catch (e) {}
-  },
-
   async init() {
-    this.addGameUI(); 
+    this.addGameUI();
     await this.fetchData();
     this.renderMap();
     this.updateHomeNav();
     this.startAFKTracker();
   },
 
-  // --- AFK LOGIC ---
-  startAFKTracker() {
-    const resetTimer = () => {
-      clearTimeout(this.afkTimer);
-      // Generates a random delay between 3 and 10 seconds
-      const randomDelay = 3000 + (Math.random() * 7000); 
-      this.afkTimer = setTimeout(() => this.showAFKPopup(), randomDelay);
-      };
-
-    window.onload = resetTimer;
-    window.onmousemove = resetTimer;
-    window.onmousedown = resetTimer; 
-    window.ontouchstart = resetTimer; 
-    window.onclick = resetTimer; 
-    window.onkeypress = resetTimer;
-  },
-
-  showAFKPopup() {
-    // Only show if the user is on the map/home screen
-    const isHome = document.querySelector('door-co').style.display !== 'none';
-    if (!isHome) return;
-
-    window.openSheet({
-      title: 'Still there?',
-      body: `
-        <div style="text-align:center; padding:10px;">
-          <div style="font-size:50px; margin-bottom:15px;">🎁</div>
-          <p style="font-weight:700; color:#4b4b4b;">Play the game and get a reward!!</p>
-        </div>
-      `,
-      buttons: [
-        { text: 'I AM READY!', color: "gold", action: () => {} }
-      ]
-    });
-  },
-
-  addGameUI() {
-    if (!document.getElementById('home-top-nav')) {
-      const hNav = document.createElement('div');
-      hNav.id = "home-top-nav";
-      hNav.style = `position:fixed; top:0; left:0; width:100%; height:60px; background:transparent; 
-                   backdrop-filter: blur(5px); z-index:900; 
-                   display:flex; align-items:center; justify-content:space-between; 
-                   padding:0 20px; box-sizing:border-box;`;
-      hNav.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px;">
-           <span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span>
-        </div>
-        <div id="home-stats" style="display:flex; gap:12px; font-weight:700; color:${DUO_PALETTE.white.text}; font-size:14px;">
-           </div>
-      `;
-      document.body.appendChild(hNav);
-    }
-
-    if (!document.getElementById('game-top-nav')) {
-      const topNav = document.createElement('div');
-      topNav.id = "game-top-nav";
-      topNav.style = `position:fixed; top:0; left:0; width:100%; height:70px; background:transparent; 
-                     backdrop-filter: blur(5px); z-index:1000; display:none; align-items:center; 
-                     padding:0 20px; box-sizing:border-box; gap:20px;`;
-      topNav.innerHTML = `
-        <button id="game-close-btn" style="background:none; border:none; font-size:24px; color:${DUO_PALETTE.gray.bg}; cursor:pointer; font-weight:bold; padding:10px;">✕</button>
-        <div style="flex:1; height:16px; background:${DUO_PALETTE.white.shadow}80; border-radius:20px; overflow:hidden;">
-          <div id="game-prog-fill" style="width:0%; height:100%; background:${DUO_PALETTE.gold.bg}; transition:width 0.3s ease; border-radius:20px;"></div>
-        </div>
-      `;
-      document.body.appendChild(topNav);
-      document.getElementById('game-close-btn').onclick = () => this.showHomeMenu();
-    }
-
-    if (!document.getElementById('game-nav-bar')) {
-      const nav = document.createElement('div');
-      nav.id = "game-nav-bar";
-      nav.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; display:none; gap:15px;";
-      nav.innerHTML = `
-        <button id="nav-prev" style="padding:10px 20px; border-radius:12px; border:2px solid ${DUO_PALETTE.white.shadow}; background:${DUO_PALETTE.white.bg}; font-weight:800; cursor:pointer; box-shadow: 0 4px 0 ${DUO_PALETTE.white.shadow};">PREV</button>
-        <button id="nav-next" style="padding:10px 20px; border-radius:12px; border:2px solid ${DUO_PALETTE.white.shadow}; background:${DUO_PALETTE.white.bg}; font-weight:800; cursor:pointer; box-shadow: 0 4px 0 ${DUO_PALETTE.white.shadow};">NEXT</button>
-      `;
-      document.body.appendChild(nav);
-      document.getElementById('nav-prev').onclick = () => this.changeQuestion(-1);
-      document.getElementById('nav-next').onclick = () => this.changeQuestion(1);
-    }
-
-    const style = document.createElement('style');
-    style.innerHTML = `
-      door-co, list-co { margin-top: 80px !important; margin-bottom: 40px !important; box-sizing: border-box; }
-      quest-ion { margin-top: 90px !important; }
-    `;
-    document.head.appendChild(style);
-  },
-
-  updateHomeNav() {
-    const prog = this.getProgress();
-    const statsContainer = document.getElementById('home-stats');
-    if (!statsContainer || !this.data) return;
-
-    let totalQuestions = 0;
-    let totalLevels = 0;
-
-    this.data.doors.forEach((door, dIdx) => {
-      door.levels.forEach((level, lIdx) => {
-        if (dIdx < prog.door || (dIdx === prog.door && lIdx < prog.level)) {
-          totalQuestions += level.questions.length;
-          totalLevels += 1;
-        } else if (dIdx === prog.door && lIdx === prog.level) {
-          totalQuestions += prog.q;
-        }
-      });
-    });
-
-    statsContainer.innerHTML = `
-      <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
-        <i class="fa-solid fa-check"></i> ${totalLevels}
-      </span>
-      <span style="color:${DUO_PALETTE.gold.bg}; display:flex; align-items:center; gap:5px; text-shadow: 0px 1px 2px rgba(0,0,0,0.1);">
-        <i class="fa-solid fa-fire"></i> ${totalQuestions}
-      </span>
-    `;
-  },
-
-  updateProgressUI() {
-    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
-    const percentage = (this.currentQuestion / level.questions.length) * 100;
-    const fill = document.getElementById('game-prog-fill');
-    if (fill) fill.style.width = percentage + "%";
-  },
-
-  changeQuestion(step) {
-    if (this.isTransitioning) return; 
-    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
-    const newIdx = this.currentQuestion + step;
-    const prog = this.getProgress();
-    const hasClearedNext = (this.currentDoor < prog.door) || 
-                           (this.currentDoor === prog.door && this.currentLevel < prog.level) || 
-                           (this.currentDoor === prog.door && this.currentLevel === prog.level && newIdx <= prog.q);
-
-    if (newIdx >= 0 && newIdx < level.questions.length) {
-      if (step > 0 && !hasClearedNext) {
-        window.triggerMoti?.({ title: "Locked", msg: "Complete current task first!", color: "gold" });
-        return;
-      }
-      this.currentQuestion = newIdx;
-      this.loadActiveQuestion(false);
-    }
-  },
-
-  showHomeMenu() {
-    window.openSheet({
-      title: 'Exit Lesson?',
-      body: '<p>Progress is saved per correct answer.</p>',
-      buttons: [
-        { text: 'Keep Learning', color:"gold", action: () => {} },
-        { 
-          text: 'End Session', 
-          color: "white", 
-          action: () => {
-            this.toggleScreen('list');
-            this.showLevelList(this.currentDoor);
-          } 
-        }
-      ]
-    });
-  },
-
   async fetchData() {
     try {
-      const response = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
-      const text = await response.text();
-      const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-      this.data = JSON.parse(jsonString);
-    } catch (e) { console.error(e); }
+      const res = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
+      const text = await res.text();
+      const json = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+      this.data = JSON.parse(json);
+    } catch(e) { console.error("Data Fetch Error:", e); }
+  },
+
+  getProgress() {
+    const s = localStorage.getItem('allwrite_progress');
+    return s ? JSON.parse(s) : { door: 0, level: 0, q: 0 };
+  },
+
+  saveProgress(doorIdx, levelIdx, qIdx = 0) {
+    const p = this.getProgress();
+    if (doorIdx > p.door ||
+       (doorIdx === p.door && levelIdx > p.level) ||
+       (doorIdx === p.door && levelIdx === p.level && qIdx > p.q)) {
+      localStorage.setItem('allwrite_progress', JSON.stringify({ door: doorIdx, level: levelIdx, q: qIdx }));
+      this.updateHomeNav();
+    }
+  },
+
+  play(type) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+      } else {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.2);
+        gain.gain.value = 0.3;
+      }
+      osc.start(); osc.stop(ctx.currentTime + 0.2);
+    } catch(e) {}
+  },
+
+  loadActiveQuestion(isFirst = false) {
+    const q = this.data.doors[this.currentDoor].levels[this.currentLevel].questions[this.currentQuestion];
+    if (!q) return this.completeLevel();
+
+    this.updateProgressUI();
+
+    // Resolve type
+    let qType = q.type || 'choice';
+    const qTextLower = q.question.toLowerCase();
+    const isInputTrigger = INPUT_TRIGGERS.some(t => qTextLower.includes(t));
+
+    if (isInputTrigger || qType === 'input') {
+      qType = 'input';
+    } else if (qType === 'word' || qType === 'choice') {
+      qType = 'choice';
+    } else if (qType === 'order') {
+      qType = 'reorder';
+    }
+
+    const target = (q.answer || '').trim();
+    const isAny = target.toUpperCase() === 'ANY' || target === '';
+
+    const questionData = {
+      type: qType,
+      question: q.question,
+      options: q.choices || q.options || [],
+      answer: q.answer,
+      contains: q.contains || [],   // pass through contains array
+      hint: q.hint || '',
+      onCorrect: () => {
+        if (this.isTransitioning) return;
+        this.isTransitioning = true;
+        this.play('correct');
+        this.currentQuestion++;
+        this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
+        setTimeout(() => {
+          this.isTransitioning = false;
+          this.loadActiveQuestion(false);
+        }, 1200);
+      }
+    };
+
+    if (isFirst) window.setQuestion(questionData);
+    else window.nextQuest(questionData);
+    this.updateNavButtons();
+  },
+
+  updateNavButtons() {
+    const prog = this.getProgress();
+    const hasClearedNext = (this.currentDoor < prog.door) ||
+                           (this.currentDoor === prog.door && this.currentLevel < prog.level) ||
+                           (this.currentDoor === prog.door && this.currentLevel === prog.level && (this.currentQuestion + 1) <= prog.q);
+    const prevBtn = document.getElementById('nav-prev');
+    const nextBtn = document.getElementById('nav-next');
+
+    if (prevBtn) {
+      prevBtn.style.opacity = this.currentQuestion === 0 ? "0.2" : "1";
+      prevBtn.onclick = this.currentQuestion === 0 ? null : () => { this.currentQuestion--; this.loadActiveQuestion(false); };
+    }
+    if (nextBtn) {
+      nextBtn.style.opacity = hasClearedNext ? "1" : "0.2";
+      nextBtn.onclick = hasClearedNext ? () => { this.currentQuestion++; this.loadActiveQuestion(false); } : null;
+    }
   },
 
   toggleScreen(screen) {
@@ -928,10 +873,8 @@ const GameEngine = {
       const el = document.querySelector(screens[k]);
       if (el) el.style.display = (screen === k) ? 'flex' : 'none';
     });
-    
     const isGame = screen === 'game';
     const isHome = screen === 'map' || screen === 'list';
-
     if (document.getElementById('home-top-nav')) document.getElementById('home-top-nav').style.display = isHome ? 'flex' : 'none';
     if (document.getElementById('game-top-nav')) document.getElementById('game-top-nav').style.display = isGame ? 'flex' : 'none';
     if (document.getElementById('game-nav-bar')) document.getElementById('game-nav-bar').style.display = isGame ? 'flex' : 'none';
@@ -944,8 +887,7 @@ const GameEngine = {
     const configs = this.data.doors.map((d, i) => {
       const isLocked = i > prog.door;
       return {
-        title: `UNIT ${d.door}`,
-        locked: isLocked,
+        title: `UNIT ${d.door}`, locked: isLocked,
         bgColor: isLocked ? '#f5f5f5' : (i % 2 === 0 ? '#fff9e6' : '#e8f7ff'),
         iconColor: isLocked ? DUO_PALETTE.gray.bg : (i % 2 === 0 ? DUO_PALETTE.gold.bg : DUO_PALETTE.blue.bg),
         depthColor: isLocked ? DUO_PALETTE.gray.shadow : (i % 2 === 0 ? DUO_PALETTE.gold.shadow : DUO_PALETTE.blue.shadow),
@@ -966,26 +908,17 @@ const GameEngine = {
     const door = this.data.doors[doorIdx];
     const prog = this.getProgress();
     this.toggleScreen('list');
-    
     const levelButtons = door.levels.map((l, i) => {
       const isLocked = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
       const isCurrent = (doorIdx === prog.door && i === prog.level);
-      
       const theme = isLocked ? DUO_PALETTE.white : DUO_PALETTE.gold;
       return {
         label: isLocked ? '🔒 Locked' : (isCurrent && prog.q > 0 ? `Lvl ${i+1} (Resume)` : `Lvl ${i+1}: ${l.title}`),
-        color: theme.bg,
-        shadow: theme.shadow,
-        textColor: isLocked ? DUO_PALETTE.gray.bg : theme.text,
+        color: theme.bg, shadow: theme.shadow, textColor: isLocked ? DUO_PALETTE.gray.bg : theme.text,
         action: isLocked ? null : () => this.startLesson(i)
       };
     });
-    levelButtons.unshift({
-      label: '← BACK',
-      color: DUO_PALETTE.white.bg, shadow: DUO_PALETTE.white.shadow, textColor: DUO_PALETTE.white.text,
-      action: () => this.renderMap()
-    });
-
+    levelButtons.unshift({ label: '← BACK', color: DUO_PALETTE.white.bg, shadow: DUO_PALETTE.white.shadow, textColor: DUO_PALETTE.white.text, action: () => this.renderMap() });
     window.renderList('list-co', levelButtons);
   },
 
@@ -993,55 +926,9 @@ const GameEngine = {
     this.currentLevel = levelIdx;
     const prog = this.getProgress();
     this.currentQuestion = (this.currentDoor === prog.door && levelIdx === prog.level) ? (prog.q || 0) : 0;
-    this.isTransitioning = false; 
+    this.isTransitioning = false;
     this.toggleScreen('game');
     this.loadActiveQuestion(true);
-  },
-
-  loadActiveQuestion(isFirst = false) {
-    const q = this.data.doors[this.currentDoor].levels[this.currentLevel].questions[this.currentQuestion];
-    if (!q) return this.completeLevel();
-
-    this.updateProgressUI();
-
-    let qType = q.type;
-    if (qType === 'word' || qType === 'choice') qType = 'choice';
-    if (qType === 'order') qType = 'reorder';
-
-    const questionData = {
-      type: qType,
-      question: q.question,
-      options: q.choices || q.options || [],
-      answer: q.answer,
-      onCorrect: () => {
-        if (this.isTransitioning) return; 
-        this.isTransitioning = true; 
-
-        this.play('correct');
-        this.currentQuestion++;
-        this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
-        
-        setTimeout(() => {
-          this.isTransitioning = false;
-          this.loadActiveQuestion(false);
-        }, 1200);
-      }
-    };
-
-    if (isFirst) window.setQuestion(questionData);
-    else window.nextQuest(questionData);
-    
-    const prog = this.getProgress();
-    const hasClearedNext = (this.currentDoor < prog.door) || 
-                           (this.currentDoor === prog.door && this.currentLevel < prog.level) || 
-                           (this.currentDoor === prog.door && this.currentLevel === prog.level && (this.currentQuestion + 1) <= prog.q);
-
-    const prevBtn = document.getElementById('nav-prev');
-    const nextBtn = document.getElementById('nav-next');
-    
-    prevBtn.style.opacity = this.currentQuestion === 0 ? "0.3" : "1";
-    nextBtn.style.opacity = hasClearedNext ? "1" : "0.3";
-    nextBtn.innerHTML = hasClearedNext ? "NEXT" : "LOCKED";
   },
 
   completeLevel() {
@@ -1050,10 +937,96 @@ const GameEngine = {
     if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
     this.saveProgress(nDoor, nLvl, 0);
     if (window.triggerMoti) window.triggerMoti({ title: "Done!", msg: "Level Unlocked!", img: "https://i.imgur.com/8N69vV9.png" });
-    setTimeout(() => {
-      this.isTransitioning = false;
-      this.showLevelList(this.currentDoor);
-    }, 2000);
+    setTimeout(() => { this.isTransitioning = false; this.showLevelList(this.currentDoor); }, 2000);
+  },
+
+  updateHomeNav() {
+    const prog = this.getProgress();
+    const statsContainer = document.getElementById('home-stats');
+    if (!statsContainer || !this.data) return;
+    let totalQ = 0, totalLvl = 0;
+    this.data.doors.forEach((door, dIdx) => {
+      door.levels.forEach((level, lIdx) => {
+        if (dIdx < prog.door || (dIdx === prog.door && lIdx < prog.level)) { totalQ += level.questions.length; totalLvl++; }
+        else if (dIdx === prog.door && lIdx === prog.level) { totalQ += prog.q; }
+      });
+    });
+    statsContainer.innerHTML = `
+      <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};"><i class="fa-solid fa-check"></i> ${totalLvl}</span>
+      <span style="color:${DUO_PALETTE.gold.bg}; display:flex; align-items:center; gap:5px;"><i class="fa-solid fa-fire"></i> ${totalQ}</span>
+    `;
+  },
+
+  updateProgressUI() {
+    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
+    const pct = (this.currentQuestion / level.questions.length) * 100;
+    const fill = document.getElementById('game-prog-fill');
+    if (fill) fill.style.width = pct + "%";
+  },
+
+  startAFKTracker() {
+    const reset = () => {
+      clearTimeout(this.afkTimer);
+      this.afkTimer = setTimeout(() => this.showAFKPopup(), 3000 + Math.random() * 7000);
+    };
+    ['onmousemove','onmousedown','ontouchstart','onclick','onkeypress'].forEach(e => window[e] = reset);
+  },
+
+  showAFKPopup() {
+    const isHome = document.querySelector('door-co')?.style.display !== 'none';
+    if (!isHome) return;
+    window.openSheet({
+      title: 'Still there?',
+      body: `<div style="text-align:center; padding:10px;"><div style="font-size:50px; margin-bottom:15px;">🎁</div><p style="font-weight:700; color:#4b4b4b;">Play the game and get a reward!!</p></div>`,
+      buttons: [{ text: 'I AM READY!', color: "gold", action: () => {} }]
+    });
+  },
+
+  addGameUI() {
+    if (!document.getElementById('home-top-nav')) {
+      const hNav = document.createElement('div');
+      hNav.id = "home-top-nav";
+      hNav.style = `position:fixed; top:0; left:0; width:100%; height:60px; background:transparent; z-index:900; display:flex; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;`;
+      hNav.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span></div><div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>`;
+      document.body.appendChild(hNav);
+    }
+
+    if (!document.getElementById('game-top-nav')) {
+      const gNav = document.createElement('div');
+      gNav.id = "game-top-nav";
+      gNav.style = `position:fixed; top:0; left:0; width:100%; height:70px; display:none; align-items:center; justify-content:center; padding:0 20px; z-index:1000; box-sizing:border-box; background:transparent;`;
+      gNav.innerHTML = `
+        <div style="display:flex; align-items:center; gap:15px; width:100%; max-width:600px;">
+          <i class="fa-solid fa-xmark" id="game-exit" style="font-size:22px; color:#afafaf; cursor:pointer;"></i>
+          <div id="game-prog-bg" style="flex:1; height:10px; background:#e5e5e5; border-radius:10px; overflow:hidden;">
+            <div id="game-prog-fill" style="width:0%; height:100%; background:${DUO_PALETTE.gold.bg}; transition:width 0.3s ease;"></div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(gNav);
+      document.getElementById('game-exit').onclick = () => this.showLevelList(this.currentDoor);
+    }
+
+    if (!document.getElementById('game-nav-bar')) {
+      const bNav = document.createElement('div');
+      bNav.id = "game-nav-bar";
+      bNav.style = `position:fixed; bottom:0; left:0; width:100%; height:80px; display:none; align-items:center; justify-content:center; background:transparent; z-index:1000; padding:0 30px; box-sizing:border-box;`;
+      bNav.innerHTML = `
+        <div style="display:flex; justify-content:space-between; width:100%; max-width:600px;">
+          <button id="nav-prev" style="width:50px; height:50px; border-radius:50%; border:none; background:transparent; color:#afafaf; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-arrow-left"></i></button>
+          <button id="nav-next" style="width:50px; height:50px; border-radius:50%; border:none; background:transparent; color:${DUO_PALETTE.gold.bg}; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      `;
+      document.body.appendChild(bNav);
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+      door-co, list-co { margin-top: 70px !important; margin-bottom: 20px !important; }
+      quest-ion { margin-top: 80px !important; }
+      #nav-prev:active, #nav-next:active { transform: scale(0.9); transition: 0.1s; }
+    `;
+    document.head.appendChild(style);
   }
 };
 
@@ -1106,7 +1079,7 @@ lastH = window.outerHeight;
   const isUserNameEmpty = !userName || userName.trim() === '';
 
   if (!isPortalDone && isUserNameEmpty) {
-    window.location.replace('https://allwrite-sh.vercel.app/allow/start');
+    window.location.replace('https://allwrite-sh.vercel.app/dev/allow/start');
   }
 })();
     </script>
