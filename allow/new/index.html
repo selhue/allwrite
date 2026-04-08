@@ -1,584 +1,1028 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>AllWrite | Pixel Spell</title>
     <meta name="description" content="Enabling next filipino generation in writing and learning english.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2064%2064'%3E%0A%3Ccircle%20cx%3D'32'%20cy%3D'32'%20r%3D'32'%20fill%3D'%23e1c066'%2F%3E%0A%3Ctext%20x%3D'32'%20y%3D'46'%20font-size%3D'38'%20font-weight%3D'700'%20text-anchor%3D'middle'%20fill%3D'%23ffffff'%20font-family%3D'Arial'%20letter-spacing%3D'-1'%3Eaw%3C%2Ftext%3E%0A%3C%2Fsvg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <style>
-        :root {
-            --duo-yellow: #ffc800; --duo-yellow-border: #ef9600;
-            --duo-green: #58cc02; --duo-green-border: #46a302;
-            --duo-blue: #1cb0f6; --duo-blue-border: #1899d6;
-            --duo-border: #e5e5e5; --duo-text: #ffffff;
-            --duo-gray: #afafaf; --duo-red: #ff4b4b;
-            --duo-red-border: #d33131;
-            --duo-purple: #ce82ff; --duo-purple-border: #a357d6;
-            --bg-space: #0A0A0A;
-        }
+</head>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body {    background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.jpg'); 
+<style>
+       body {    background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.jpg'); 
             background-size: cover; background-position: center;
             font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif; background-color: #000; color: var(--duo-text); display: flex; justify-content: center; height: 100dvh; overflow: hidden; }
+  .bg-dim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: -1; }
 
-        .app-container { width: 100%; max-width: 720px;  
-          display: flex; flex-direction: column; position: relative; }
-        .bg-dim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 0; }
+</style>   <div class="bg-dim"></div>
 
-        header, main { position: relative; z-index: 1; }
-
-        .screen-content { animation: fadeIn 0.4s ease-out forwards; height: 100%; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .hidden { display: none !important; }
-
-        header { padding: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid rgba(255,255,255,0.1); min-height: 80px; }
-        .logo { font-size: 1.2rem; font-weight: 800; color: var(--duo-yellow); text-transform: uppercase; }
-        .lvl-pill { background: var(--duo-yellow); color: white; padding: 8px 16px; border-radius: 14px; font-weight: 800; border-bottom: 4px solid var(--duo-yellow-border); font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
-
-        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        /* PORTAL STYLES */
-        #portal-container { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-space); z-index: 9999; overflow: hidden; transition: opacity 1s; }
-        .interaction-wrapper { position: relative; z-index: 100; width: 90%; max-width: 340px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
-        .perspective-box { position: absolute; perspective: 600px; width: 100vw; height: 100vh; }
-        .warp-scene { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
-        .fragment { position: absolute; border-radius: 8px; opacity: 0; pointer-events: none; }
-        .fragment.yellow { background: var(--duo-yellow); box-shadow: 0 0 8px var(--duo-yellow); }
-        .fragment.blue { background: var(--duo-blue); box-shadow: 0 0 8px var(--duo-blue); }
-        .fragment.white { background: #FFF; box-shadow: 0 0 8px #FFF; }
-        @keyframes flyPast {
-            0% { transform: translate3d(var(--x), var(--y), -1500px); opacity: 0; }
-            15% { opacity: 0.8; } 85% { opacity: 0.8; }
-            100% { transform: translate3d(var(--mx), var(--my), 600px); opacity: 0; }
-        }
-        #user-input { width: 100%; padding: 20px; border-radius: 16px; border: 3px solid #222; background: rgba(255, 255, 255, 0.05); color: white; font-size: 1.1rem; text-align: center; outline: none; font-family: 'Nunito', sans-serif; }
-        .hidden-under { opacity: 0; transform: translateY(15px); pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .hidden-under.reveal { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .warp-btn { width: 100%; background: linear-gradient(180deg, #ffd700 0%, #ffbf00 100%); color: #333; border: 2px solid #ffde6b; border-bottom: 5px solid var(--duo-yellow-border); padding: 18px; border-radius: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-family: 'Nunito', sans-serif; }
-        .portal-overlay { position: fixed; inset: 0; background: rgb(8, 20, 48); opacity: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .flash { animation: portalWhite 0.8s forwards ease-in; }
-        @keyframes portalWhite { to { opacity: 1; } }
-        .hue-style { font-weight: 700; font-size: 2.2rem; color: #fafafa; opacity: 0; transition: opacity 0.5s; }
-        .allwrite-style { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 2.5em; color: var(--duo-yellow); opacity: 0; transition: opacity 0.5s; }
-        .fade-in { opacity: 1 !important; }
-        .hyper-drive .fragment { animation-duration: 0.4s !important; }
-
-        /* LOBBY & GAME */
-        .snap-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 40px; padding: 40px 100px; scrollbar-width: none; align-items: center; flex: 1; 
-        -webkit-mask-image: linear-gradient(
-        to right, 
-        transparent 0%, 
-        black 15%, 
-        black 85%, 
-        transparent 100%
-    );
-    mask-image: linear-gradient(
-        to right, 
-        transparent 0%, 
-        black 15%, 
-        black 85%, 
-        transparent 100%
-    );
-}
-        .snap-carousel::-webkit-scrollbar { display: none; }
-        .door-item { scroll-snap-align: center; flex: 0 0 200px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .door { width: 180px; height: 240px; background: var(--color); border-radius: 24px; border: none; border-bottom: 8px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
-        .door.locked { background: #444 !important; border-bottom-color: #222 !important; cursor: not-allowed; opacity: 0.5; filter: grayscale(1); }
-        .door i { font-size: 4rem; color: white; }
-        .choice-grid { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; margin-top: 20px; }
-        .btn-choice { background: white; color: #4b4b4b; border: 2px solid var(--duo-border); border-bottom-width: 5px; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-align: left; transition: all 0.2s; }
-        .btn-choice.correct { background: var(--duo-green) !important; color: white !important; border-color: var(--duo-green-border) !important; }
-        .btn-choice.wrong { background: var(--duo-red) !important; color: white !important; border-color: var(--duo-red-border) !important; }
-        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 16px; font-weight: 800; text-transform: uppercase; cursor: pointer; background: var(--duo-green); color: white; border-bottom: 5px solid var(--duo-green-border); }
-        .input-box { width: 100%; padding: 18px; border: 2px solid var(--duo-border); border-radius: 16px; font-size: 1.1rem; margin: 20px 0; outline: none; background: white; color: #333; }
-        .overlay-sheet { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; }
-        .bottom-sheet { 
-            
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: white; color: #333; 
-            opacity:0%;
-            padding: 32px 24px; 
-border-top-left-radius: 24px;
-border-top-right-radius: 24px;
-border-bottom-left-radius: 0;
-border-bottom-right-radius: 0;
-                       z-index: 101; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sheet-open { transform: translateY(0); opacity:100%;}
-    </style>
-</head>
 <body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<div id="portal-container">
-    <div class="perspective-box">
-        <div id="warp-scene" class="warp-scene"></div>
-    </div>
-    <div class="interaction-wrapper">
-        <div class="stage">
-            <input type="text" id="user-input" placeholder="What's your name?" autocomplete="off" />
-        </div>
-        <div id="button-stage" class="stage hidden-under">
-            <button id="warp-btn" class="warp-btn">Continue</button>
-        </div>
-    </div>
-    <div id="portal-overlay" class="portal-overlay">
-        <div id="brand-text"></div>
-    </div>
-</div>
+    <spacing>
+      <div
+      style="
+      display: block;
+      margin-top: 2in;
+      margin-bottom: 2in;
+      "></div>
+    </spacing>
+<list-co>
 
-<div class="app-container">
-    <div class="bg-dim"></div>
+  <script>
+    (function() {
+      // 1. Inject Styles
+      const style = document.createElement('style');
+      style.textContent = `
+        list-co { 
+          display: flex; 
+          flex-direction: column; 
+          gap: 12px; 
+          padding: 10px; 
+          width: 100%;
+          box-sizing: border-box;
+        }
 
-    <header id="app-header" class="hidden">
-        <button id="back-to-home" class="back-btn hidden" style="background:none; border:none; color:white; font-size:1.5rem;" onclick="goHome()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div class="logo" id="header-logo">All Write</div>
-        <div class="lvl-pill"><i class="fa-solid fa-bolt"></i><span>Q: <span id="lvl-display">1</span></span></div>
-        <button style="background:none; border:none; color:white; font-size:1.5rem;" onclick="toggleSheet()"><i class="fa-solid fa-gear"></i></button>
-    </header>
+        @keyframes listIn {
+          0% { opacity: 0; transform: translateX(-20px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
 
-    <main>
-        <div id="lobby-view" class="screen-content hidden" style="display:flex; flex-direction:column;">
-            <h2 style="text-align: center; font-weight: 800; color: var(--duo-gray); font-size: 0.9rem; letter-spacing: 2px; margin: 20px 0;">SELECT CHAPTER</h2>
-            <div id="door-container" class="snap-carousel"></div>
-        </div>
+        .duo-button {
+          width: 100%;
+          box-sizing: border-box;
+          appearance: none;
+          border: 2px solid rgba(0,0,0,0.1);
+          border-radius: 16px;
+          cursor: pointer;
+          font-family: Arial, sans-serif;
+          font-size: 15px;
+          font-weight: bold;
+          padding: 16px 20px;
+          text-transform: uppercase;
+          position: relative;
+          transition: all 0.1s;
+          outline: none;
+          opacity: 0;
+          animation: listIn 0.5s ease forwards;
+        }
 
-      <div id="material-view" class="screen-content hidden" style="padding: 24px; overflow-y: auto;">
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-        <div id="mat-icon-box" style="width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
-            <i class="fa-solid fa-book-open"></i>
-        </div>
-        <div>
-            <h2 id="mat-title" style="font-weight: 800; font-size: 1.4rem;"></h2>
-            <p style="color: var(--duo-gray); font-size: 0.9rem; font-weight: 600;">Learning Materials</p>
-        </div>
-    </div>
-    <div id="material-list" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px;">
-        </div>
-    <button class="btn-main" onclick="startLesson()">Got it! Start Test</button>
-</div>
+        .duo-button:active {
+          border-bottom-width: 2px !important;
+          transform: translateY(4px);
+        }
+      `;
+      document.head.appendChild(style);
 
-<div id="intro-view" class="screen-content hidden" style="padding:40px; text-align:center; display: flex; flex-direction: column; justify-content: center;">
-    <div id="intro-icon" style="font-size: 4rem; margin-bottom: 20px;">📖</div>
-    <h2 id="intro-title" style="font-weight: 800; font-size: 1.8rem; margin-bottom: 10px;"></h2>
-    <p id="intro-subtitle" style="color: var(--duo-gray); font-weight: 600; margin-bottom: 40px;"></p>
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button class="btn-main" onclick="openMaterial()">Read Study Guide</button>
-        <button class="btn-main" style="background: none; border: 2px solid rgba(255,255,255,0.2); border-bottom-width: 4px;" onclick="startLesson()">Skip to Test</button>
-    </div>
-</div>
+      // 2. Attach Function to Window
+      window.renderList = function(selector, items) {
+        const containers = document.querySelectorAll(selector);
+        
+        containers.forEach(container => {
+          // Clear to replace or remove line to append
+          container.innerHTML = ''; 
 
-        <div id="game-view" class="screen-content hidden" style="padding:24px; display: flex; flex-direction: column; justify-content: center;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 id="game-title" style="font-weight: 800; color: var(--duo-blue);"></h3>
-                <span id="game-progress-text" style="font-weight: 800; color: var(--duo-gray);">1/3</span>
+          items.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'duo-button';
+            btn.textContent = item.label;
+            btn.style.animationDelay = `${index * 0.1}s`;
+
+            // Dynamic Colors
+            btn.style.backgroundColor = item.color || '#ffffff';
+            btn.style.borderBottom = `6px solid ${item.shadow || '#e5e5e5'}`;
+            btn.style.color = item.textColor || '#4b4b4b';
+
+            // Optional: Handle click if provided in config
+            if(item.action) btn.onclick = item.action;
+
+            container.appendChild(btn);
+          });
+          container.dataset.rendered = "true";
+        });
+      };
+
+      /*
+      
+      const defaultButtons = [
+        { label: 'Home', color: '#58cc02', shadow: '#46a302', textColor: '#fff' },
+        { label: 'Profile', color: '#1cb0f6', shadow: '#1899d6', textColor: '#fff' },
+        { label: 'Settings', color: '#ffffff', shadow: '#e5e5e5', textColor: '#4b4b4b' },
+        { label: 'Leaderboard', color: '#ffc800', shadow: '#e5a500', textColor: '#fff' },
+        { label: 'Shop', color: '#ce82ff', shadow: '#a560d6', textColor: '#fff' }
+      ];
+
+      window.renderList('list-co', defaultButtons);*/ 
+      
+    })();
+  </script>
+</list-co>
+
+<door-co>
+
+  <script>
+    (function() {
+      // 1. Setup Styles
+      const style = document.createElement('style');
+      style.textContent = `
+        door-co { 
+          display: flex; flex-direction: row; justify-content: flex-start; 
+          gap: 40px; padding: 60px 0; width: 100%; box-sizing: border-box;
+          overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+          -webkit-overflow-scrolling: touch; perspective: 1500px;
+          scroll-snap-type: x mandatory;
+          mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+          -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+        door-co::before, door-co::after { content: ''; flex: 0 0 calc(50vw - 80px); }
+        door-co::-webkit-scrollbar { display: none; }
+        @keyframes doorIn {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .door-wrapper {
+          display: inline-flex; flex-direction: column; align-items: center;
+          gap: 20px; flex: 0 0 160px; opacity: 0; 
+          animation: doorIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          scroll-snap-align: center;
+        }
+        .door-frame {
+          width: 160px; height: 220px; background: #e5e5e5; 
+          border: 4px solid #d4d4d4; border-radius: 12px; 
+          padding: 8px; box-sizing: border-box; position: relative;
+        }
+        .duo-door {
+          width: 100%; height: 100%; background-color: var(--inside-color);
+          border: none; cursor: pointer; position: relative; border-radius: 4px;
+          transform-style: preserve-3d; outline: none;
+        }
+        .door-panel {
+          position: absolute; inset: 0; background-color: var(--icon-color);
+          z-index: 10; border-radius: 4px; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-style: preserve-3d; display: grid; grid-template-columns: 1fr 1fr;
+          grid-template-rows: 1fr 1fr; gap: 12px; padding: 15px; box-sizing: border-box;
+          transform-origin: left;
+        }
+        .door-panel span { background: var(--inside-color); border-radius: 2px; border-bottom: 4px solid var(--depth-color); opacity: 0.8; }
+        .door-panel::after { content: ''; position: absolute; right: 15px; top: 50%; width: 16px; height: 16px; background: var(--depth-color); border-radius: 50%; transform: translateY(-50%); }
+        .door-panel::before { content: ''; position: absolute; width: 14px; height: 100%; background: var(--depth-color); top: 0; right: -14px; transform: rotateY(90deg); transform-origin: left; }
+        .duo-door:not(.locked):hover .door-panel { transform: rotateY(-110deg); }
+        .duo-door.locked { cursor: default; filter: grayscale(0.8); opacity: 0.7; }
+        .duo-door.locked .door-panel { background-color: #afafaf; }
+        .duo-door.locked .door-panel span { background-color: #d4d4d4; border-bottom-color: #999; }
+        .duo-door.locked .door-panel::after, .duo-door.locked .door-panel::before { background-color: #888; }
+        .lock-overlay { position: absolute; z-index: 20; color: white; font-size: 24px; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.3); display: none; }
+        .locked .lock-overlay { display: block; }
+        .door-content { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        .door-content i { font-size: 60px; color: var(--icon-color); }
+        .content-label { font-family: Arial, sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; }
+        .content-label.bad { color: #888; text-transform: uppercase; }
+        .content-label.good {color: #fafaff; }
+        .duo-door::after { content: attr(data-door-label); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); background-color: #4b4b4b; color: #fff; font-family: Arial, sans-serif; font-size: 10px; font-weight: 900; padding: 2px 10px; border-radius: 6px; z-index: 20; }
+      `;
+      document.head.appendChild(style);
+
+      // 2. Attach Function to Window
+      window.renderSideDoors = function(selector, items) {
+        const containers = document.querySelectorAll(selector);
+        containers.forEach(container => {
+          // Clear container if you want to replace, or remove this line to append
+          container.innerHTML = ''; 
+          
+          items.forEach((item, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'door-wrapper';
+            wrapper.style.animationDelay = `${index * 0.1}s`;
+            wrapper.innerHTML = `
+              <div class="door-frame">
+                <button class="duo-door ${item.locked ? 'locked' : ''}" 
+                        data-door-label="${item.title}" 
+                        style="--inside-color: ${item.bgColor}; --icon-color: ${item.iconColor}; --depth-color: ${item.depthColor}">
+                  <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                  <div class="door-panel"><span></span><span></span><span></span><span></span></div>
+                  <div class="door-content "><i class="${item.faIcon}"></i></div>
+                </button>
+              </div>
+              <div class="content-label ${item.locked ? 'bad' : 'good'}">${item.contentLabel}</div>
+            `;
+            container.appendChild(wrapper);
+          });
+        });
+      };
+
+      /*
+      
+      // 3. Initial Load
+      const initialConfig = [
+        { title: 'UNIT 1', locked: false, bgColor: '#fff4d1', iconColor: '#ffc800', depthColor: '#e5a500', faIcon: 'fa-solid fa-feather-alt', contentLabel: 'Spella' },
+        { title: 'UNIT 2', locked: false, bgColor: '#d7ffb8', iconColor: '#58cc02', depthColor: '#46a302', faIcon: 'fa-solid fa-scroll', contentLabel: 'Canix' },
+        { title: 'UNIT 3', locked: true,  bgColor: '#d1f2ff', iconColor: '#1cb0f6', depthColor: '#168ec6', faIcon: 'fa-solid fa-comments', contentLabel: 'Vocaby' },
+        { title: 'UNIT 4', locked: true,  bgColor: '#ffdfe0', iconColor: '#ff4b4b', depthColor: '#cc3c3c', faIcon: 'fa-solid fa-list-ol', contentLabel: 'Gramix' },
+        { title: 'UNIT 5', locked: true,  bgColor: '#f3e1ff', iconColor: '#ce82ff', depthColor: '#a568cc', faIcon: 'fa-solid fa-flag', contentLabel: 'Finale' }
+        ];
+
+      window.renderSideDoors('door-co', initialConfig);*/
+    })();
+  </script>
+</door-co>
+
+<shee-t>
+  <script>
+    (function() {
+      const DUO_PALETTE = {
+        green:   { bg: '#58cc02', shadow: '#46a302', text: '#ffffff' },
+        blue:    { bg: '#1cb0f6', shadow: '#1899d6', text: '#ffffff' },
+        red:     { bg: '#ff4b4b', shadow: '#cc3c3c', text: '#ffffff' },
+        gold:    { bg: '#ffc800', shadow: '#e5a500', text: '#ffffff' },
+        purple:  { bg: '#ce82ff', shadow: '#a560d6', text: '#ffffff' },
+        white:   { bg: '#ffffff', shadow: '#e5e5e5', text: '#4b4b4b' },
+        gray:    { bg: '#afafaf', shadow: '#888888', text: '#ffffff' }
+      };
+
+      const style = document.createElement('style');
+      style.textContent = `
+        shee-t {
+          --sheet-bg: #ffffff;
+          --overlay-color: rgba(0, 0, 0, 0.5); 
+          --handle-color: #e5e5e5;
+          --duo-text: #4b4b4b;
+          font-family: Arial, sans-serif;
+        }
+
+        /* Shared Button Style */
+        .duo-btn-base {
+          padding: 15px 25px;
+          border-radius: 16px;
+          border: 2px solid rgba(0,0,0,0.05);
+          font-family: Arial, sans-serif;
+          font-size: 17px;
+          font-weight: 800;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.1s;
+          outline: none;
+          position: relative;
+          display: inline-block;
+          text-align: center;
+        }
+        .duo-btn-base:active { transform: translateY(4px); box-shadow: none !important; }
+
+        /* Trigger specific */
+        .duo-trigger {
+          background: #ffffff;
+          color: #afafaf;
+          box-shadow: 0 4px 0 #e5e5e5;
+          border: 2px solid #e5e5e5;
+        }
+
+        .sheet-overlay {
+          position: fixed; inset: 0; background: var(--overlay-color);
+          z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .sheet-container {
+          position: fixed; left: 0; right: 0; bottom: 0;
+          background: var(--sheet-bg); z-index: 2001;
+          border-radius: 24px 24px 0 0; padding: 12px 20px 30px;
+          transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+          max-height: 85vh; border-top: 2px solid #e5e5e5;
+          display: flex; flex-direction: column;
+        }
+        .sheet-overlay.active { opacity: 1; visibility: visible; }
+        .sheet-container.active { transform: translateY(0); }
+        .sheet-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; flex-shrink: 0; }
+        .sheet-handle { width: 40px; height: 6px; background: var(--handle-color); border-radius: 20px; margin-bottom: 10px; }
+        .sheet-title { font-size: 24px; font-weight: 800; margin: 5px 0; color: var(--duo-text); }
+        .sheet-body { overflow-y: auto; padding-bottom: 20px; color: var(--duo-text); flex-grow: 1; }
+        .sheet-footer { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+      `;
+      document.head.appendChild(style);
+
+      class DuoSheet extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+            <div class="sheet-overlay"></div>
+            <div class="sheet-container">
+              <div class="sheet-header">
+                <div class="sheet-handle"></div>
+                <h2 class="sheet-title"></h2>
+              </div>
+              <div class="sheet-body"></div>
+              <div class="sheet-footer"></div>
             </div>
-            <p id="game-question" style="font-size: 1.3rem; font-weight: 700; margin-bottom: 15px;"></p>
-            <p id="game-hint" style="color: var(--duo-green); font-size: 0.9rem; font-weight: 700; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; display: inline-block;"></p>
-            <div id="choice-area" class="choice-grid"></div>
-            <div id="write-area" class="hidden">
-                <input type="text" id="game-input" class="input-box" placeholder="Type here...">
-                <button class="btn-main" onclick="checkAnswer(null, this)">Submit Answer</button>
-            </div>
-        </div>
-    </main>
+          `;
+          this.overlay = this.querySelector('.sheet-overlay');
+          this.container = this.querySelector('.sheet-container');
+          this.titleEl = this.querySelector('.sheet-title');
+          this.bodyEl = this.querySelector('.sheet-body');
+          this.footerEl = this.querySelector('.sheet-footer');
+          this.overlay.onclick = () => this.close();
+        }
 
-    <div id="sheet-overlay" class="overlay-sheet hidden" onclick="toggleSheet()"></div>
-    <div id="bottom-sheet" class="bottom-sheet">
-        <h3 style="text-align: center; margin-bottom: 20px;">Settings</h3>
-        <button class="btn-main" style="background: var(--duo-red); border-bottom-color: var(--duo-red-border);" onclick="resetGame()">Reset Progress</button>
-    </div>
+        open(config) {
+          this.titleEl.textContent = config.title || "Hello!";
+          this.bodyEl.innerHTML = config.body || "";
+          this.footerEl.innerHTML = ""; 
+
+          const buttons = config.buttons || [{ text: "Continue", color: "green" }];
+
+          buttons.forEach(btnData => {
+            const btn = document.createElement('button');
+            btn.className = 'duo-btn-base';
+            btn.textContent = btnData.text;
+            
+            const theme = DUO_PALETTE[btnData.color] || { bg: btnData.color, shadow: 'rgba(0,0,0,0.2)', text: btnData.textColor || 'white' };
+            
+            btn.style.backgroundColor = theme.bg;
+            btn.style.color = btnData.textColor || theme.text;
+            btn.style.boxShadow = `0 5px 0 ${theme.shadow}`;
+            btn.style.width = "100%"; // Footer buttons are full width
+            
+            btn.onclick = () => {
+              if (btnData.action) btnData.action();
+              this.close();
+            };
+            this.footerEl.appendChild(btn);
+          });
+
+          this.container.classList.add('active');
+          this.overlay.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+
+        close() {
+          this.container.classList.remove('active');
+          this.overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      customElements.define('shee-t', DuoSheet);
+      window.openSheet = (config) => document.querySelector('shee-t')?.open(config);
+    })();
+  </script>
+</shee-t>
+
+<quest-ion>
+  <script>
+    (function() {
+      const playSound = (type) => {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          if (type === 'correct') {
+            osc.frequency.setValueAtTime(523, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+          } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+          }
+          osc.start(); osc.stop(ctx.currentTime + 0.2);
+          console.log("Audio Played");
+        } catch(e) { console.log("Audio blocked"); }
+      };
+
+      const style = document.createElement('style');
+      style.textContent = `
+        quest-ion { 
+          display: flex; flex-direction:column; font-family: "din-round", sans-serif; flex:1; 
+          min-width: 30px; margin: 20px auto; color: #4b4b4b; padding: 10px;
+          transition: opacity 0.3s ease-out; 
+        }
+        quest-ion.fade-out { opacity: 0; pointer-events: none; }
+        
+        .q-title { font-size: 22px; font-weight: 800; margin-bottom: 24px; text-align: center; color: #fafaff; }
+        .reorder-zone { display: flex; flex-wrap: wrap; gap: 8px; align-content:center; justify-content: center; padding: 15px; min-height: 90px; border-top: 2px solid #e5e5e5; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
+        .word-pill { height:max-content; padding: 12px 18px; background: white; border: 2px solid #e5e5e5; border-radius: 14px; cursor: grab; font-weight: bold; box-shadow: 0 4px 0 #e5e5e5; color: #4b4b4b; font-size: 16px; transition: transform 0.1s; }
+        .word-pill.dragging { opacity: 0.2; }
+
+        .choice-grid { display: flex; flex-direction: column; gap: 12px; }
+        .q-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px solid #e5e5e5; background: white; font-size: 17px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #e5e5e5; text-align: left; transition: all 0.2s; outline: none; color: #4b4b4b; }
+        
+        .q-btn.correct { background: #d7ffb8 !important; border-color: #58cc02 !important; box-shadow: 0 4px 0 #58cc02 !important; color: #58cc02 !important; }
+        .q-btn.wrong { background: #ffdfe0 !important; border-color: #ff4b4b !important; box-shadow: 0 4px 0 #ff4b4b !important; color: #ff4b4b !important; }
+
+        .input-display { width: 100%; padding: 15px; border: 2px solid #e5e5e5; border-radius: 16px; font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; background: #f7f7f7; min-height: 60px; box-sizing: border-box; color: #1cb0f6; border-bottom: 4px solid #e5e5e5; }
+        .kb-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #e5e5e5; padding: 12px; border-radius: 16px; }
+        .kb-key { padding: 14px 0; background: white; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #afafaf; font-size: 15px; color: #4b4b4b; }
+
+        #check-btn { background: #58cc02; color: white; border-color: #58cc02; box-shadow: 0 5px 0 #46a302; text-align: center; }
+        .feedback { text-align: center; font-weight: 800; margin-top: 20px; font-size: 20px; min-height: 28px; text-transform: uppercase; }
+      `;
+      document.head.appendChild(style);
+
+      class QuestIon extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+            <div class="q-title" id="q-text"></div>
+            <div id="q-content"></div>
+            <div id="q-actions" style="display:none; margin-top:25px;">
+              <button class="q-btn" id="check-btn">CHECK</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+          `;
+          this.querySelector('#check-btn').onclick = () => this.validate();
+        }
+
+        loadQuestion(data) {
+          this.classList.remove('fade-out'); // Restore visibility
+          this.currentData = data; 
+          this.userVal = ""; 
+          this.querySelector('#feedback').textContent = '';
+          const content = this.querySelector('#q-content');
+          const actions = this.querySelector('#q-actions');
+          this.querySelector('#q-text').textContent = data.question;
+          content.innerHTML = '';
+          actions.style.display = (data.type === 'reorder' || data.type === 'input') ? 'block' : 'none';
+
+          if (data.type === 'reorder') {
+            const zone = document.createElement('div'); zone.className = 'reorder-zone';
+            data.options.sort(() => Math.random() - 0.5).forEach(opt => {
+              const p = document.createElement('div'); p.className = 'word-pill'; p.draggable = true; p.textContent = opt;
+              p.ondragstart = () => p.classList.add('dragging'); p.ondragend = () => p.classList.remove('dragging');
+              zone.appendChild(p);
+            });
+            zone.ondragover = (e) => {
+              e.preventDefault();
+              const drag = zone.querySelector('.dragging');
+              const sibs = [...zone.querySelectorAll('.word-pill:not(.dragging)')];
+              const next = sibs.find(s => {
+                const b = s.getBoundingClientRect();
+                return e.clientX <= b.left + b.width/2 && e.clientY <= b.top + b.height/2;
+              });
+              zone.insertBefore(drag, next);
+            };
+            content.appendChild(zone);
+          } 
+          else if (data.type === 'choice') {
+            const grid = document.createElement('div'); grid.className = 'choice-grid';
+            data.options.forEach(opt => {
+              const b = document.createElement('button'); b.className = 'q-btn'; b.textContent = opt;
+              b.onclick = () => { this.userVal = opt; this.validate(b); };
+              grid.appendChild(b);
+            });
+            content.appendChild(grid);
+          }
+          else if (data.type === 'input') {
+            const disp = document.createElement('div'); disp.className = 'input-display';
+            const kb = document.createElement('div'); kb.className = 'kb-grid';
+            "QWERTYUIOPASDFGHJKLZXCVBNM".split('').forEach(l => {
+              const k = document.createElement('button'); k.className = 'kb-key'; k.textContent = l;
+              k.onclick = () => { this.userVal += l; disp.textContent = this.userVal; };
+              kb.appendChild(k);
+            });
+            const del = document.createElement('button'); del.className = 'kb-key'; del.textContent = '⌫'; del.style.gridColumn = 'span 2'; del.style.background = '#ffdfe0'; del.style.color = '#ff4b4b';
+            del.onclick = () => { this.userVal = this.userVal.slice(0,-1); disp.textContent = this.userVal; };
+            kb.appendChild(del);
+            content.append(disp, kb);
+          }
+          else if (data.type === 'spin') {
+            content.innerHTML = `<div class="wheel-wrap"><div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); z-index:5; width:24px; height:24px; background:#4b4b4b; clip-path:polygon(50% 100%, 0 0, 100% 0)"></div><svg class="wheel-svg" id="w-svg" viewBox="0 0 32 32"><circle r="16" cx="16" cy="16" fill="transparent" stroke="#58cc02" stroke-width="32" stroke-dasharray="25 100" /><circle r="16" cx="16" cy="16" fill="transparent" stroke="#1cb0f6" stroke-width="32" stroke-dasharray="25 100" stroke-dashoffset="-25" /><circle r="16" cx="16" cy="16" fill="transparent" stroke="#ffc800" stroke-width="32" stroke-dasharray="25 100" stroke-dashoffset="-50" /><circle r="16" cx="16" cy="16" fill="transparent" stroke="#ff4b4b" stroke-width="32" stroke-dasharray="25 100" stroke-dashoffset="-75" /></svg></div>`;
+            const b = document.createElement('button'); b.className = 'q-btn'; b.id = 'check-btn'; b.style.textAlign = 'center'; b.textContent = "SPIN TO WIN";
+            b.onclick = () => {
+              const deg = 3600 + Math.random() * 3600; 
+              content.querySelector('#w-svg').style.transform = `rotate(${deg}deg)`;
+              b.disabled = true;
+              setTimeout(() => { this.validate(); b.disabled = false; }, 4100);
+            };
+            content.appendChild(b);
+          }
+        }
+
+        validate(btn = null) {
+          const fb = this.querySelector('#feedback');
+          const checkBtn = this.querySelector('#check-btn');
+          let ok = false;
+          const match = (u, t) => u.toLowerCase().trim() === t.toLowerCase().trim();
+
+          if (this.currentData.type === 'reorder') {
+            const cur = [...this.querySelectorAll('.word-pill')].map(el => el.textContent);
+            ok = JSON.stringify(cur) === JSON.stringify(this.currentData.answer);
+          } else if (this.currentData.type === 'choice' || this.currentData.type === 'input') {
+            ok = match(this.userVal, this.currentData.answer);
+          } else if (this.currentData.type === 'spin') { ok = true; }
+
+          playSound(ok ? 'correct' : 'error');
+          fb.textContent = ok ? "Excellent!" : "Not quite right";
+          fb.style.color = ok ? "#58cc02" : "#ff4b4b";
+
+          const target = btn || checkBtn;
+          target.classList.add(ok ? 'correct' : 'wrong');
+
+          if (ok) {
+            setTimeout(() => {
+              this.classList.add('fade-out');
+              if (this.currentData.onCorrect) this.currentData.onCorrect();
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              target.classList.remove('wrong');
+              fb.textContent = "";
+            }, 1000);
+          }
+        }
+      }
+
+      customElements.define('quest-ion', QuestIon);
+
+      // Helper to find the element
+      const getEl = () => document.querySelector('quest-ion');
+
+      // Restored the original function your external code expects
+      window.setQuestion = (d) => getEl()?.loadQuestion(d);
+
+      // Added nextQuest for progression
+      window.nextQuest = (d) => {
+        const el = getEl();
+        if (el) {
+          el.classList.remove('fade-out');
+          el.loadQuestion(d);
+        }
+      };
+    })();
+  </script>
+</quest-ion>
+
+<!--samples>
+
+<button class="duo-btn-base duo-trigger" onclick="window.openSheet({
+  title: 'Exit Lesson?',
+  body: '<p>You\'ll lose your progress if you leave now.</p>',
+  buttons: [
+    { text: 'Keep Learning', color: 'gold', action: () => console.log('Staying') },
+    { text: 'End Session', color: 'white', action: () => console.log('Leaving') }
+  ]
+})">Open Dynamic Sheet</button>
+
+  <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; padding:20px;">
+  <button class="q-btn" style="width:auto; text-align:center;" onclick="window.setQuestion({type:'reorder', question:'Make a sentence:', options:['is','Blue','sky','The'], answer:['The','sky','is','Blue'], mode:'caps'})">Reorder</button>
+  <button class="q-btn" style="width:auto; text-align:center;" onclick="window.setQuestion({type:'choice', question:'2 + 2 = ?', options:['3','4','5'], answer:'4'})">Choice</button>
+  <button class="q-btn" style="width:auto; text-align:center;" onclick="window.setQuestion({type:'input', question:'Type APPLE:', answer:'APPLE', mode:'caps'})">Input</button>
+  <button class="q-btn" style="width:auto; text-align:center;" onclick="window.setQuestion({type:'spin', question:'Wheel of Fortune'})">Spin</button>
 </div>
 
-<script>
-    const LESSONS = [ {    
-    id: 1,    key: 'Basics',    icon: 'fa-feather',    color: '#ffc800',    border: '#ef9600',    levels: [     
-    
-    { title: 'Spelling', word: 'Choose the correct spelling:', answer: 'friend', choices: ['friend', 'freind'], type: 'word', hint: 'Which one looks right?' },     
-    { title: 'Spot the Error', word: 'Which word is correctly spelled?', answer: 'Little', choices: ['Little', 'Litle', 'Ridding', 'grandmoter'], type: 'word', hint: 'From the Little Red Riding Hood story' },     
-    
-    { title: 'Capitalization', word: 'Which rewrite is correct? "i am from cagayan"', answer: 'I am from Cagayan.', choices: ['i am from cagayan.', 'I am from Cagayan.', 'I am from cagayan.', 'i am From Cagayan.'], type: 'caps', hint: 'Names of places are always capitalized' },     
-    
-    { title: 'Editing', word: 'Which sentence is correctly written?', answer: 'My name is Carlo and I live in Cagayan.', choices: ['my name is carlo and i live in cagayan', 'My name is Carlo and I live in Cagayan.', 'My Name Is Carlo And I Live In Cagayan.', 'My name is carlo and I live in Cagayan'], type: 'word', hint: 'Check every name and the pronoun I' },     
-    
-    { title: 'Write About Me', word: 'Write 1-3 simple sentence.',
-     answer: '.', 
-    type: 'write', hint: 'Start with a capital letter. End with a period. Include family, My, learn, Tell how they motivate you' }   ] }, {    
-    id: 2,    key: 'Punctuation',    icon: 'fa-scroll',    color: '#58cc02',    border: '#46a302',    levels: [     
-        { title: 'Basic Marks', word: 'What is the use of a Period (.)?', answer: 'Ends a sentence', choices: ['Starts a sentence', 'Ends a sentence', 'Shows surprise', 'Asks a question'], type: 'word', hint: 'Think about where you put a period' },     
-    { title: 'Identification', word: 'Which sentence uses the correct punctuation?', answer: 'Where is your bag?', choices: ['Where is your bag.', 'Where is your bag?', 'Where is your bag!', 'where is your bag?'], type: 'word', hint: 'It is a question - what mark do questions need?' },     
-    { title: 'Editing', word: 'Complete: "That was incredible ___"', answer: 'That was incredible!', choices: ['That was incredible.', 'That was incredible?', 'That was incredible!', 'that was incredible!'], type: 'word', hint: 'It expresses strong emotion' },     
-    
-    { title: 'Expressive Writing', word: 'Write a question about my favorite food.', 
-    answer: '?', 
-    type: 'write', hint: 'Remember to end your question with a question mark - Favorite food.' }   ] }, {    
-    id: 3,    key: 'Vocabulary',    icon: 'fa-book',    color: '#ff4b4b',    border: '#d33131',    levels: [     
-        { title: 'Familiar Contexts', word: 'Which object would you see in a school?', answer: 'Textbook', choices: ['Frying pan', 'Textbook', 'Hammer', 'Fishing rod'], type: 'word', hint: 'Think about what you use in class' },     
-    { title: 'Word Meanings', word: 'What is a "Farmer"?', answer: 'A person who grows crops', choices: ['A person who fixes machines', 'A person who grows crops', 'A person who teaches students', 'A person who heals the sick'], type: 'word', hint: 'Think about fields and agriculture' },     
-    { title: 'Real Sentences', word: 'The scientist will ______ the results carefully.', answer: 'examine', choices: ['ignore', 'examine', 'lose', 'forget'], type: 'word', hint: 'It means to look at something closely' },     
-    
-    { title: 'Application', word: 'Use the word "Gifted" in a sentence.', 
-    answer: '.', 
-    type: 'write', hint: 'Tell her how "Gifted" she is on singing.' }   ] }, {    
-    id: 4,    key: 'Grammar',    icon: 'fa-pen-nib',    color: '#1cb0f6',    border: '#1899d6',    levels: [     
-        { title: 'Build It Correctly', word: '"The dog barks loudly." — What is the subject?', answer: 'The dog', choices: ['barks', 'loudly', 'The dog', 'The dog barks'], type: 'word', hint: 'The subject is who or what the sentence is about' },     
-    { title: 'Time to Choose', word: 'The girls ______ singing.', answer: 'are', choices: ['is', 'are', 'was', 'am'], type: 'word', hint: '"Girls" is plural — which verb matches?' },     
-    { title: 'Sentence Builder', word: 'Put in the correct order: [school] [He] [to] [goes]', answer: 'He goes to school.', choices: ['Goes he to school.', 'He goes to school.', 'To school he goes.', 'School he to goes.'], type: 'word', hint: 'Start with the subject, then the verb' },     
-    { title: 'Grammar Checking', word: 'Which sentence is grammatically correct?', answer: "Little Red Riding Hood goes to her grandmother's house.", choices: ["Little Red Riding Hood go to her grandmother's house.", "Little Red Riding Hood goes to her grandmother's house.", "Little Red Riding Hood going to her grandmother's house.", "Little Red Riding Hood gone to her grandmother's house."], type: 'word', hint: 'She is singular — which verb form fits?' }   ] }, {    
-    id: 5,    key: 'Mastery',    icon: 'fa-crown',    color: '#ce82ff',    border: '#a357d6',    levels: [     
-        { title: 'Start with a Frame', word: 'Complete the frame: "I live in ______"', answer: 'I live in Quezon City.', choices: ['I lives in Quezon City.', 'I live Quezon City.', 'I live in Quezon City.', 'I living in Quezon City.'], type: 'word', hint: 'Which sentence sounds natural and complete?' },     
-    { title: 'Add More', word: 'Which sentence expands "She runs." with a detail?', answer: 'She runs in the park.', choices: ['She runs.', 'She runs in the park.', 'In the park.', 'Running park she.'], type: 'word', hint: 'Add a Where detail to expand the sentence' },     
-    { title: 'Link Ideas', word: 'Combine: "I like milk." + "I like juice."', answer: 'I like milk and I like juice.', choices: ['I like milk but I like juice.', 'I like milk I like juice.', 'I like milk and I like juice.', 'I like milk, juice.'], type: 'word', hint: 'Which connector shows they are both true?' },     
-    
-    { title: 'Put It Together', word: 'Write 3-5 connected sentences about your family.', 
-    answer: '.', 
-    type: 'write', hint: 'Use and, but, so to connect your ideas.' }   ] }
-];
+<div style="display:flex; gap:10px; justify-content:center; padding:20px;">
+  <button class="duo-btn-base" onclick="triggerMoti()">
+    Default
+  </button>
+  
+  <button class="duo-btn-base" onclick="triggerMoti({
+    title: 'Achievement',
+    msg: 'New High Score Unlocked!',
+    img: ''
+  })">
+    Custom
+  </button>
+</div>
+</samples-->
 
-</script>
-<script>
-    const MATERIALS = {
-    'Basics': [
-        { topic: 'Spelling Rules', info: 'Common words like "friend" often follow the "i before e except after c" rule.' },
-        { topic: 'Proper Names', info: 'Always capitalize the first letter of names (Carlo) and places (Cagayan).' },
-        { topic: 'The Pronoun "I"', info: 'The word "I" is always written as a capital letter when referring to yourself.' }
-    ],
-    'Punctuation': [
-        { topic: 'The Period (.)', info: 'Use a period to end a statement or a complete thought.' },
-        { topic: 'Question Mark (?)', info: 'Place this at the end of every sentence that asks something.' },
-        { topic: 'Exclamation Point (!)', info: 'Use this to show strong feelings like excitement or surprise.' }
-    ],
-    'Vocabulary': [
-        { topic: 'Context Clues', info: 'Look at the words around a new word to guess its meaning (e.g., Scientist -> examine).' },
-        { topic: 'Action Words', info: 'Verbs describe what someone is doing, like "growing" or "healing".' }
-    ],
-    'Grammar': [
-        { topic: 'Subject-Verb Agreement', info: 'Singular subjects (The dog) need singular verbs (barks). Plural subjects (The girls) need plural verbs (are).' },
-        { topic: 'Sentence Structure', info: 'A standard English sentence usually follows: Subject + Verb + Object.' }
-    ],
-    'Mastery': [
-        { topic: 'Sentence Expansion', info: 'Make sentences better by adding "where" or "when" details.' },
-        { topic: 'Connecting Ideas', info: 'Use "and" to join similar ideas, and "but" for different ideas.' }
-    ]
+<moti-co>
+  <script>
+    (function() {
+      const style = document.createElement('style');
+      style.textContent = `
+        moti-co {
+          position: fixed; left: -450px; bottom: 40px; z-index: 9999;
+          display: flex; align-items: center; gap: 15px;
+          background: white; padding: 12px 20px; border-radius: 18px;
+          border: 2px solid #e5e5e5; box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+          transition: left 0.4s cubic-bezier(0.32, 0.72, 0, 1), transform 0.1s;
+          font-family: Arial, sans-serif; max-width: 320px;
+          pointer-events: none; cursor: grab; user-select: none; touch-action: none;
+        }
+        moti-co.active { left: 20px; pointer-events: auto; }
+        moti-co:active { cursor: grabbing; }
+        .moti-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex-shrink: 0; pointer-events: none; }
+        .moti-text { color: #4b4b4b; font-size: 15px; font-weight: 700; margin: 0; line-height: 1.4; pointer-events: none; }
+        .moti-sub { color: #afafaf; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; pointer-events: none; }
+      `;
+      document.head.appendChild(style);
+
+      class MotiCo extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+            <img src="" class="moti-avatar" id="moti-img">
+            <div>
+              <div class="moti-sub" id="moti-title">Motivation</div>
+              <p class="moti-text" id="moti-msg"></p>
+            </div>
+          `;
+        }
+      }
+      customElements.define('moti-co', MotiCo);
+
+      const el = document.querySelector('moti-co');
+      let hideTimeout;
+      
+      // Drag & Dismiss Logic
+      let isDragging = false; let startX = 0;
+      const startDrag = (e) => { 
+        isDragging = true; 
+        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        el.style.transition = 'none';
+      };
+      const moveDrag = (e) => {
+        if (!isDragging) return;
+        const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const deltaX = currentX - startX;
+        if (deltaX < 0) {
+          el.style.transform = `translateX(${deltaX}px)`;
+          if (deltaX < -100) { isDragging = false; el.classList.remove('active'); }
+        }
+      };
+      const endDrag = () => {
+        isDragging = false;
+        el.style.transition = 'left 0.4s cubic-bezier(0.32, 0.72, 0, 1), transform 0.3s';
+        el.style.transform = `translateX(0px)`;
+      };
+
+      el.addEventListener('mousedown', startDrag);
+      window.addEventListener('mousemove', moveDrag);
+      window.addEventListener('mouseup', endDrag);
+      el.addEventListener('touchstart', startDrag);
+      window.addEventListener('touchmove', moveDrag);
+      window.addEventListener('touchend', endDrag);
+
+      // Global Trigger Function
+      window.triggerMoti = function(config = {}) {
+        const defaults = {
+          img: 'https://i.imgur.com/8N69vV9.png',
+          title: 'Motivation',
+          msg: "You're doing great! Keep going!"
+        };
+
+        const show = () => {
+          document.getElementById('moti-img').src = config.img || defaults.img;
+          document.getElementById('moti-title').textContent = config.title || defaults.title;
+          document.getElementById('moti-msg').textContent = config.msg || defaults.msg;
+          
+          el.style.transform = `translateX(0px)`;
+          el.classList.add('active');
+
+          clearTimeout(hideTimeout);
+          hideTimeout = setTimeout(() => el.classList.remove('active'), 5000);
+        };
+
+        if (el.classList.contains('active')) {
+          el.classList.remove('active');
+          setTimeout(show, 400); 
+        } else {
+          show();
+        }
+      };
+    })();
+  </script>
+</moti-co>
+
+<game>
+  <script>
+/**
+ * DUO-ALLWRITE ENGINE
+ * Palette-Driven | Gold Theme | Transparent Navs | Spam Protection
+ */
+
+const DUO_PALETTE = {
+  green:  { bg: '#58cc02', shadow: '#46a302', text: '#ffffff' },
+  blue:   { bg: '#1cb0f6', shadow: '#1899d6', text: '#ffffff' },
+  red:    { bg: '#ff4b4b', shadow: '#cc3c3c', text: '#ffffff' },
+  gold:   { bg: '#ffc800', shadow: '#e5a500', text: '#ffffff' },
+  purple: { bg: '#ce82ff', shadow: '#a560d6', text: '#ffffff' },
+  white:  { bg: '#ffffff', shadow: '#e5e5e5', text: '#4b4b4b' },
+  gray:   { bg: '#afafaf', shadow: '#888888', text: '#ffffff' }
 };
 
-function openMaterial() {
-    const chapKey = LESSONS[state.activeChapter].key;
-    const matList = document.getElementById('material-list');
-    const matTitle = document.getElementById('mat-title');
-    const iconBox = document.getElementById('mat-icon-box');
-    
-    matTitle.innerText = chapKey;
-    iconBox.style.backgroundColor = LESSONS[state.activeChapter].color;
-    matList.innerHTML = '';
-    
-    (MATERIALS[chapKey] || []).forEach(item => {
-        const card = document.createElement('div');
-        card.style.cssText = `background: rgba(255,255,255,0); padding: 18px;; border-left: 5px solid ${LESSONS[state.activeChapter].color};`;
-        card.innerHTML = `
-            <h4 style="color: ${LESSONS[state.activeChapter].color}; margin-bottom: 5px; font-size: 1rem;">${item.topic}</h4>
-            <p style="font-size: 0.95rem; line-height: 1.4; opacity: 0.9;">${item.info}</p>
-        `;
-        matList.appendChild(card);
+const GameEngine = {
+  data: null,
+  currentDoor: 0,
+  currentLevel: 0,
+  currentQuestion: 0,
+  isTransitioning: false, // New flag to prevent spamming
+
+  // --- PROGRESS ---
+  getProgress() {
+    const saved = localStorage.getItem('allwrite_progress');
+    return saved ? JSON.parse(saved) : { door: 0, level: 0, q: 0 };
+  },
+
+  saveProgress(doorIdx, levelIdx, questionIdx = 0) {
+    const currentProg = this.getProgress();
+    if (doorIdx > currentProg.door || 
+       (doorIdx === currentProg.door && levelIdx > currentProg.level) || 
+       (doorIdx === currentProg.door && levelIdx === currentProg.level && questionIdx > currentProg.q)) {
+      
+      localStorage.setItem('allwrite_progress', JSON.stringify({ 
+        door: doorIdx, 
+        level: levelIdx, 
+        q: questionIdx 
+      }));
+      this.updateHomeNav(); 
+    }
+  },
+
+  play(type) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+      } else {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.2);
+        gain.gain.value = 0.3;
+      }
+      osc.start(); osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {}
+  },
+
+  async init() {
+    this.addGameUI(); 
+    await this.fetchData();
+    this.renderMap();
+    this.updateHomeNav();
+  },
+
+  addGameUI() {
+    if (!document.getElementById('home-top-nav')) {
+      const hNav = document.createElement('div');
+      hNav.id = "home-top-nav";
+      hNav.style = `position:fixed; top:0; left:0; width:100%; height:60px; background:transparent; 
+                   backdrop-filter: blur(5px); z-index:900; 
+                   display:flex; align-items:center; justify-content:space-between; 
+                   padding:0 20px; box-sizing:border-box;`;
+      hNav.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+           <span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span>
+        </div>
+        <div id="home-stats" style="display:flex; gap:12px; font-weight:700; color:${DUO_PALETTE.white.text}; font-size:14px;">
+           </div>
+      `;
+      document.body.appendChild(hNav);
+    }
+
+    if (!document.getElementById('game-top-nav')) {
+      const topNav = document.createElement('div');
+      topNav.id = "game-top-nav";
+      topNav.style = `position:fixed; top:0; left:0; width:100%; height:70px; background:transparent; 
+                     backdrop-filter: blur(5px); z-index:1000; display:none; align-items:center; 
+                     padding:0 20px; box-sizing:border-box; gap:20px;`;
+      topNav.innerHTML = `
+        <button id="game-close-btn" style="background:none; border:none; font-size:24px; color:${DUO_PALETTE.gray.bg}; cursor:pointer; font-weight:bold; padding:10px;">✕</button>
+        <div style="flex:1; height:16px; background:${DUO_PALETTE.white.shadow}80; border-radius:20px; overflow:hidden;">
+          <div id="game-prog-fill" style="width:0%; height:100%; background:${DUO_PALETTE.gold.bg}; transition:width 0.3s ease; border-radius:20px;"></div>
+        </div>
+      `;
+      document.body.appendChild(topNav);
+      document.getElementById('game-close-btn').onclick = () => this.showHomeMenu();
+    }
+
+    if (!document.getElementById('game-nav-bar')) {
+      const nav = document.createElement('div');
+      nav.id = "game-nav-bar";
+      nav.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; display:none; gap:15px;";
+      nav.innerHTML = `
+        <button id="nav-prev" style="padding:10px 20px; border-radius:12px; border:2px solid ${DUO_PALETTE.white.shadow}; background:${DUO_PALETTE.white.bg}; font-weight:800; cursor:pointer; box-shadow: 0 4px 0 ${DUO_PALETTE.white.shadow};">PREV</button>
+        <button id="nav-next" style="padding:10px 20px; border-radius:12px; border:2px solid ${DUO_PALETTE.white.shadow}; background:${DUO_PALETTE.white.bg}; font-weight:800; cursor:pointer; box-shadow: 0 4px 0 ${DUO_PALETTE.white.shadow};">NEXT</button>
+      `;
+      document.body.appendChild(nav);
+      document.getElementById('nav-prev').onclick = () => this.changeQuestion(-1);
+      document.getElementById('nav-next').onclick = () => this.changeQuestion(1);
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+      door-co, list-co { margin-top: 80px !important; margin-bottom: 40px !important; box-sizing: border-box; }
+      quest-ion { margin-top: 90px !important; }
+    `;
+    document.head.appendChild(style);
+  },
+
+  updateHomeNav() {
+    const prog = this.getProgress();
+    const statsContainer = document.getElementById('home-stats');
+    if (!statsContainer || !this.data) return;
+
+    let totalQuestions = 0;
+    let totalLevels = 0;
+
+    this.data.doors.forEach((door, dIdx) => {
+      door.levels.forEach((level, lIdx) => {
+        if (dIdx < prog.door || (dIdx === prog.door && lIdx < prog.level)) {
+          totalQuestions += level.questions.length;
+          totalLevels += 1;
+        } else if (dIdx === prog.door && lIdx === prog.level) {
+          totalQuestions += prog.q;
+        }
+      });
+    });
+
+    statsContainer.innerHTML = `
+      <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
+        <i class="fa-solid fa-check"></i> ${totalLevels}
+      </span>
+      <span style="color:${DUO_PALETTE.gold.bg}; display:flex; align-items:center; gap:5px; text-shadow: 0px 1px 2px rgba(0,0,0,0.1);">
+        <i class="fa-solid fa-fire"></i> ${totalQuestions}
+      </span>
+    `;
+  },
+
+  updateProgressUI() {
+    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
+    const percentage = (this.currentQuestion / level.questions.length) * 100;
+    const fill = document.getElementById('game-prog-fill');
+    if (fill) fill.style.width = percentage + "%";
+  },
+
+  changeQuestion(step) {
+    if (this.isTransitioning) return; // Block input during transition
+    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
+    const newIdx = this.currentQuestion + step;
+    const prog = this.getProgress();
+    const hasClearedNext = (this.currentDoor < prog.door) || 
+                           (this.currentDoor === prog.door && this.currentLevel < prog.level) || 
+                           (this.currentDoor === prog.door && this.currentLevel === prog.level && newIdx <= prog.q);
+
+    if (newIdx >= 0 && newIdx < level.questions.length) {
+      if (step > 0 && !hasClearedNext) {
+        window.triggerMoti?.({ title: "Locked", msg: "Complete current task first!", color: "gold" });
+        return;
+      }
+      this.currentQuestion = newIdx;
+      this.loadActiveQuestion(false);
+    }
+  },
+
+  showHomeMenu() {
+    window.openSheet({
+      title: 'Exit Lesson?',
+      body: '<p>Progress is saved per correct answer.</p>',
+      buttons: [
+        { text: 'Keep Learning', color:"gold", action: () => {} },
+        { 
+          text: 'End Session', 
+          color: "white", 
+          action: () => {
+            this.toggleScreen('list');
+            this.showLevelList(this.currentDoor);
+          } 
+        }
+      ]
+    });
+  },
+
+  async fetchData() {
+    try {
+      const response = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
+      const text = await response.text();
+      const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+      this.data = JSON.parse(jsonString);
+    } catch (e) { console.error(e); }
+  },
+
+  toggleScreen(screen) {
+    const screens = { 'map': 'door-co', 'list': 'list-co', 'game': 'quest-ion' };
+    Object.keys(screens).forEach(k => {
+      const el = document.querySelector(screens[k]);
+      if (el) el.style.display = (screen === k) ? 'flex' : 'none';
     });
     
-    navigate('material-view');
-}
-    // MONITORING & STORAGE
-    const handler = {
-        set(target, key, value) {
-            console.log(`[STORAGE LOG] ${key} changed to:`, value);
-            localStorage.setItem(`allWrite_${key}`, JSON.stringify(value));
-            target[key] = value;
-            return true;
-        }
+    const isGame = screen === 'game';
+    const isHome = screen === 'map' || screen === 'list';
+
+    if (document.getElementById('home-top-nav')) document.getElementById('home-top-nav').style.display = isHome ? 'flex' : 'none';
+    if (document.getElementById('game-top-nav')) document.getElementById('game-top-nav').style.display = isGame ? 'flex' : 'none';
+    if (document.getElementById('game-nav-bar')) document.getElementById('game-nav-bar').style.display = isGame ? 'flex' : 'none';
+  },
+
+  renderMap() {
+    if (!this.data) return;
+    this.toggleScreen('map');
+    const prog = this.getProgress();
+    const configs = this.data.doors.map((d, i) => {
+      const isLocked = i > prog.door;
+      return {
+        title: `UNIT ${d.door}`,
+        locked: isLocked,
+        bgColor: isLocked ? '#f5f5f5' : (i % 2 === 0 ? '#fff9e6' : '#e8f7ff'),
+        iconColor: isLocked ? DUO_PALETTE.gray.bg : (i % 2 === 0 ? DUO_PALETTE.gold.bg : DUO_PALETTE.blue.bg),
+        depthColor: isLocked ? DUO_PALETTE.gray.shadow : (i % 2 === 0 ? DUO_PALETTE.gold.shadow : DUO_PALETTE.blue.shadow),
+        faIcon: isLocked ? 'fa-solid fa-lock' : 'fa-solid fa-feather-alt',
+        contentLabel: d.name.split(':')[1]?.trim() || "Lesson",
+      };
+    });
+    window.renderSideDoors('door-co', configs);
+    setTimeout(() => {
+      document.querySelectorAll('.duo-door').forEach((btn, i) => {
+        if (i <= prog.door) btn.onclick = () => this.showLevelList(i);
+      });
+    }, 200);
+  },
+
+  showLevelList(doorIdx) {
+    this.currentDoor = doorIdx;
+    const door = this.data.doors[doorIdx];
+    const prog = this.getProgress();
+    this.toggleScreen('list');
+    
+    const levelButtons = door.levels.map((l, i) => {
+      const isLocked = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
+      const isCurrent = (doorIdx === prog.door && i === prog.level);
+      
+      const theme = isLocked ? DUO_PALETTE.white : DUO_PALETTE.gold;
+      return {
+        label: isLocked ? '🔒 Locked' : (isCurrent && prog.q > 0 ? `Lvl ${i+1} (Resume)` : `Lvl ${i+1}: ${l.title}`),
+        color: theme.bg,
+        shadow: theme.shadow,
+        textColor: isLocked ? DUO_PALETTE.gray.bg : theme.text,
+        action: isLocked ? null : () => this.startLesson(i)
+      };
+    });
+   levelButtons.unshift({
+      label: '← BACK',
+      color: DUO_PALETTE.white.bg, shadow: DUO_PALETTE.white.shadow, textColor: DUO_PALETTE.white.text,
+      action: () => this.renderMap()
+    });
+
+ 
+    window.renderList('list-co', levelButtons);
+  },
+
+  startLesson(levelIdx) {
+    this.currentLevel = levelIdx;
+    const prog = this.getProgress();
+    this.currentQuestion = (this.currentDoor === prog.door && levelIdx === prog.level) ? (prog.q || 0) : 0;
+    this.isTransitioning = false; // Reset on start
+    this.toggleScreen('game');
+    this.loadActiveQuestion(true);
+  },
+
+  loadActiveQuestion(isFirst = false) {
+    const q = this.data.doors[this.currentDoor].levels[this.currentLevel].questions[this.currentQuestion];
+    if (!q) return this.completeLevel();
+
+    this.updateProgressUI();
+
+    let qType = q.type;
+    if (qType === 'word' || qType === 'choice') qType = 'choice';
+    if (qType === 'order') qType = 'reorder';
+
+    const questionData = {
+      type: qType,
+      question: q.question,
+      options: q.choices || q.options || [],
+      answer: q.answer,
+      onCorrect: () => {
+        if (this.isTransitioning) return; // Stop spamming onCorrect
+        this.isTransitioning = true; 
+
+        this.play('correct');
+        this.currentQuestion++;
+        this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
+        
+        setTimeout(() => {
+          this.isTransitioning = false;
+          this.loadActiveQuestion(false);
+        }, 1200);
+      }
     };
 
-    const storage = new Proxy({
-        progress: JSON.parse(localStorage.getItem('allWrite_progress')) || 1,
-        name: localStorage.getItem('allWrite_name') || '',
-        hyperdriveDone: localStorage.getItem('allWrite_hyperdriveDone') === 'true'
-    }, handler);
-
-
-    let state = { activeChapter: 0, activeLevel: 0 };
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playBeep(f, type="sine") {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + 0.2);
-    }
-
-
-// HYPERDRIVE & ENTRY
-    window.onload = () => {
-        if (storage.hyperdriveDone) {
-            document.getElementById('portal-container').remove();
-            handleLogin();
-        } else {
-            initPortal();
-        }
-    };
-
-function initPortal() {
-    const scene = document.getElementById('warp-scene');
-    const colors = ['yellow', 'blue', 'white'];
-    for (let i = 0; i < 50; i++) {
-        const frag = document.createElement('div');
-        frag.className = `fragment ${colors[Math.floor(Math.random() * colors.length)]}`;
-        const size = Math.random() * 6 + 2;
-        frag.style.width = frag.style.height = `${size}px`;
-        const x = (Math.random() - 0.5) * 1200, y = (Math.random() - 0.5) * 1200;
-        frag.style.setProperty('--x', `${x}px`); frag.style.setProperty('--y', `${y}px`);
-        frag.style.setProperty('--mx', `${x * 4}px`); frag.style.setProperty('--my', `${y * 4}px`);
-        frag.style.left = frag.style.top = '50%';
-        frag.style.animation = `flyPast ${2 + Math.random() * 2}s linear infinite`;
-        scene.appendChild(frag);
-    }
-
-    const portalInput = document.getElementById('user-input');
-    const btnStage = document.getElementById('button-stage');
-    const brandText = document.getElementById('brand-text');
-    const portalOverlay = document.getElementById('portal-overlay');
-
-    portalInput.oninput = (e) => btnStage.classList.toggle('reveal', e.target.value.trim().length > 0);
+    if (isFirst) window.setQuestion(questionData);
+    else window.nextQuest(questionData);
     
-    document.getElementById('warp-btn').onclick = () => {
-        storage.name = portalInput.value.trim();
-        storage.hyperdriveDone = true;
-        
-        // Start hyperdrive animation
-        document.getElementById('portal-container').classList.add('hyper-drive');
-        
-        // 1. Flash and Show "HUE"
-        setTimeout(() => {
-            portalOverlay.classList.add('flash');
-            brandText.innerHTML = '<span class="hue-style">HUE</span>';
-            setTimeout(() => brandText.firstChild.classList.add('fade-in'), 100);
-        }, 1500);
+    const prog = this.getProgress();
+    const hasClearedNext = (this.currentDoor < prog.door) || 
+                           (this.currentDoor === prog.door && this.currentLevel < prog.level) || 
+                           (this.currentDoor === prog.door && this.currentLevel === prog.level && (this.currentQuestion + 1) <= prog.q);
 
-        // 2. Switch to "AllWrite"
-        setTimeout(() => {
-            brandText.innerHTML = '<span class="allwrite-style">AllWrite</span>';
-            setTimeout(() => brandText.firstChild.classList.add('fade-in'), 100);
-        }, 3500);
-
-        // 3. Final Exit
-        setTimeout(() => {
-            document.getElementById('portal-container').style.opacity = '0';
-            handleLogin();
-            setTimeout(() => document.getElementById('portal-container').remove(), 1000);
-        }, 5500);
-    };
-}
+    const prevBtn = document.getElementById('nav-prev');
+    const nextBtn = document.getElementById('nav-next');
     
+    prevBtn.style.opacity = this.currentQuestion === 0 ? "0.3" : "1";
+    nextBtn.style.opacity = hasClearedNext ? "1" : "0.3";
+    nextBtn.innerHTML = hasClearedNext ? "NEXT" : "LOCKED";
+  },
 
-    function handleLogin() {
-        document.getElementById('app-header').classList.remove('hidden');
-        document.getElementById('lvl-display').innerText = storage.progress;
-        renderDoors(); navigate('lobby-view');
-    }
+  completeLevel() {
+    const door = this.data.doors[this.currentDoor];
+    let nDoor = this.currentDoor, nLvl = this.currentLevel + 1;
+    if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
+    this.saveProgress(nDoor, nLvl, 0);
+    if (window.triggerMoti) window.triggerMoti({ title: "Done!", msg: "Level Unlocked!", img: "https://i.imgur.com/8N69vV9.png" });
+    setTimeout(() => {
+      this.isTransitioning = false;
+      this.showLevelList(this.currentDoor);
+    }, 2000);
+  }
+};
 
-    function renderDoors() {
-        const container = document.getElementById('door-container');
-        container.innerHTML = '';
-        LESSONS.forEach((chap, index) => {
-            let totalPrev = 0;
-            for(let i=0; i<index; i++) totalPrev += LESSONS[i].levels.length;
-            const isLocked = storage.progress <= totalPrev;
-            const doorDiv = document.createElement('div');
-            doorDiv.className = 'door-item';
-            doorDiv.innerHTML = `<button class="door ${isLocked ? 'locked' : ''}" style="--color:${chap.color}; --border:${chap.border}" onclick="handleDoorClick(${index}, ${isLocked})"><i class="fa-solid ${chap.icon}"></i></button><span class="door-label" style="font-weight:700; color:var(--duo-gray)">${chap.key}</span>`;
-            container.appendChild(doorDiv);
-        });
-    }
+GameEngine.init();</script>
+</game>
 
-    function handleDoorClick(index, locked) {
-        if(locked) { playBeep(150, "square"); return; }
-        state.activeChapter = index; state.activeLevel = 0;
-        document.getElementById('intro-title').innerText = LESSONS[index].key;
-        document.getElementById('intro-subtitle').innerText = "Test your skills.";
-        navigate('intro-view');
-    }
-
-    function startLesson() { navigate('game-view'); loadLevel(); }
-
-    function loadLevel() {
-        const level = LESSONS[state.activeChapter].levels[state.activeLevel];
-        document.getElementById('game-title').innerText = level.title;
-        document.getElementById('game-progress-text').innerText = `${state.activeLevel + 1}/${LESSONS[state.activeChapter].levels.length}`;
-        document.getElementById('game-question').innerText = level.word;
-        document.getElementById('game-hint').innerText = `Hint: ${level.hint}`;
-        
-        const cArea = document.getElementById('choice-area'), wArea = document.getElementById('write-area');
-        
-        if(level.type === 'word' || level.type === 'caps') {
-            cArea.classList.remove('hidden'); wArea.classList.add('hidden'); cArea.innerHTML = '';
-            level.choices.forEach(c => {
-                const btn = document.createElement('button'); btn.className = 'btn-choice'; btn.innerText = c;
-                btn.onclick = (e) => checkAnswer(c, e.target); cArea.appendChild(btn);
-            });
-        } else {
-            cArea.classList.add('hidden'); wArea.classList.remove('hidden');
-            document.getElementById('game-input').value = '';
-        }
-    }
-
-// 1. DYNAMIC FUZZY LOGIC (FOR 'WRITE' TYPE)
-function checkSubjective(input, level) {
-    const text = input.trim();
-    // Safety check for empty or too short input
-    if (text.length < 1) return false;
-
-    // --- 1. CAPS TYPE LOGIC ---
-    // Focuses only on right capital letters; ignores punctuation differences.
-    if (level.type === 'caps') {
-        const cleanInput = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
-        const cleanAnswer = level.answer.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
-        return cleanInput === cleanAnswer;
-    }
-
-    // --- 2. WRITE TYPE LOGIC (Mechanical Check) ---
-    
-    // Rule A: Must start with a Capital letter (A-Z)
-    const startsWithCap = /^[A-Z]/.test(text);
-
-    // Rule B: No double spaces (prevents messy/spam typing)
-    const hasBadSpacing = /\s\s+/.test(text);
-
-    // Rule C: Punctuation must match the 'answer' character exactly
-    // If level.answer is '.', it checks for a dot at the end.
-    const expectedPunc = level.answer.trim(); 
-    const endsCorrectly = text.endsWith(expectedPunc);
-
-    // Final Validation: All mechanical rules must pass.
-    return startsWithCap && !hasBadSpacing && endsCorrectly;
-}
-// 2. MAIN CHECKER FUNCTION
-// 1. MECHANICAL STRUCTURE CHECKER
-function checkSubjective(input, level) {
-    const text = input.trim();
-    if (text.length < 1) return false;
-
-    // CAPS MODE: Ignore punctuation, match literal casing
-    if (level.type === 'caps') {
-        const cleanInput = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
-        const cleanAnswer = level.answer.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
-        return cleanInput === cleanAnswer;
-    }
-
-    // WRITE MODE: Mechanical check
-    const startsWithCap = /^[A-Z]/.test(text); // Strict Capital start
-    const hasBadSpacing = /\s\s+/.test(text); // Detect double-space spam
-    
-    // Check if ends with the specific answer punctuation (e.g., '.', '?')
-    const expectedPunc = level.answer.trim();
-    const endsCorrectly = text.endsWith(expectedPunc);
-
-    return startsWithCap && !hasBadSpacing && endsCorrectly;
-}
-
-// 2. MAIN ANSWER HANDLER
-function checkAnswer(userAns, element) {
-    const level = LESSONS[state.activeChapter].levels[state.activeLevel];
-    const rawInput = (userAns || document.getElementById('game-input').value).trim();
-    
-    // Prevent Spam/Speedrunning: Disable clicks immediately
-    const cArea = document.getElementById('choice-area');
-    const wArea = document.getElementById('write-area');
-    cArea.style.pointerEvents = 'none';
-    wArea.style.pointerEvents = 'none';
-
-    let isCorrect = false;
-
-    // Route logic based on level type
-    if (level.type === 'word' || level.type === 'caps') {
-        isCorrect = (rawInput === level.answer);
-    } else {
-        isCorrect = checkSubjective(rawInput, level);
-    }
-
-    if (isCorrect) {
-        playBeep(1000); 
-        if (element) element.classList.add('correct');
-        
-        setTimeout(() => {
-            if (element) element.classList.remove('correct');
-
-            // Absolute Progress Math
-            let absoluteFinished = 0;
-            for (let i = 0; i < state.activeChapter; i++) {
-                absoluteFinished += LESSONS[i].levels.length;
-            }
-            absoluteFinished += (state.activeLevel + 1);
-
-            // Update UI/Storage
-            if (absoluteFinished >= storage.progress) {
-                storage.progress = absoluteFinished + 1;
-                document.getElementById('lvl-display').innerText = storage.progress;
-            }
-
-            state.activeLevel++;
-            
-            // Re-enable clicks for the next level
-            cArea.style.pointerEvents = 'auto';
-            wArea.style.pointerEvents = 'auto';
-
-            if (state.activeLevel < LESSONS[state.activeChapter].levels.length) {
-                loadLevel();
-            } else {
-                playBeep(1200); 
-                goHome(); 
-            }
-        }, 600);
-
-    } else {
-        // --- WRONG ANSWER ---
-        playBeep(200, "square");
-        if (element) {
-            element.classList.add('wrong');
-            setTimeout(() => {
-                element.classList.remove('wrong');
-                // Re-enable clicks so they can try again after animation
-                cArea.style.pointerEvents = 'auto';
-                wArea.style.pointerEvents = 'auto';
-            }, 500);
-        }
-        
-        // Visual indicator for typing mistakes
-        if (level.type === 'write') {
-            const inputField = document.getElementById('game-input');
-            if (inputField) {
-                inputField.style.borderColor = 'var(--duo-red)';
-                setTimeout(() => inputField.style.borderColor = 'var(--duo-border)', 1000);
-            }
-        }
-    }
-}
-function navigate(id) {
-
-
-
-        document.querySelectorAll('.screen-content').forEach(s => s.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-        document.getElementById('back-to-home').classList.toggle('hidden', id === 'lobby-view');
-    }
-
-    function goHome() { renderDoors(); navigate('lobby-view'); }
-    function toggleSheet() { document.getElementById('bottom-sheet').classList.toggle('sheet-open'); document.getElementById('sheet-overlay').classList.toggle('hidden'); }
-    function resetGame() { localStorage.clear(); location.reload(); }
-</script>
  <security>
 <script>
 document.addEventListener('contextmenu', e => e.preventDefault());
@@ -613,5 +1057,21 @@ lastH = window.outerHeight;
 }, 1000);
 </script>
 </security>
+
+<recheck>
+    <script>
+        (function() {
+  const portalDone = localStorage.getItem('portal_done');
+  const userName = localStorage.getItem('user_name');    
+
+  const isPortalDone = portalDone === 'true';
+  const isUserNameEmpty = !userName || userName.trim() === '';
+
+  if (!isPortalDone && isUserNameEmpty) {
+    window.location.replace('https://allwrite-sh.vercel.app/dev/allow/start');
+  }
+})();
+    </script>
+</recheck> 
 </body>
 </html>
