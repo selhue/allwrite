@@ -25,7 +25,6 @@
             overflow-x: hidden;
         }
 
-        /* Stats Card */
         .header-card {
             background: white;
             width: 90%;
@@ -38,7 +37,6 @@
             box-shadow: 0 4px 0 var(--border);
         }
 
-        /* The Wheel Area */
         .wheel-container {
             position: relative;
             width: 300px;
@@ -85,7 +83,6 @@
             font-size: 1.4rem;
             box-shadow: 0 6px 0 #46a302;
             cursor: pointer;
-            transition: 0.1s;
         }
 
         .btn-spin:active {
@@ -93,12 +90,11 @@
             box-shadow: 0 2px 0 #46a302;
         }
 
-        /* Modal / Pop-up */
         #modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -106,24 +102,30 @@
 
         .modal {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 25px;
             text-align: center;
-            width: 80%;
-            max-width: 320px;
-            transform: scale(0.8);
-            animation: popIn 0.3s forwards;
+            width: 85%;
+            max-width: 340px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes popIn { to { transform: scale(1); } }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 99;
+        .prize-img-pop {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            margin: 15px 0;
+            animation: bounce 2s infinite;
         }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99; }
     </style>
 </head>
 <body>
@@ -131,7 +133,7 @@
 <canvas id="canvas"></canvas>
 
 <div class="header-card">
-    <h2 id="name-display">Hi, Champion!</h2>
+    <h2 id="name-display">Hi!</h2>
     <div style="display:flex; justify-content:space-around;">
         <div><small>Doors</small><div id="door-val" style="font-weight:bold; font-size:1.2rem;">0</div></div>
         <div><small>Tasks</small><div style="font-weight:bold; font-size:1.2rem;">125</div></div>
@@ -147,10 +149,10 @@
 
 <div id="modal-overlay">
     <div class="modal">
-        <h1 style="color:var(--primary)">AWESOME!</h1>
-        <p>You claimed:</p>
-        <h2 id="prize-name" style="background:#f0f0f0; padding:10px; border-radius:10px;">Item</h2>
-        <button class="btn-spin" onclick="closeModal()" style="font-size:1rem; padding:10px 30px;">CONTINUE</button>
+        <h1 style="color:var(--primary); margin:0;">YOU WON!</h1>
+        <img id="prize-img" src="" class="prize-img-pop">
+        <h2 id="prize-name" style="margin:10px 0; color:var(--text);">Item</h2>
+        <button class="btn-spin" onclick="closeModal()" style="font-size:1rem; padding:12px 40px; margin-top:10px;">CLAIM NOW</button>
     </div>
 </div>
 
@@ -158,7 +160,7 @@
 <audio id="win-sound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
 
 <script>
-    // Validation
+    // Validation & Redirect
     const rawProgress = localStorage.getItem('allwrite_progress');
     const uName = localStorage.getItem('user_name');
     
@@ -169,6 +171,14 @@
     const progress = JSON.parse(rawProgress);
     document.getElementById('name-display').innerText = `Hi, ${uName}!`;
     document.getElementById('door-val').innerText = progress.door;
+
+    const prizeData = [
+        { name: "Fudgee Bar", img: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400" },
+        { name: "Pen and Paper", img: "https://images.unsplash.com/photo-1516962080544-eac695c93791?w=400" },
+        { name: "Nova", img: "https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400" },
+        { name: "Combi", img: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400" },
+        { name: "Piattos", img: "https://images.unsplash.com/photo-1613919113166-796cae8d27de?w=400" }
+    ];
 
     let spinning = false;
 
@@ -183,32 +193,25 @@
         btn.disabled = true;
         spinSfx.play();
 
-        const deg = Math.floor(Math.random() * 360) + 3600; // 10 rotations + random
+        const deg = Math.floor(Math.random() * 360) + 3600; 
         wheel.style.transform = `rotate(${deg}deg)`;
 
         setTimeout(() => {
-            showPrize(deg);
+            const actualDeg = deg % 360;
+            const index = Math.floor((360 - actualDeg) / 72) % 5;
+            const win = prizeData[index];
+
+            document.getElementById('prize-name').innerText = win.name;
+            document.getElementById('prize-img').src = win.img;
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('win-sound').play();
+            startConfetti();
         }, 4000);
     }
 
-    function showPrize(deg) {
-        const prizes = ["Fudgee Bar", "Pen and Paper", "Nova", "Combi", "Piattos"];
-        const actualDeg = deg % 360;
-        const index = Math.floor((360 - actualDeg) / 72) % 5;
-        const won = prizes[index];
+    function closeModal() { location.reload(); }
 
-        document.getElementById('prize-name').innerText = won;
-        document.getElementById('modal-overlay').style.display = 'flex';
-        document.getElementById('win-sound').play();
-        
-        startConfetti();
-    }
-
-    function closeModal() {
-        location.reload(); // Reset for next time
-    }
-
-    // --- Confetti Engine ---
+    // Confetti
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -216,14 +219,13 @@
     function startConfetti() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        for(let i=0; i<100; i++) {
+        for(let i=0; i<80; i++) {
             particles.push({
-                x: canvas.width/2,
-                y: canvas.height/2,
+                x: canvas.width/2, y: canvas.height/2,
                 dir: Math.random() * Math.PI * 2,
-                speed: Math.random() * 10 + 5,
-                color: `hsl(${Math.random()*360}, 70%, 50%)`,
-                r: Math.random() * 6 + 2
+                speed: Math.random() * 8 + 4,
+                color: `hsl(${Math.random()*360}, 80%, 60%)`,
+                r: Math.random() * 5 + 2
             });
         }
         requestAnimationFrame(updateConfetti);
@@ -231,14 +233,12 @@
 
     function updateConfetti() {
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        particles.forEach((p, i) => {
+        particles.forEach((p) => {
             p.x += Math.cos(p.dir) * p.speed;
-            p.y += Math.sin(p.dir) * p.speed + 3; // gravity
-            p.speed *= 0.98;
+            p.y += Math.sin(p.dir) * p.speed + 2;
+            p.speed *= 0.99;
             ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
         });
         if(particles.length > 0) requestAnimationFrame(updateConfetti);
     }
