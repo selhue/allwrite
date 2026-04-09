@@ -520,27 +520,83 @@
         } catch(e) {}
       };
 
+      // Detect touch device
+      const isTouchDevice = () => ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
       const style = document.createElement('style');
       style.textContent = `
-        quest-ion { display: flex; flex-direction:column; font-family: "din-round", sans-serif; flex:1; min-width: 30px; margin: 20px auto; color: #4b4b4b; padding: 10px; transition: opacity 0.3s ease-out; }
+        quest-ion {
+          display: flex; flex-direction: column; font-family: "din-round", sans-serif;
+          flex: 1; min-width: 30px; color: #4b4b4b; padding: 10px;
+          transition: opacity 0.3s ease-out;
+          overflow-y: auto;
+        }
+        quest-ion.has-kb { padding-bottom: 290px; }
         quest-ion.fade-out { opacity: 0; pointer-events: none; }
-        .q-title { font-size: 22px; font-weight: 800; margin-bottom: 24px; text-align: center; color: #fafaff; }
+
+        .q-title { font-size: 22px; font-weight: 800; margin-bottom: 24px; text-align: center; color: #fafaff; margin-top: 20px; }
         .reorder-zone { display: flex; flex-wrap: wrap; gap: 8px; align-content:center; justify-content: center; padding: 15px; min-height: 90px; border-top: 2px solid #e5e5e5; border-bottom: 2px solid #e5e5e5; margin-bottom: 20px; }
-        .word-pill { height:max-content; padding: 12px 18px; background: white; border: 2px solid #e5e5e5; border-radius: 14px; cursor: grab; font-weight: bold; box-shadow: 0 4px 0 #e5e5e5; color: #4b4b4b; font-size: 16px; transition: transform 0.1s; }
+        .word-pill { height:max-content; padding: 12px 18px; background: white; border: 2px solid #e5e5e5; border-radius: 14px; cursor: grab; font-weight: bold; box-shadow: 0 4px 0 #e5e5e5; color: #4b4b4b; font-size: 16px; }
         .choice-grid { display: flex; flex-direction: column; gap: 12px; }
         .q-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px solid #e5e5e5; background: white; font-size: 17px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #e5e5e5; text-align: left; transition: all 0.2s; outline: none; color: #4b4b4b; }
         .q-btn.correct { background: #d7ffb8 !important; border-color: #58cc02 !important; box-shadow: 0 4px 0 #58cc02 !important; color: #58cc02 !important; }
-        .q-btn.wrong { background: #ffdfe0 !important; border-color: #ff4b4b !important; box-shadow: 0 4px 0 #ff4b4b !important; color: #ff4b4b !important; }
-        .input-display { width: 100%; padding: 15px; border: 2px solid #e5e5e5; border-radius: 16px; font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 12px; background: #f7f7f7; min-height: 60px; box-sizing: border-box; color: #1cb0f6; border-bottom: 4px solid #e5e5e5; word-break: break-word; white-space: pre-wrap; }
-        .kb-container { background: #e5e5e5; padding: 10px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .kb-row { display: flex; justify-content: center; gap: 4px; }
-        .kb-key { flex: 1; min-width: 0; padding: 12px 0; background: white; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #afafaf; font-size: 14px; color: #4b4b4b; }
+        .q-btn.wrong   { background: #ffdfe0 !important; border-color: #ff4b4b !important; box-shadow: 0 4px 0 #ff4b4b !important; color: #ff4b4b !important; }
+
+        .input-display {
+          width: 100%; padding: 15px; border: 2px solid #e5e5e5; border-radius: 16px;
+          font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 8px;
+          background: #f7f7f7; min-height: 60px; box-sizing: border-box;
+          color: #1cb0f6; border-bottom: 4px solid #e5e5e5;
+          word-break: break-word; white-space: pre-wrap;
+          cursor: text;
+        }
+        .input-display.kb-open { border-color: #1cb0f6; box-shadow: 0 0 0 3px rgba(28,176,246,0.2); }
+
+        /* tap hint — only shown on touch */
+        .kb-tap-hint {
+          font-size: 12px; color: #afafaf; text-align: center;
+          margin-bottom: 8px; font-style: italic;
+        }
+
+        /* Fixed keyboard dock */
+        .kb-dock {
+          position: fixed; left: 0; right: 0; bottom: 75px; z-index: 30;
+          
+          padding: 8px 8px 16px;
+          display: flex; flex-direction: column; gap: 6px;
+          box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+       
+          transition: transform 0.25s cubic-bezier(0.32,0.72,0,1);
+        }
+        .kb-dock.visible { transform: translateY(0); }
+
+        .check-row { display: flex; gap: 8px; }
+        #check-btn-inline {
+          flex: 1; padding: 13px; border-radius: 14px;
+          background: #58cc02; color: white; border: none;
+          border-bottom: 4px solid #46a302;
+          font-size: 15px; font-weight: 900; cursor: pointer;
+          text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        #check-btn-inline:active { transform: translateY(3px); border-bottom-width: 1px; }
+        #check-btn-inline.correct { background: #d7ffb8; color: #58cc02; border-color: #58cc02; }
+        #check-btn-inline.wrong   { background: #ffdfe0; color: #ff4b4b; border-color: #ff4b4b; }
+
+        .kb-container { display: flex; flex-direction: column; gap: 5px;}
+        .kb-row { display: flex; justify-content: center; gap: 3px; }
+        .kb-key {
+          flex: 1; min-width: 0; padding: 10px 0;
+          background: white; border-radius: 7px; border: none;
+          font-weight: bold; cursor: pointer;
+          box-shadow: 0 3px 0 #afafaf; font-size: 13px; color: #4b4b4b;
+        }
         .kb-key:active { transform: translateY(2px); box-shadow: 0 1px 0 #afafaf; }
         .kb-key.active { background: #1cb0f6; color: white; box-shadow: 0 3px 0 #168ec6; }
-        .kb-key.wide { flex: 1.5; }
+        .kb-key.wide  { flex: 1.5; }
         .kb-key.space { flex: 5; }
-        #check-btn { background: #58cc02; color: white; border-color: #58cc02; box-shadow: 0 5px 0 #46a302; text-align: center; }
-        .feedback { text-align: center; font-weight: 800; margin-top: 20px; font-size: 20px; min-height: 28px; text-transform: uppercase; }
+
+        #check-btn { background: #58cc02; color: white; border-color: #58cc02; box-shadow: 0 5px 0 #46a302; text-align: center; margin-bottom:0.5in; }
+        .feedback { text-align: center; font-weight: 800; margin-top: 16px; font-size: 20px; min-height: 28px; text-transform: uppercase; }
         .q-hint { font-size: 13px; color: #afafaf; text-align: center; margin-bottom: 10px; font-style: italic; }
       `;
       document.head.appendChild(style);
@@ -558,9 +614,33 @@
           `;
           this.querySelector('#check-btn').onclick = () => this.validate();
           this.isShift = true;
+          this._kbDock = null;
+          this._physicalHandler = null;
+        }
+
+        _removeKbDock() {
+          if (this._kbDock) {
+            this._kbDock.classList.remove('visible');
+            setTimeout(() => { if (this._kbDock) { this._kbDock.remove(); this._kbDock = null; } }, 260);
+          }
+          if (this._physicalHandler) { window.removeEventListener('keydown', this._physicalHandler); this._physicalHandler = null; }
+          this.classList.remove('has-kb');
+        }
+
+        _showKb() {
+          if (!this._kbDock) return;
+          this._kbDock.classList.add('visible');
+          this.classList.add('has-kb');
+        }
+
+        _hideKb() {
+          if (!this._kbDock) return;
+          this._kbDock.classList.remove('visible');
+          this.classList.remove('has-kb');
         }
 
         loadQuestion(data) {
+          this._removeKbDock();
           this.classList.remove('fade-out');
           this.currentData = data;
           this.userVal = "";
@@ -600,8 +680,26 @@
             content.appendChild(grid);
           }
           else if (data.type === 'input') {
-            const disp = document.createElement('div'); disp.className = 'input-display'; disp.id = 'input-disp';
+            actions.style.display = 'none';
+
+            const disp = document.createElement('div'); disp.className = 'input-display';
             disp.textContent = '';
+
+            const touch = isTouchDevice();
+
+            if (touch) {
+              // Tap hint for mobile
+              const hint = document.createElement('div'); hint.className = 'kb-tap-hint';
+              hint.textContent = 'Tap here to type';
+              content.appendChild(hint);
+            }
+
+            content.appendChild(disp);
+
+            // Build dock (hidden initially)
+            const dock = document.createElement('div'); dock.className = 'kb-dock';
+            this._kbDock = dock;
+
             const kbContainer = document.createElement('div'); kbContainer.className = 'kb-container';
 
             const renderKeys = () => {
@@ -653,7 +751,64 @@
               });
             };
             renderKeys();
-            content.append(disp, kbContainer);
+
+            const checkRow = document.createElement('div'); checkRow.className = 'check-row';
+            const checkBtn = document.createElement('button'); checkBtn.id = 'check-btn-inline'; checkBtn.textContent = 'CHECK';
+            checkBtn.onclick = () => this.validate();
+            checkRow.appendChild(checkBtn);
+
+            dock.appendChild(kbContainer);
+            dock.appendChild(checkRow);
+            document.body.appendChild(dock);
+
+            if (touch) {
+              // Mobile: tap display to show/hide keyboard
+              disp.onclick = () => {
+                const open = dock.classList.contains('visible');
+                if (open) {
+                  disp.classList.remove('kb-open');
+                  this._hideKb();
+                } else {
+                  disp.classList.add('kb-open');
+                  this._showKb();
+                }
+              };
+            } else {
+              // Desktop: no on-screen keyboard, just physical typing
+              // Show a minimal check-only dock instead of full keyboard
+              kbContainer.style.display = 'none';
+              this._showKb();
+            }
+
+            // Physical keyboard always active on desktop; also works on mobile if hw keyboard connected
+            this._physicalHandler = (e) => {
+              if (this.currentData?.type !== 'input') return;
+              // Ignore if a dialog/sheet is open
+              if (document.querySelector('dialog[open]')) return;
+              const k = e.key;
+              if (k === 'Enter') { e.preventDefault(); this.validate(); return; }
+              if (k === 'Backspace') {
+                e.preventDefault();
+                this.userVal = this.userVal.slice(0, -1);
+                if (this.userVal.length === 0) this.isShift = true;
+                disp.textContent = this.userVal; renderKeys(); return;
+              }
+              if (k === ' ') {
+                e.preventDefault();
+                if (this.userVal.slice(-1) !== ' ') { this.userVal += ' '; disp.textContent = this.userVal; }
+                return;
+              }
+              if (k.length === 1 && !e.ctrlKey && !e.metaKey) {
+                this.userVal += k;
+                disp.textContent = this.userVal;
+                if ([".", "!", "?", ";"].includes(k)) { this.isShift = true; }
+                else { this.isShift = false; }
+                renderKeys();
+                // On mobile with hw keyboard, show the dock when typing starts
+                if (!dock.classList.contains('visible')) { disp.classList.add('kb-open'); this._showKb(); }
+              }
+            };
+            window.addEventListener('keydown', this._physicalHandler);
           }
         }
 
@@ -661,8 +816,7 @@
           const fb = this.querySelector('#feedback');
           const checkBtn = this.querySelector('#check-btn');
           const data = this.currentData;
-          let ok = false;
-          let failMsg = "Not quite right";
+          let ok = false, failMsg = "Not quite right";
 
           const input = this.userVal.trim();
           const target = (data.answer || '').trim();
@@ -677,39 +831,38 @@
             const hasPunctuation = /[.!?,;]$/.test(input);
             const noDoubleSpace = !/  /.test(input);
             const hasContent = input.length > 0;
-
-            if (!hasContent) { failMsg = "Please write something!"; ok = false; }
-            else if (!isCapitalized) { failMsg = "Start with a capital letter!"; ok = false; }
+            if (!hasContent)          { failMsg = "Please write something!"; ok = false; }
+            else if (!isCapitalized)  { failMsg = "Start with a capital letter!"; ok = false; }
             else if (!hasPunctuation) { failMsg = "End with . ! ? or ,"; ok = false; }
-            else if (!noDoubleSpace) { failMsg = "No double spaces!"; ok = false; }
+            else if (!noDoubleSpace)  { failMsg = "No double spaces!"; ok = false; }
             else if (isAny) {
-              const mustContain = data.contains || [];
-              const missing = mustContain.filter(word => !input.includes(word));
-              if (missing.length > 0) { failMsg = `Include the word: "${missing[0]}"`; ok = false; }
-              else { ok = true; }
+              const missing = (data.contains || []).filter(w => !input.includes(w));
+              ok = missing.length === 0;
+              if (!ok) failMsg = `Include the word: "${missing[0]}"`;
             }
-            else {
-              ok = input === target;
-              if (!ok) failMsg = "Not quite right";
-            }
+            else { ok = input === target; if (!ok) failMsg = "Not quite right"; }
           }
           else {
             ok = this.userVal === target;
           }
 
           playSound(ok ? 'correct' : 'error');
-
           fb.textContent = ok ? "Excellent!" : failMsg;
           fb.style.color = ok ? "#58cc02" : "#ff4b4b";
 
-          const btnTarget = btn || checkBtn;
-          btnTarget.classList.add(ok ? 'correct' : 'wrong');
+          const dockBtn = document.getElementById('check-btn-inline');
+          const btnTarget = dockBtn || btn || checkBtn;
+          btnTarget?.classList.add(ok ? 'correct' : 'wrong');
 
           if (ok) {
-         
-            setTimeout(() => {    nice();this.classList.add('fade-out'); if (data.onCorrect) data.onCorrect(); }, 1000);
+            setTimeout(() => {
+              nice();
+              this._removeKbDock();
+              this.classList.add('fade-out');
+              if (data.onCorrect) data.onCorrect();
+            }, 1000);
           } else {
-            setTimeout(() => { btnTarget.classList.remove('wrong'); fb.textContent = ""; }, 1800);
+            setTimeout(() => { btnTarget?.classList.remove('wrong'); fb.textContent = ""; }, 1800);
           }
         }
       }
@@ -1024,34 +1177,6 @@ const GameEngine = {
     this.startAFKTracker();
   },
 
-async fetchData() {
-    try {
-      const res = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
-      const text = await res.text();
-      const json = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-      this.data = JSON.parse(json);
-
-      // Inject "Test!" level into every door — all questions forced to input type
-      this.data.doors.forEach(door => {
-        const allQuestions = door.levels.flatMap(l => l.questions);
-        const testQuestions = allQuestions
-          .filter(q => !q.question.toLowerCase().startsWith('identify'))
-          .map(q => {
-            const stripped = q.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
-            const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
-            return {
-              ...q,
-              type: 'input',
-              question: writePrompt,
-              answer: 'ANY',
-              contains: q.contains || []
-            };
-          });
-        door.levels.push({ title: "Test!", questions: testQuestions });
-      });
-
-    } catch(e) { console.error("Data Fetch Error:", e); }
-  },
 
   getProgress() {
     const s = localStorage.getItem('allwrite_progress');
@@ -1085,23 +1210,40 @@ async fetchData() {
     } catch(e) {}
   },
 
-  loadActiveQuestion(isFirst = false) {
-    const q = this.data.doors[this.currentDoor].levels[this.currentLevel].questions[this.currentQuestion];
-    if (!q) return this.completeLevel();
+async fetchData() {
+    try {
+      const res = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
+      const text = await res.text();
+      const json = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+      this.data = JSON.parse(json);
+      // No Test level injection — removed
+    } catch(e) { console.error("Data Fetch Error:", e); }
+  },
 
+
+  loadActiveQuestion(isFirst = false) {
+    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
+    const totalQ = level.questions.length;
+
+    // Index beyond last real question = final writing quest
+    if (this.currentQuestion === totalQ) {
+      return this._loadFinalWritingQuest(level);
+    }
+    // Index beyond that = actually complete
+    if (this.currentQuestion > totalQ) {
+      return this.completeLevel();
+    }
+
+    const q = level.questions[this.currentQuestion];
     this.updateProgressUI();
 
     let qType = q.type || 'choice';
     const qTextLower = q.question.toLowerCase();
     const isInputTrigger = INPUT_TRIGGERS.some(t => qTextLower.includes(t));
 
-    if (isInputTrigger || qType === 'input') {
-      qType = 'input';
-    } else if (qType === 'word' || qType === 'choice') {
-      qType = 'choice';
-    } else if (qType === 'order') {
-      qType = 'reorder';
-    }
+    if (isInputTrigger || qType === 'input') { qType = 'input'; }
+    else if (qType === 'word' || qType === 'choice') { qType = 'choice'; }
+    else if (qType === 'order') { qType = 'reorder'; }
 
     const questionData = {
       type: qType,
@@ -1125,6 +1267,51 @@ async fetchData() {
     this.updateNavButtons();
   },
 
+  _loadFinalWritingQuest(level) {
+    // Pick a random question from the level, exclude Identify, force to input/write
+    const pool = level.questions.filter(q => !q.question.toLowerCase().startsWith('identify'));
+    const src  = pool[Math.floor(Math.random() * pool.length)];
+    const stripped = src.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
+    const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
+
+    const finalQ = {
+      type: 'input',
+      question: writePrompt,
+      answer: 'ANY',
+      contains: src.contains || [],
+      hint: src.hint || '',
+      onCorrect: () => {
+        if (this.isTransitioning) return;
+        this.isTransitioning = true;
+        this.play('correct');
+        this.currentQuestion++; // push past totalQ so next call hits completeLevel
+        this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
+        setTimeout(() => { this.isTransitioning = false; this.completeLevel(); }, 1200);
+      }
+    };
+
+    // Show dialogue first, then load the question
+    if (window.Dialogue) {
+      const charName = localStorage.getItem('game_char_name') || 'Friend';
+      const charId   = localStorage.getItem('game_char_id') || 'a';
+      window.Dialogue.open([
+        {
+          charId,
+          pose: 'smile',
+          text: `Great job! Now let's finish this level with one final quest!`,
+          options: [{ label: "LET'S GO!", color: 'gold' }]
+        }
+      ], () => {
+        window.nextQuest(finalQ);
+        this.updateProgressUI();
+        this.updateNavButtons();
+      });
+    } else {
+      window.nextQuest(finalQ);
+      this.updateProgressUI();
+      this.updateNavButtons();
+    }
+  },
   updateNavButtons() {
     const prog = this.getProgress();
     const hasClearedNext = (this.currentDoor < prog.door) ||
@@ -1177,22 +1364,22 @@ async fetchData() {
     }, 200);
   },
 
-showLevelList(doorIdx) {
+ showLevelList(doorIdx) {
     this.currentDoor = doorIdx;
     const door = this.data.doors[doorIdx];
     const prog = this.getProgress();
     const seenKey = `allwrite_door_seen_${doorIdx}`;
-    const isRevisit = !!localStorage.getItem(seenKey);
-    // door contentLabel is the material key (Spella, Canix, etc.)
+    const isFirstVisit = !localStorage.getItem(seenKey);
+    const fromGame = !!this._fromGame;
+    this._fromGame = false; // reset immediately
     const doorLabel = door.name.split(':')[1]?.trim() || door.name;
 
     const renderList = () => {
       this.toggleScreen('list');
       const levelButtons = door.levels.map((l, i) => {
-        const isTest   = l.title === "Test!";
-        const isLocked = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
+        const isLocked  = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
         const isCurrent = (doorIdx === prog.door && i === prog.level);
-        const theme = isLocked ? DUO_PALETTE.white : (isTest ? DUO_PALETTE.purple : DUO_PALETTE.gold);
+        const theme = isLocked ? DUO_PALETTE.white : DUO_PALETTE.gold;
         return {
           label: isLocked ? '🔒 Locked' : (isCurrent && prog.q > 0 ? `Lvl ${i+1} (Resume)` : `Lvl ${i+1}: ${l.title}`),
           color: theme.bg, shadow: theme.shadow,
@@ -1208,15 +1395,22 @@ showLevelList(doorIdx) {
       window.renderList('list-co', levelButtons);
     };
 
-    // Always show dialogue when entering a door
+    // Coming back from inside the game (exit button or level complete) — skip dialogue
+    if (fromGame) {
+      renderList();
+      return;
+    }
+
+    // Clicked door from the map
     if (window.triggerDoorIntro) {
-      if (!isRevisit) localStorage.setItem(seenKey, 'true');
-      this.toggleScreen('map'); // backdrop stays as map while dialogue is open
-      window.triggerDoorIntro(doorIdx, doorLabel, isRevisit, renderList);
+      if (isFirstVisit) localStorage.setItem(seenKey, 'true');
+      this.toggleScreen('map');
+      window.triggerDoorIntro(doorIdx, doorLabel, !isFirstVisit, renderList);
     } else {
-      renderList(); // fallback if dial-tem not loaded
+      renderList();
     }
   },
+
   startLesson(levelIdx) {
     this.currentLevel = levelIdx;
     const prog = this.getProgress();
@@ -1227,11 +1421,12 @@ showLevelList(doorIdx) {
   },
 
   completeLevel() {
-    nice()
+    nice();
     const door = this.data.doors[this.currentDoor];
     let nDoor = this.currentDoor, nLvl = this.currentLevel + 1;
     if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
     this.saveProgress(nDoor, nLvl, 0);
+    this._fromGame = true; // came from inside the game, skip door dialogue
     if (window.triggerMoti) window.triggerMoti({ title: "Done!", msg: "Level Unlocked!", img: "https://i.imgur.com/8N69vV9.png" });
     setTimeout(() => { this.isTransitioning = false; this.showLevelList(this.currentDoor); }, 2000);
   },
@@ -1299,8 +1494,8 @@ showLevelList(doorIdx) {
         </div>
       `;
       document.body.appendChild(gNav);
-      document.getElementById('game-exit').onclick = () => this.showLevelList(this.currentDoor);
-    }
+        document.getElementById('game-exit').onclick = () => { this._fromGame = true; this.showLevelList(this.currentDoor); };
+      }
     if (!document.getElementById('game-nav-bar')) {
       const bNav = document.createElement('div');
       bNav.id = "game-nav-bar";
