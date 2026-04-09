@@ -965,28 +965,8 @@
 </script></script>
 </dial-tem>
 
-<extends>  <script>
-        // 1. Define Audio Assets
-        // Hover: Soft tick | Click: Snappy pop
-        const hoverSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        const clickSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+<extends>  
 
-        const btn = document.querySelector('.game-btn');
-
-        // 2. Hover Sound (On Mouse Enter)
-        btn.addEventListener('mouseenter', () => {
-            hoverSfx.currentTime = 0; 
-            hoverSfx.volume = 0.2;
-            hoverSfx.play().catch(() => {}); 
-        });
-
-        // 3. Click Sound (On Mousedown for instant feedback)
-        btn.addEventListener('mousedown', () => {
-            clickSfx.currentTime = 0;
-            clickSfx.volume = 0.5;
-            clickSfx.play().catch(() => {});
-        });
-    </script>
 <script>
 
 const bgm = new Audio('https://cdn.pixabay.com/download/audio/2026/02/11/audio_1c5f7e241c.mp3?filename=idoberg-fun-indie-game-type-jazz-music-483446.mp3');
@@ -1403,12 +1383,12 @@ updateHomeNav() {
   statsContainer.innerHTML = `
     ${btnSt}
 
-        <button class="duo-btn-reward duo-wr" onclick="bgmTog()">
+        <button class="duo-btn-reward duo-wr" onmousedown="bgmTog()">
         <i id="tgM" class="fa-solid fa-toggle-on"></i>
         <span>BGM</span>
       </button>
       
-        <button class="duo-btn-reward duo-wr" onclick="window.openSheet({
+        <button class="duo-btn-reward duo-wr" onmousedown="window.openSheet({
   title: 'Reset Progress?',
   body: '<p>This will erase your saved progress.</p>',
   buttons: [
