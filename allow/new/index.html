@@ -879,7 +879,7 @@
       const userName = localStorage.getItem('user_name') || 'there';
       window.Dialogue.open([
         { pose: 'wave', text: `Hi, ${userName}! I'm ${char.name}. I'll be your writing buddy!` },
-        { pose: 'smile', text: `Each door has levels to complete. Finish all levels to unlock the next door.`, options: [{ label: "LET'S GO!", color: 'green' }] }
+        { pose: 'point', text: `Each door has levels to complete. Finish all levels to unlock the next door.`, options: [{ label: "LET'S GO!", color: 'green' }] }
       ]);
     };
     pGrid.appendChild(card);
@@ -950,12 +950,12 @@
     if (!isRevisit) {
       steps = [
         { pose: 'wave', text: `Hi, ${userName}! Welcome to ${doorLabel}! This door will sharpen your writing skills. Complete each level to move forward.` },
-        { pose: 'smile', text: `Here's what you'll practice in ${doorLabel}:${mats ? '\n\n' + mats.map(m => `• ${m.topic}: ${m.info}`).join('\n') : ''}`, options: [{ label: 'GOT IT!', color: 'green' }] },
+        { pose: 'wave', text: `Here's what you'll practice in ${doorLabel}:${mats ? '\n\n' + mats.map(m => `• ${m.topic}: ${m.info}`).join('\n') : ''}`, options: [{ label: 'GOT IT!', color: 'green' }] },
         { pose: 'point', text: `Let's begin! You can do this!`, options: [{ label: 'START!', color: 'gold' }] }
       ];
     } else {
       steps = [
-        { pose: 'smile', text: `Welcome back to ${doorLabel}, ${userName}!${mats ? '\n\nQuick review:\n' + mats.map(m => `• ${m.topic}: ${m.info}`).join('\n') : ' Keep going and finish all the levels!'}`, options: [{ label: "LET'S GO!", color: 'blue' }] }
+        { pose: 'wave', text: `Welcome back to ${doorLabel}, ${userName}!${mats ? '\n\nQuick review:\n' + mats.map(m => `• ${m.topic}: ${m.info}`).join('\n') : ' Keep going and finish all the levels!'}`, options: [{ label: "LET'S GO!", color: 'blue' }] }
       ];
     }
 
@@ -1239,7 +1239,7 @@ _loadFinalWritingQuest(level) {
     const charId = localStorage.getItem('game_char_id') || 'a';
     window.Dialogue.open([{
       charId,
-      pose: 'smile',
+      pose: 'wave',
       text: `Great job! Now let's finish this level with one final quest!`,
       options: [{ label: "LET'S GO!", color: 'gold' }]
     }], () => {
