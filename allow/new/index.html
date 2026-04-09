@@ -472,7 +472,7 @@
       // Global Trigger Function
       window.triggerMoti = function(config = {}) {
         const defaults = {
-          img: 'https://i.imgur.com/8N69vV9.png',
+          img: charImg,
           title: 'Motivation',
           msg: "You're doing great! Keep going!"
         };
@@ -979,6 +979,8 @@
   </style>
   <script>
 
+const charId = localStorage.getItem('game_char_id') || 'a';
+    const charImg = `https://allwrite-sh.vercel.app/${charId}-wave.png`;
 const emojis = ['✨', '🎉', '🎊', '🎈', '⭐'];
 
 window.nice = () => {
@@ -1114,25 +1116,32 @@ let qType = q.type || 'choice';
     else window.nextQuest(questionData);
     this.updateNavButtons();
   },
-
 _loadFinalWritingQuest(level) {
-  // Lock choice to the specific level ID to prevent cross-level leaking
   if (!this.fixedFinalQuest || this.lastLevelId !== level.id) {
-    this.lastLevelId = level.id; // Track current level
+    this.lastLevelId = level.id;
     
     const pool = level.questions.filter(q => !q.question.toLowerCase().startsWith('identify'));
-    
-    // Fallback if pool is empty
     if (pool.length === 0) return this.completeLevel();
 
     const src = pool[Math.floor(Math.random() * pool.length)];
-    const stripped = src.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
-    const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
+    let stripped = src.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
+    
+    // Add dot to the prompt instruction if the answer has one
+    if (src.answer && src.answer.endsWith('.') && !stripped.endsWith('.')) {
+      stripped += '.';
+    }
+    
+    const writePrompt = `Final: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
+
+    // Simple Logic: If choices exist, use 'choice'. Otherwise, use 'input'.
+    const finalOptions = src.choices || src.options || [];
+    const finalType = finalOptions.length > 0 ? 'choice' : 'input';
 
     this.fixedFinalQuest = {
-      type: 'input',
+      type: finalType,
       question: writePrompt,
-      answer: 'ANY',
+      options: finalOptions,
+      answer: src.answer,
       contains: src.contains || [],
       hint: src.hint || '',
       onCorrect: () => {
@@ -1157,11 +1166,11 @@ _loadFinalWritingQuest(level) {
     window.Dialogue.open([{
       charId,
       pose: 'smile',
-      text: `Great job level is done! Now let's finish this level with one final quest!`,
+      text: `Great job! Now let's finish this level with one final quest!`,
       options: [{ label: "LET'S GO!", color: 'gold' }]
     }], () => {
       window.nextQuest(finalQ);
-      window.triggerMoti({ title: "Done!", msg: "Level Finished!", img: "https://i.imgur.com/8N69vV9.png" });
+      if (window.triggerMoti) window.triggerMoti({ title: "Done!", msg: "Level Finished!", img: charImg });
       this.updateProgressUI();
       this.updateNavButtons();
     });
@@ -1171,8 +1180,7 @@ _loadFinalWritingQuest(level) {
     this.updateNavButtons();
   }
 },
-  
-  updateNavButtons() {
+updateNavButtons() {
     const prog = this.getProgress();
     const hasClearedNext = (this.currentDoor < prog.door) ||
                            (this.currentDoor === prog.door && this.currentLevel < prog.level) ||
@@ -1287,7 +1295,7 @@ _loadFinalWritingQuest(level) {
     if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
     this.saveProgress(nDoor, nLvl, 0);
     this._fromGame = true; // came from inside the game, skip door dialogue
-    if (window.triggerMoti) window.triggerMoti({ title: "Next!", msg: "Level Up!", img: "https://i.imgur.com/8N69vV9.png" });
+    if (window.triggerMoti) window.triggerMoti({ title: "Next!", msg: "Level Up!", img: charImg });
     setTimeout(() => { this.isTransitioning = false; this.showLevelList(this.currentDoor); }, 2000);
   },
 
