@@ -1008,6 +1008,29 @@ const DUO_PALETTE = {
   gray:   { bg: '#afafaf', shadow: '#888888', text: '#ffffff' }
 };
 
+const HARD_CODED_FINALS = {
+  "0-0": { type:'choice', question:'Correct spelling of "Litle"', options:['Litle','Little','Littel'], answer:'Little' },
+  "0-1": { type:'choice', question:'Correct spelling of "Ridding"', options:['Ridding','Riding','Riddng'], answer:'Riding' },
+  "0-2": { type:'choice', question:'Choose the correct sentence', options:['i live in the philippines','I live in the Philippines','I live in the philippines'], answer:'I live in the Philippines' },
+  "0-3": { type:'choice', question:'Choose the correct sentence', options:['my teacher is mr. santos','My teacher is Mr. Santos','My Teacher is Mr. santos'], answer:'My teacher is Mr. Santos' },
+  "0-4": { type:'choice', question:'Fix the sentence: i have a sister named maria she is very kind', options:['I have a sister named Maria. She is very kind.','I have a sister named maria she is very kind','I have a sister named Maria she is very kind'], answer:'I have a sister named Maria. She is very kind.' },
+  "1-0": { type:'choice', question:'What punctuation ends a sentence?', options:['.','?','!'], answer:'.' },
+  "1-1": { type:'choice', question:'What punctuation asks a question?', options:['.','?','!'], answer:'?' },
+  "1-2": { type:'choice', question:'What punctuation shows strong feeling?', options:['.','?','!'], answer:'!' },
+  "1-3": { type:'choice', question:'Where are you now __', options:['.','?','!'], answer:'?' },
+  "1-4": { type:'choice', question:'I am very happy __', options:['.','?','!'], answer:'!' },
+  "2-0": { type:'choice', question:'Choose one familiar place', options:['Classroom','Home','Market','Playground'], answer:'Classroom' },
+  "3-0": { type:'choice', question:'The ___ barks loudly.', options:['The dog','Anna','Sun'], answer:'The dog' },
+  "3-1": { type:'choice', question:'___ writes a letter.', options:['Anna','Children','Sun'], answer:'Anna' },
+  "3-2": { type:'choice', question:'The ___ play in the park.', options:['Children','Sun','Father'], answer:'Children' },
+  "3-3": { type:'choice', question:'The ___ shines brightly.', options:['Sun','Dog','Father'], answer:'Sun' },
+  "3-4": { type:'choice', question:'Choose correct sentence', options:['He run fast','He runs fast','He running fast'], answer:'He runs fast' },
+  "4-0": { type:'choice', question:'Complete: I am ________.', options:['happy','run','book'], answer:'happy' },
+  "4-1": { type:'choice', question:'Complete: I like ________.', options:['apples','sing','fast'], answer:'apples' },
+  "4-2": { type:'choice', question:'Complete: I can ________.', options:['sing','apple','home'], answer:'sing' },
+  "4-3": { type:'choice', question:'Expand: I eat.', options:['I eat rice at home.','I eat.','Eat I rice'], answer:'I eat rice at home.' },
+  "4-4": { type:'choice', question:'Expand: She runs.', options:['She runs in the park.','She run park','She runs'], answer:'She runs in the park.' }
+};
 const INPUT_TRIGGERS = ["write", "rewrite", "type", "input", "list"];
 
 const GameEngine = {
@@ -1069,97 +1092,50 @@ async fetchData() {
     } catch(e) { console.error("Data Fetch Error:", e); }
   },
 
+loadActiveQuestion(isFirst = false) {
+  const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
+  const totalQ = level.questions.length;
 
-  loadActiveQuestion(isFirst = false) {
-    const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
-    const totalQ = level.questions.length;
-
-    // Index beyond last real question = final writing quest
-    if (this.currentQuestion === totalQ) {
-      return this._loadFinalWritingQuest(level);
-    }
-    // Index beyond that = actually complete
-    if (this.currentQuestion > totalQ) {
-      return this.completeLevel();
-    }
-
-    const q = level.questions[this.currentQuestion];
-    this.updateProgressUI();
-let qType = q.type || 'choice';
-    const qTextLower = q.question.toLowerCase();
-    const hasChoices = (q.choices || q.options || []).length > 0;
-    const isInputTrigger = !hasChoices && INPUT_TRIGGERS.some(t => qTextLower.includes(t));
-
-    if (isInputTrigger || qType === 'input') { qType = 'input'; }
-    else if (qType === 'word' || qType === 'choice') { qType = 'choice'; }
-    else if (qType === 'order') { qType = 'reorder'; }
-
-
-    const questionData = {
-      type: qType,
-      question: q.question,
-      options: q.choices || q.options || [],
-      answer: q.answer,
-      contains: q.contains || [],
-      hint: q.hint || '',
-      onCorrect: () => {
-        if (this.isTransitioning) return;
-        this.isTransitioning = true;
-        this.play('correct');
-        this.currentQuestion++;
-        this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
-        setTimeout(() => { this.isTransitioning = false; this.loadActiveQuestion(false); }, 1200);
-      }
-    };
-
-    if (isFirst) window.setQuestion(questionData);
-    else window.nextQuest(questionData);
-    this.updateNavButtons();
-  },
-_loadFinalWritingQuest(level) {
-  if (!this.fixedFinalQuest || this.lastLevelId !== level.id) {
-    this.lastLevelId = level.id;
-    
-    const pool = level.questions.filter(q => !q.question.toLowerCase().startsWith('identify'));
-    if (pool.length === 0) return this.completeLevel();
-
-    const src = pool[Math.floor(Math.random() * pool.length)];
-    let stripped = src.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
-    
-    // Add dot to the prompt instruction if the answer has one
-    if (src.answer && src.answer.endsWith('.') && !stripped.endsWith('.')) {
-      stripped += '.';
-    }
-    
-    const writePrompt = `Final: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
-
-    // Simple Logic: If choices exist, use 'choice'. Otherwise, use 'input'.
-    const finalOptions = src.choices || src.options || [];
-    const finalType = finalOptions.length > 0 ? 'choice' : 'input';
-
-    this.fixedFinalQuest = {
-      type: finalType,
-      question: writePrompt,
-      options: finalOptions,
-      answer: src.answer,
-      contains: src.contains || [],
-      hint: src.hint || '',
-      onCorrect: () => {
-        if (this.isTransitioning) return;
-        this.isTransitioning = true;
-        this.play('correct');
-        this.currentQuestion++;
-        this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
-        setTimeout(() => { 
-          this.isTransitioning = false; 
-          this.fixedFinalQuest = null; 
-          this.completeLevel(); 
-        }, 1200);
-      }
-    };
+  // If we reach the end of the regular array, load the hard-coded final
+  if (this.currentQuestion === totalQ) {
+    return this._loadFinalWritingQuest(level);
+  }
+  
+  // If beyond the final quest, level is complete
+  if (this.currentQuestion > totalQ) {
+    return this.completeLevel();
   }
 
-  const finalQ = this.fixedFinalQuest;
+  const q = level.questions[this.currentQuestion];
+  this._renderQuestion(q, isFirst);
+  this.updateProgressUI();
+  this.updateNavButtons();
+},
+
+_loadFinalWritingQuest(level) {
+  const key = `${this.currentDoor}-${this.currentLevel}`;
+  const hardQ = HARD_CODED_FINALS[key];
+
+  // If there's no hard-coded final for this specific level, just finish the level
+  if (!hardQ) return this.completeLevel();
+
+  const finalQData = {
+    type: hardQ.type || 'choice',
+    question: `Final: ${hardQ.question}`,
+    options: hardQ.options || [],
+    answer: hardQ.answer,
+    onCorrect: () => {
+      if (this.isTransitioning) return;
+      this.isTransitioning = true;
+      this.play('correct');
+      this.currentQuestion++;
+      this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
+      setTimeout(() => { 
+        this.isTransitioning = false; 
+        this.completeLevel(); 
+      }, 1200);
+    }
+  };
 
   if (window.Dialogue) {
     const charId = localStorage.getItem('game_char_id') || 'a';
@@ -1169,16 +1145,47 @@ _loadFinalWritingQuest(level) {
       text: `Great job! Now let's finish this level with one final quest!`,
       options: [{ label: "LET'S GO!", color: 'gold' }]
     }], () => {
-      window.nextQuest(finalQ);
+      window.nextQuest(finalQData);
       if (window.triggerMoti) window.triggerMoti({ title: "Done!", msg: "Level Finished!", img: charImg });
       this.updateProgressUI();
       this.updateNavButtons();
     });
   } else {
-    window.nextQuest(finalQ);
+    window.nextQuest(finalQData);
     this.updateProgressUI();
     this.updateNavButtons();
   }
+},
+
+_renderQuestion(q, isFirst) {
+  let qType = q.type || 'choice';
+  const qTextLower = q.question.toLowerCase();
+  const hasChoices = (q.choices || q.options || []).length > 0;
+  const isInputTrigger = !hasChoices && INPUT_TRIGGERS.some(t => qTextLower.includes(t));
+
+  if (isInputTrigger || qType === 'input') { qType = 'input'; }
+  else if (qType === 'word' || qType === 'choice') { qType = 'choice'; }
+  else if (qType === 'order') { qType = 'reorder'; }
+
+  const questionData = {
+    type: qType,
+    question: q.question,
+    options: q.choices || q.options || [],
+    answer: q.answer,
+    contains: q.contains || [],
+    hint: q.hint || '',
+    onCorrect: () => {
+      if (this.isTransitioning) return;
+      this.isTransitioning = true;
+      this.play('correct');
+      this.currentQuestion++;
+      this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
+      setTimeout(() => { this.isTransitioning = false; this.loadActiveQuestion(false); }, 1200);
+    }
+  };
+
+  if (isFirst) window.setQuestion(questionData);
+  else window.nextQuest(questionData);
 },
 updateNavButtons() {
     const prog = this.getProgress();
@@ -1299,22 +1306,69 @@ updateNavButtons() {
     setTimeout(() => { this.isTransitioning = false; this.showLevelList(this.currentDoor); }, 2000);
   },
 
-  updateHomeNav() {
-    const prog = this.getProgress();
-    const statsContainer = document.getElementById('home-stats');
-    if (!statsContainer || !this.data) return;
-    let totalQ = 0, totalLvl = 0;
-    this.data.doors.forEach((door, dIdx) => {
-      door.levels.forEach((level, lIdx) => {
-        if (dIdx < prog.door || (dIdx === prog.door && lIdx < prog.level)) { totalQ += level.questions.length; totalLvl++; }
-        else if (dIdx === prog.door && lIdx === prog.level) { totalQ += prog.q; }
-      });
+updateHomeNav() {
+  const prog = this.getProgress();
+  const statsContainer = document.getElementById('home-stats');
+  if (!statsContainer || !this.data) return;
+
+  let totalQ = 0, totalLvl = 0;
+  this.data.doors.forEach((door, dIdx) => {
+    door.levels.forEach((level, lIdx) => {
+      if (dIdx < prog.door || (dIdx === prog.door && lIdx < prog.level)) { 
+        totalQ += level.questions.length; 
+        totalLvl++; 
+      }
+      else if (dIdx === prog.door && lIdx === prog.level) { 
+        totalQ += prog.q; 
+      }
     });
-    statsContainer.innerHTML = `
-      <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};"><i class="fa-solid fa-check"></i> ${totalLvl}</span>
-      <span style="color:${DUO_PALETTE.gold.bg}; display:flex; align-items:center; gap:5px;"><i class="fa-solid fa-fire"></i> ${totalQ}</span>
+  });
+
+  // Check if user has reached Door 5
+  let rewardBtn = '';
+  if (prog.door >= 5) {
+    rewardBtn = `
+      <button class="duo-btn-reward" onclick="window.location.href='https://allwrite-sh.vercel.app/allow/rewards'">
+        <i class="fa-solid fa-medal"></i>
+        <span>REWARDS</span>
+      </button>
+      <style>
+        .duo-btn-reward {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          background-color: #ffc800;
+          color: #af7a00;
+          font-family: 'din-round', sans-serif;
+          font-weight: bold;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          border-bottom: 4px solid #e5a500;
+          transition: all 0.1s;
+          text-transform: uppercase;
+          margin-right: 10px;
+          font-size: 12px;
+        }
+        .duo-btn-reward:active {
+          border-bottom-width: 0px;
+          transform: translateY(4px);
+        }
+      </style>
     `;
-  },
+  }
+
+  statsContainer.innerHTML = `
+    ${rewardBtn}
+    <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
+      <i class="fa-solid fa-check"></i> ${totalLvl}
+    </span>
+    <span style="color:${DUO_PALETTE.gold.bg}; display:flex; align-items:center; gap:5px;">
+      <i class="fa-solid fa-fire"></i> ${totalQ}
+    </span>
+  `;
+},
 
   updateProgressUI() {
     const level = this.data.doors[this.currentDoor].levels[this.currentLevel];
