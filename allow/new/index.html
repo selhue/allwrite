@@ -10,9 +10,13 @@
 </head>
 
 <style>
-       body {    background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.jpg'); 
-            background-size: cover; background-position: center;
-            font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif; background-color: #000; color: var(--duo-text); display: flex; justify-content: center; height: 100dvh; overflow: hidden; }
+    body {    
+      background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.jpg'); 
+      background-size: cover; background-position: center;
+      font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif; 
+      background-color: #000; color: var(--duo-text); 
+      display: flex; justify-content: center; height: 100dvh; overflow: hidden; 
+    }
   .bg-dim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: -1; }
 
 </style>   <div class="bg-dim"></div>
@@ -572,7 +576,7 @@
 
           if (data.type === 'reorder') {
             const zone = document.createElement('div'); zone.className = 'reorder-zone';
-            data.options.sort(() => Math.random() - 0.5).forEach(opt => {
+            [...data.options].sort(() => Math.random() - 0.5).forEach(opt => {
               const p = document.createElement('div'); p.className = 'word-pill'; p.draggable = true; p.textContent = opt;
               p.ondragstart = () => p.classList.add('dragging'); p.ondragend = () => p.classList.remove('dragging');
               zone.appendChild(p);
@@ -588,7 +592,7 @@
           }
           else if (data.type === 'choice') {
             const grid = document.createElement('div'); grid.className = 'choice-grid';
-            data.options.forEach(opt => {
+            [...data.options].sort(() => Math.random() - 0.5).forEach(opt => {
               const b = document.createElement('button'); b.className = 'q-btn'; b.textContent = opt;
               b.onclick = () => { this.userVal = opt; this.validate(b); };
               grid.appendChild(b);
@@ -627,7 +631,6 @@
                   } else if (key === "SPACE") {
                     k.textContent = 'SPACE'; k.classList.add('space');
                     k.onclick = () => {
-                      // prevent double space
                       if (this.userVal.slice(-1) !== ' ') { this.userVal += ' '; disp.textContent = this.userVal; }
                     };
                   } else if (key === "CLEAR") {
@@ -670,7 +673,6 @@
             ok = JSON.stringify(cur) === JSON.stringify(data.answer);
           }
           else if (data.type === 'input') {
-            // Basic format checks always apply
             const isCapitalized = /^[A-Z]/.test(input);
             const hasPunctuation = /[.!?,;]$/.test(input);
             const noDoubleSpace = !/  /.test(input);
@@ -681,24 +683,18 @@
             else if (!hasPunctuation) { failMsg = "End with . ! ? or ,"; ok = false; }
             else if (!noDoubleSpace) { failMsg = "No double spaces!"; ok = false; }
             else if (isAny) {
-              // ANY: check contains array if provided
               const mustContain = data.contains || [];
               const missing = mustContain.filter(word => !input.includes(word));
-              if (missing.length > 0) {
-                failMsg = `Include the word: "${missing[0]}"`;
-                ok = false;
-              } else {
-                ok = true;
-              }
+              if (missing.length > 0) { failMsg = `Include the word: "${missing[0]}"`; ok = false; }
+              else { ok = true; }
             }
             else {
-              // Exact match
               ok = input === target;
               if (!ok) failMsg = "Not quite right";
             }
           }
           else {
-            ok = input === target || this.userVal === target;
+            ok = this.userVal === target;
           }
 
           playSound(ok ? 'correct' : 'error');
@@ -709,10 +705,7 @@
           btnTarget.classList.add(ok ? 'correct' : 'wrong');
 
           if (ok) {
-            setTimeout(() => {
-              this.classList.add('fade-out');
-              if (data.onCorrect) data.onCorrect();
-            }, 1000);
+            setTimeout(() => { this.classList.add('fade-out'); if (data.onCorrect) data.onCorrect(); }, 1000);
           } else {
             setTimeout(() => { btnTarget.classList.remove('wrong'); fb.textContent = ""; }, 1800);
           }
@@ -742,7 +735,6 @@ const DUO_PALETTE = {
   gray:   { bg: '#afafaf', shadow: '#888888', text: '#ffffff' }
 };
 
-// Keywords that force input type
 const INPUT_TRIGGERS = ["write", "rewrite", "type", "input", "list"];
 
 const GameEngine = {
@@ -767,6 +759,25 @@ const GameEngine = {
       const text = await res.text();
       const json = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
       this.data = JSON.parse(json);
+
+      // Inject "Test!" level into every door — all questions forced to input type
+      this.data.doors.forEach(door => {
+        const allQuestions = door.levels.flatMap(l => l.questions);
+        const testQuestions = allQuestions.map(q => {
+          // Strip original question down to the core subject, prefix with "Write: "
+          const stripped = q.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
+          const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
+          return {
+            ...q,
+            type: 'input',
+            question: writePrompt,
+            answer: 'ANY',
+            contains: q.contains || []
+          };
+        });
+        door.levels.push({ title: "Test!", questions: testQuestions });
+      });
+
     } catch(e) { console.error("Data Fetch Error:", e); }
   },
 
@@ -808,7 +819,6 @@ const GameEngine = {
 
     this.updateProgressUI();
 
-    // Resolve type
     let qType = q.type || 'choice';
     const qTextLower = q.question.toLowerCase();
     const isInputTrigger = INPUT_TRIGGERS.some(t => qTextLower.includes(t));
@@ -821,15 +831,12 @@ const GameEngine = {
       qType = 'reorder';
     }
 
-    const target = (q.answer || '').trim();
-    const isAny = target.toUpperCase() === 'ANY' || target === '';
-
     const questionData = {
       type: qType,
       question: q.question,
       options: q.choices || q.options || [],
       answer: q.answer,
-      contains: q.contains || [],   // pass through contains array
+      contains: q.contains || [],
       hint: q.hint || '',
       onCorrect: () => {
         if (this.isTransitioning) return;
@@ -837,10 +844,7 @@ const GameEngine = {
         this.play('correct');
         this.currentQuestion++;
         this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
-        setTimeout(() => {
-          this.isTransitioning = false;
-          this.loadActiveQuestion(false);
-        }, 1200);
+        setTimeout(() => { this.isTransitioning = false; this.loadActiveQuestion(false); }, 1200);
       }
     };
 
@@ -856,7 +860,6 @@ const GameEngine = {
                            (this.currentDoor === prog.door && this.currentLevel === prog.level && (this.currentQuestion + 1) <= prog.q);
     const prevBtn = document.getElementById('nav-prev');
     const nextBtn = document.getElementById('nav-next');
-
     if (prevBtn) {
       prevBtn.style.opacity = this.currentQuestion === 0 ? "0.2" : "1";
       prevBtn.onclick = this.currentQuestion === 0 ? null : () => { this.currentQuestion--; this.loadActiveQuestion(false); };
@@ -873,8 +876,7 @@ const GameEngine = {
       const el = document.querySelector(screens[k]);
       if (el) el.style.display = (screen === k) ? 'flex' : 'none';
     });
-    const isGame = screen === 'game';
-    const isHome = screen === 'map' || screen === 'list';
+    const isGame = screen === 'game', isHome = screen === 'map' || screen === 'list';
     if (document.getElementById('home-top-nav')) document.getElementById('home-top-nav').style.display = isHome ? 'flex' : 'none';
     if (document.getElementById('game-top-nav')) document.getElementById('game-top-nav').style.display = isGame ? 'flex' : 'none';
     if (document.getElementById('game-nav-bar')) document.getElementById('game-nav-bar').style.display = isGame ? 'flex' : 'none';
@@ -909,9 +911,11 @@ const GameEngine = {
     const prog = this.getProgress();
     this.toggleScreen('list');
     const levelButtons = door.levels.map((l, i) => {
+      const isTest = l.title === "Test!";
       const isLocked = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
       const isCurrent = (doorIdx === prog.door && i === prog.level);
-      const theme = isLocked ? DUO_PALETTE.white : DUO_PALETTE.gold;
+      // Test level uses purple theme if unlocked
+      const theme = isLocked ? DUO_PALETTE.white : (isTest ? DUO_PALETTE.purple : DUO_PALETTE.gold);
       return {
         label: isLocked ? '🔒 Locked' : (isCurrent && prog.q > 0 ? `Lvl ${i+1} (Resume)` : `Lvl ${i+1}: ${l.title}`),
         color: theme.bg, shadow: theme.shadow, textColor: isLocked ? DUO_PALETTE.gray.bg : theme.text,
@@ -990,7 +994,6 @@ const GameEngine = {
       hNav.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span></div><div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>`;
       document.body.appendChild(hNav);
     }
-
     if (!document.getElementById('game-top-nav')) {
       const gNav = document.createElement('div');
       gNav.id = "game-top-nav";
@@ -1006,7 +1009,6 @@ const GameEngine = {
       document.body.appendChild(gNav);
       document.getElementById('game-exit').onclick = () => this.showLevelList(this.currentDoor);
     }
-
     if (!document.getElementById('game-nav-bar')) {
       const bNav = document.createElement('div');
       bNav.id = "game-nav-bar";
@@ -1019,7 +1021,6 @@ const GameEngine = {
       `;
       document.body.appendChild(bNav);
     }
-
     const style = document.createElement('style');
     style.innerHTML = `
       door-co, list-co { margin-top: 70px !important; margin-bottom: 20px !important; }
