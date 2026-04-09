@@ -731,7 +731,7 @@
     /* Blurred Background for Dialogs */ 
     .duo-dialog {
       border: none; padding: 0; margin: 0; 
-      width: 100dvw; height: 50dvh; max-width: none; max-height: 50dvh;
+      width: 100dvw; height: 100dvh; max-width: none; max-height:none;
       background: transparent; overflow-x: hidden;
     }
     .duo-dialog::backdrop {
@@ -754,30 +754,41 @@
     }
     .profile-card:hover { transform: translateY(-5px); background: #f7f7f7; border-color: #1cb0f6; }
     .profile-card:active { border-bottom-width: 3px; transform: translateY(2px); }
-    .profile-card img { width: 110px; height: 110px; object-fit: contain; pointer-events: none; }
+    .profile-card img { width: 80px; height: 90px; object-fit: contain; pointer-events: none; }
     .profile-card span { display: block; margin-top: 12px; font-weight: 800; color: #4b4b4b; font-size: 14px; }
+
+    #game-dialogue-ui,.bubble {
+      max-height: 50dvh;
+      overflow-y: scroll;
+    }
+
 
     /* Dialogue UI */
     #dialogue-overlay {
-      position: fixed; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: flex-end; padding-bottom: 40px;
+      position: fixed; inset: 0; display: flex; margin: 0.1in; flex-direction: column;
+      align-items: center; justify-content: flex-end; padding-bottom: -10px;
       font-family: 'Segoe UI', sans-serif;
     }
-    .char-box { position: relative; margin-bottom: -45px; z-index: 10; pointer-events: none; }
+    .char-box { position: relative; margin-bottom: -45px; z-index: 4; pointer-events: none; }
     .char-img { width: 220px; height: 220px; object-fit: contain; }
     .bubble {
       background: white; border: 4px solid #e5e5e5; border-radius: 28px;
-      width: 90%; max-width: 500px; padding: 45px 25px 25px;
+      width: 90%; max-width: 500px; padding: 45px 25px 25px;z-index: 6; 
       box-shadow: 0 10px 0 #e5e5e5; position: relative;
     }
     .name-tag {
-      position: absolute; top: -20px; left: 30px; background: #58cc02; color: white;
+        position: sticky;  top:0px;
+     display:flex;top: -20px; left: 30px; background: #58cc02; color: white;
       padding: 8px 24px; border-radius: 14px; font-weight: 900; text-transform: uppercase;
       border-bottom: 4px solid #46a302; font-size: 14px;
     }
     .msg { font-size: 1.4rem; color: #3c3c3c; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
-    .btns { display: flex; flex-direction: column; gap: 12px; }
+    .btns {display: flex; flex-direction: column; gap: 12px; }
+    #diag-btns {
+         position: sticky;  bottom:0px;
+    }
     .d-btn {
+    
       width: 100%; border: 2px solid transparent; padding: 18px; border-radius: 20px;
       font-weight: 800; cursor: pointer; text-align: center; transition: 0.1s;
       text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;
