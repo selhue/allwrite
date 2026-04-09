@@ -19,7 +19,8 @@
     }
   .bg-dim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: -1; }
 
-</style>   <div class="bg-dim"></div>
+</style>   
+<div class="bg-dim"></div>
 
 <body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -1020,6 +1021,40 @@ const setVolume = (val) => bgm.volume = val;
     }
   </style>
   <script>
+  function openDoorSelector() {
+  window.openSheet({
+    title: 'Select Door',
+    body: '<p>Pick a door to unlock</p>',
+    buttons: [
+      { text: 'Door 1', color: 'white', action: () => unlockDoor(0) },
+      { text: 'Door 2', color: 'white', action: () => unlockDoor(1) },
+      { text: 'Door 3', color: 'white', action: () => unlockDoor(2) },
+      { text: 'Door 4', color: 'white', action: () => unlockDoor(3) },
+      { text: 'Door 5', color: 'white', action: () => unlockDoor(4) }
+    ]
+  });
+}
+
+function unlockDoor(door) {
+  let progress = JSON.parse(localStorage.getItem('allwrite_progress') || '{"door":0,"level":1,"q":0}')
+
+  progress.door = door
+  progress.level = Math.max(progress.level, door)
+  progress.q = 0
+
+  localStorage.setItem('allwrite_progress', JSON.stringify(progress))
+
+  window.openSheet({
+    title: 'Unlocked',
+    body: `<p>Door ${door} unlocked</p>`,
+    buttons: [
+      { text: 'OK', color: 'white', action: () => console.log('ok') }
+    ]
+  });
+  window.location.reload(true); 
+}
+  </script>
+  <script>
 
 const charId = localStorage.getItem('game_char_id') || 'a';
     const charImg = `https://allwrite-sh.vercel.app/${charId}-wave.png`;
@@ -1442,9 +1477,9 @@ updateHomeNav() {
         }
       </style>
     
-    <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
+    <button style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
       <i class="fa-solid fa-check"></i> ${totalLvl}
-    </span>
+    </button>
     <span style="color:${DUO_PALETTE.gold.bg}; display:flex; align-items:center; gap:5px;">
       <i class="fa-solid fa-fire"></i> ${totalQ}
     </span>
@@ -1482,7 +1517,12 @@ updateHomeNav() {
       hNav.id = "home-top-nav";
       hNav.style = `position:fixed; top:0; left:0; width:100%; height:60px; background:transparent; z-index:900; display:flex; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;`;
       hNav.innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px;"><span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span></div>
+      <div 
+        style="display:flex; align-items:center; gap:10px;">
+        <span  ondblclick="openDoorSelector()"
+        style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">
+        ALLWRITE</span>
+        </div>
       
       <div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>
       
@@ -1495,7 +1535,7 @@ updateHomeNav() {
       gNav.style = `position:fixed; top:0; left:0; width:100%; height:70px; display:none; align-items:center; justify-content:center; padding:0 20px; z-index:1000; box-sizing:border-box; background:transparent;`;
       gNav.innerHTML = `
         <div style="display:flex; align-items:center; gap:15px; width:100%; max-width:600px;">
-          <i class="fa-solid fa-xmark" id="game-exit" style="font-size:22px; color:#afafaf; cursor:pointer;"></i>
+          <i class="fa-solid fa-xmark"  id="game-exit" style="font-size:22px; color:#afafaf; cursor:pointer;"></i>
           <div id="game-prog-bg" style="flex:1; height:10px; background:#e5e5e5; border-radius:10px; overflow:hidden;">
             <div id="game-prog-fill" style="width:0%; height:100%; background:${DUO_PALETTE.gold.bg}; transition:width 0.3s ease;"></div>
           </div>
