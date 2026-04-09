@@ -1134,7 +1134,7 @@ const GameEngine = {
 
 async fetchData() {
     try {
-      const res = await fetch('http://allwrite-sh.vercel.app/data.js');
+      const res = await fetch('http://selhue.com/allwrite/data.js');
       const text = await res.text();
       const json = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
       this.data = JSON.parse(json);
