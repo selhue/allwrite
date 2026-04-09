@@ -1083,14 +1083,15 @@ async fetchData() {
 
     const q = level.questions[this.currentQuestion];
     this.updateProgressUI();
-
-    let qType = q.type || 'choice';
+let qType = q.type || 'choice';
     const qTextLower = q.question.toLowerCase();
-    const isInputTrigger = INPUT_TRIGGERS.some(t => qTextLower.includes(t));
+    const hasChoices = (q.choices || q.options || []).length > 0;
+    const isInputTrigger = !hasChoices && INPUT_TRIGGERS.some(t => qTextLower.includes(t));
 
     if (isInputTrigger || qType === 'input') { qType = 'input'; }
     else if (qType === 'word' || qType === 'choice') { qType = 'choice'; }
     else if (qType === 'order') { qType = 'reorder'; }
+
 
     const questionData = {
       type: qType,
@@ -1114,14 +1115,21 @@ async fetchData() {
     this.updateNavButtons();
   },
 
-  _loadFinalWritingQuest(level) {
-    // Pick a random question from the level, exclude Identify, force to input/write
+_loadFinalWritingQuest(level) {
+  // Lock choice to the specific level ID to prevent cross-level leaking
+  if (!this.fixedFinalQuest || this.lastLevelId !== level.id) {
+    this.lastLevelId = level.id; // Track current level
+    
     const pool = level.questions.filter(q => !q.question.toLowerCase().startsWith('identify'));
-    const src  = pool[Math.floor(Math.random() * pool.length)];
+    
+    // Fallback if pool is empty
+    if (pool.length === 0) return this.completeLevel();
+
+    const src = pool[Math.floor(Math.random() * pool.length)];
     const stripped = src.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
     const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
 
-    const finalQ = {
+    this.fixedFinalQuest = {
       type: 'input',
       question: writePrompt,
       answer: 'ANY',
@@ -1131,34 +1139,39 @@ async fetchData() {
         if (this.isTransitioning) return;
         this.isTransitioning = true;
         this.play('correct');
-        this.currentQuestion++; // push past totalQ so next call hits completeLevel
+        this.currentQuestion++;
         this.saveProgress(this.currentDoor, this.currentLevel, this.currentQuestion);
-        setTimeout(() => { this.isTransitioning = false; this.completeLevel(); }, 1200);
+        setTimeout(() => { 
+          this.isTransitioning = false; 
+          this.fixedFinalQuest = null; 
+          this.completeLevel(); 
+        }, 1200);
       }
     };
+  }
 
-    // Show dialogue first, then load the question
-    if (window.Dialogue) {
-      const charName = localStorage.getItem('game_char_name') || 'Friend';
-      const charId   = localStorage.getItem('game_char_id') || 'a';
-      window.Dialogue.open([
-        {
-          charId,
-          pose: 'smile',
-          text: `Great job! Now let's finish this level with one final quest!`,
-          options: [{ label: "LET'S GO!", color: 'gold' }]
-        }
-      ], () => {
-        window.nextQuest(finalQ);
-        this.updateProgressUI();
-        this.updateNavButtons();
-      });
-    } else {
+  const finalQ = this.fixedFinalQuest;
+
+  if (window.Dialogue) {
+    const charId = localStorage.getItem('game_char_id') || 'a';
+    window.Dialogue.open([{
+      charId,
+      pose: 'smile',
+      text: `Great job level is done! Now let's finish this level with one final quest!`,
+      options: [{ label: "LET'S GO!", color: 'gold' }]
+    }], () => {
       window.nextQuest(finalQ);
+      window.triggerMoti({ title: "Done!", msg: "Level Finished!", img: "https://i.imgur.com/8N69vV9.png" });
       this.updateProgressUI();
       this.updateNavButtons();
-    }
-  },
+    });
+  } else {
+    window.nextQuest(finalQ);
+    this.updateProgressUI();
+    this.updateNavButtons();
+  }
+},
+  
   updateNavButtons() {
     const prog = this.getProgress();
     const hasClearedNext = (this.currentDoor < prog.door) ||
@@ -1274,7 +1287,7 @@ async fetchData() {
     if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
     this.saveProgress(nDoor, nLvl, 0);
     this._fromGame = true; // came from inside the game, skip door dialogue
-    if (window.triggerMoti) window.triggerMoti({ title: "Done!", msg: "Level Unlocked!", img: "https://i.imgur.com/8N69vV9.png" });
+    if (window.triggerMoti) window.triggerMoti({ title: "Next!", msg: "Level Up!", img: "https://i.imgur.com/8N69vV9.png" });
     setTimeout(() => { this.isTransitioning = false; this.showLevelList(this.currentDoor); }, 2000);
   },
 
