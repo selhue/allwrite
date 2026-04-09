@@ -2,99 +2,105 @@
 <html>
 <head>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f7f7f7; }
-        .controls { margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f7f7f7; }
+        .section-title { color: #4b4b4b; border-bottom: 2px solid #e5e5e5; padding-bottom: 10px; margin-top: 30px; }
         
         /* Duolingo Style Button */
         .btn-duo {
-            background-color: #58cc02;
-            color: white;
-            border: none;
-            border-bottom: 4px solid #46a302;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: filter 0.2s;
+            background-color: #58cc02; color: white; border: none;
+            border-bottom: 4px solid #46a302; padding: 10px 20px;
+            font-size: 14px; font-weight: bold; border-radius: 12px;
+            cursor: pointer; text-transform: uppercase; margin-bottom: 10px;
         }
-        .btn-duo:active {
-            border-bottom: 0px;
-            margin-top: 4px;
-        }
+        .btn-duo:active { border-bottom: 0px; transform: translateY(4px); }
 
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
-        th { background-color: #fff; color: #afafaf; text-transform: uppercase; font-size: 12px; }
-        .type-tag { background: #e5e5e5; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
+        th { background-color: #fff; color: #afafaf; font-size: 11px; text-transform: uppercase; }
+        .type-tag { background: #ceecff; color: #1cb0f6; padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: bold; }
+        .ans { color: #58cc02; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <button class="btn-duo" onclick="fetchData()">Load API Data</button>
-    </div>
+    <button class="btn-duo" onclick="loadAll()">Refresh Data</button>
 
-    <div id="output">
-        <p style="color: #999;">Click the button to load data from the API...</p>
-    </div>
+    <h2 class="section-title">API Questions</h2>
+    <div id="api-output">Loading API...</div>
+
+    <h2 class="section-title">Hard-coded Finals</h2>
+    <div id="hardcoded-output"></div>
 
     <script>
-        async function fetchData() {
-            const output = document.getElementById('output');
-            output.innerHTML = "Loading...";
+        const HARD_CODED_FINALS = {
+            "0-0": { type:'choice', question:'Correct spelling of "Litle"', options:['Litle','Little','Littel'], answer:'Little' },
+            "0-1": { type:'choice', question:'Correct spelling of "Ridding"', options:['Ridding','Riding','Riddng'], answer:'Riding' },
+            "0-2": { type:'choice', question:'Choose the correct sentence', options:['i live in the philippines','I live in the Philippines','I live in the philippines'], answer:'I live in the Philippines' },
+            "0-3": { type:'choice', question:'Choose the correct sentence', options:['my teacher is mr. santos','My teacher is Mr. Santos','My Teacher is Mr. santos'], answer:'My teacher is Mr. Santos' },
+            "0-4": { type:'choice', question:'Fix the sentence: i have a sister named maria she is very kind', options:['I have a sister named Maria. She is very kind.','I have a sister named maria she is very kind','I have a sister named Maria she is very kind'], answer:'I have a sister named Maria. She is very kind.' },
+            "1-0": { type:'choice', question:'What punctuation ends a sentence?', options:['.','?','!'], answer:'.' },
+            "1-1": { type:'choice', question:'What punctuation asks a question?', options:['.','?','!'], answer:'?' },
+            "1-2": { type:'choice', question:'What punctuation shows strong feeling?', options:['.','?','!'], answer:'!' },
+            "1-3": { type:'choice', question:'Where are you now __', options:['.','?','!'], answer:'?' },
+            "1-4": { type:'choice', question:'I am very happy __', options:['.','?','!'], answer:'!' },
+            "2-0": { type:'choice', question:'Choose one familiar place', options:['Classroom','Home','Market','Playground'], answer:'Classroom' },
+            "3-0": { type:'choice', question:'The ___ barks loudly.', options:['The dog','Anna','Sun'], answer:'The dog' },
+            "3-1": { type:'choice', question:'___ writes a letter.', options:['Anna','Children','Sun'], answer:'Anna' },
+            "3-2": { type:'choice', question:'The ___ play in the park.', options:['Children','Sun','Father'], answer:'Children' },
+            "3-3": { type:'choice', question:'The ___ shines brightly.', options:['Sun','Dog','Father'], answer:'Sun' },
+            "3-4": { type:'choice', question:'Choose correct sentence', options:['He run fast','He runs fast','He running fast'], answer:'He runs fast' },
+            "4-0": { type:'choice', question:'Complete: I am ________.', options:['happy','run','book'], answer:'happy' },
+            "4-1": { type:'choice', question:'Complete: I like ________.', options:['apples','sing','fast'], answer:'apples' },
+            "4-2": { type:'choice', question:'Complete: I can ________.', options:['sing','apple','home'], answer:'sing' },
+            "4-3": { type:'choice', question:'Expand: I eat.', options:['I eat rice at home.','I eat.','Eat I rice'], answer:'I eat rice at home.' },
+            "4-4": { type:'choice', question:'Expand: She runs.', options:['She runs in the park.','She run park','She runs'], answer:'She runs in the park.' }
+        };
 
+        // Initialize on load
+        window.onload = loadAll;
+
+        function loadAll() {
+            fetchApiData();
+            renderHardcoded();
+        }
+
+        async function fetchApiData() {
             try {
-                // Fetching from your specific URL
                 const response = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
                 const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
                 
-                // Since the file is .js, we strip potential 'const data =' or similar if it's not pure JSON
-                // If it is pure JSON, JSON.parse(text) works.
-                const cleanJson = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-                const data = JSON.parse(cleanJson);
-                
-                renderTable(data);
-            } catch (error) {
-                output.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+                let html = `<table><thead><tr><th>Door</th><th>Type</th><th>Question</th><th>Answer</th></tr></thead><tbody>`;
+                data.doors.forEach(d => {
+                    d.levels.forEach(l => {
+                        l.questions.forEach(q => {
+                            html += `<tr><td>${d.door}</td><td><span class="type-tag">${q.type}</span></td><td>${q.question}</td><td class="ans">${q.answer}</td></tr>`;
+                        });
+                    });
+                });
+                html += `</tbody></table>`;
+                document.getElementById('api-output').innerHTML = html;
+            } catch (e) {
+                document.getElementById('api-output').innerHTML = "Failed to load API.";
             }
         }
 
-        function renderTable(data) {
-            let html = `<table>
-                <thead>
-                    <tr>
-                        <th>Door</th>
-                        <th>Level</th>
-                        <th>Type</th>
-                        <th>Question</th>
-                        <th>Answer</th>
-                        <th>Choices</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-
-            data.doors.forEach(door => {
-                door.levels.forEach(level => {
-                    level.questions.forEach(q => {
-                        html += `<tr>
-                            <td><strong>${door.door}</strong></td>
-                            <td>${level.title} (Lvl ${level.level})</td>
-                            <td><span class="type-tag">${q.type.toUpperCase()}</span></td>
-                            <td>${q.question}</td>
-                            <td style="color: #58cc02; font-weight:bold;">${q.answer}</td>
-                            <td>${q.choices ? q.choices.join(' | ') : 'N/A'}</td>
-                        </tr>`;
-                    });
-                });
-            });
-
-            html += '</tbody></table>';
-            document.getElementById('output').innerHTML = html;
+        function renderHardcoded() {
+            let html = `<table><thead><tr><th>Key</th><th>Type</th><th>Question</th><th>Answer</th><th>Options</th></tr></thead><tbody>`;
+            for (let key in HARD_CODED_FINALS) {
+                const q = HARD_CODED_FINALS[key];
+                html += `<tr>
+                    <td>${key}</td>
+                    <td><span class="type-tag">${q.type}</span></td>
+                    <td>${q.question}</td>
+                    <td class="ans">${q.answer}</td>
+                    <td>${q.options.join(' | ')}</td>
+                </tr>`;
+            }
+            html += `</tbody></table>`;
+            document.getElementById('hardcoded-output').innerHTML = html;
         }
-
-        fetchData();
     </script>
 </body>
 </html>
