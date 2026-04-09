@@ -11,7 +11,7 @@
 
 <style>
     body {    
-      background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.jpg'); 
+      background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.png'); 
       background-size: cover; background-position: center;
       font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif; 
       background-color: #000; color: var(--duo-text); 
@@ -964,6 +964,32 @@
 })();
 </script></script>
 </dial-tem>
+<script>
+  // 1. Create the Audio Object
+const bgm = new Audio('https://cdn.pixabay.com/download/audio/2026/02/11/audio_1c5f7e241c.mp3?filename=idoberg-fun-indie-game-type-jazz-music-483446.mp3');
+bgm.loop = true;
+bgm.volume = 0.4; // 40% volume (so it's not too loud)
+
+// 2. The "Unlocker" Function
+const startBGM = () => {
+    bgm.play()
+        .then(() => {
+            console.log("Music started!");
+            // Remove listeners so it doesn't try to play again on every click
+            window.removeEventListener('click', startBGM);
+            window.removeEventListener('keydown', startBGM);
+        })
+        .catch(err => console.log("Waiting for user interaction..."));
+};
+
+// 3. Listen for the first interaction to trigger play
+window.addEventListener('click', startBGM);
+window.addEventListener('keydown', startBGM);
+
+// 4. (Optional) Control functions for your game logic
+const stopMusic = () => bgm.pause();
+const setVolume = (val) => bgm.volume = val;
+</script>
 <game>
    <style>
     .confetti {
