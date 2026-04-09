@@ -39,18 +39,23 @@
 
         .wheel-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 320px;
+            height: 320px;
             margin: 20px auto;
         }
 
-        #wheel {
+        #wheel-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+
+        #wheel-bg {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             border: 8px solid #4b4b4b;
-            position: relative;
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
             background: conic-gradient(
                 #ff4b4b 0deg 72deg, 
                 #f7a600 72deg 144deg, 
@@ -58,6 +63,27 @@
                 #1cb0f6 216deg 288deg, 
                 #ce82ff 288deg 360deg
             );
+        }
+
+        .wheel-labels {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0% 0%;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 110px;
+            margin-left: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .wheel-pointer {
@@ -142,7 +168,10 @@
 
 <div class="wheel-container">
     <div class="wheel-pointer"></div>
-    <div id="wheel"></div>
+    <div id="wheel-wrapper">
+        <div id="wheel-bg"></div>
+        <div class="wheel-labels" id="labels-container"></div>
+    </div>
 </div>
 
 <button class="btn-spin" onclick="spinNow()" id="spin-btn">SPIN!</button>
@@ -160,25 +189,31 @@
 <audio id="win-sound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
 
 <script>
-    // Validation & Redirect
+    const prizeData = [
+        { name: "Fudgee Bar", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlRPxvDJXWMR4tRoW5Ph1sG7l7t0NobFiYwNu6fxksJfRiwH9y" },
+        { name: "Pen & Paper", img: "https://img.freepik.com/free-photo/notebook-blue-wood-table_1249-633.jpg?w=740&q=80" },
+        { name: "Nova", img: "https://shopsuki.ph/cdn/shop/files/4800016663802_1024x.jpg?v=1756178180" },
+        { name: "Combi", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA9A4FHRPEqbZg1aFQpPMzYF8x_aOLMlSb7g&s" },
+        { name: "Piattos", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmfT9K1LB6vOLdgVkrQYGy0rwoPKZa2q-tuA&s" }
+    ];
+
+    const labelsContainer = document.getElementById('labels-container');
+    prizeData.forEach((item, i) => {
+        const angle = (i * 72) + 36;
+        const el = document.createElement('div');
+        el.className = 'label';
+        el.style.transform = `rotate(${angle}deg) translate(15px, -50%)`;
+        el.innerText = item.name;
+        labelsContainer.appendChild(el);
+    });
+
     const rawProgress = localStorage.getItem('allwrite_progress');
     const uName = localStorage.getItem('user_name');
-    
-    if(!rawProgress || !uName) {
-        window.location.href = "https://allwrite-sh.vercel.app/allow/new";
-    }
+    if(!rawProgress || !uName) window.location.href = "";
 
     const progress = JSON.parse(rawProgress);
     document.getElementById('name-display').innerText = `Hi, ${uName}!`;
     document.getElementById('door-val').innerText = progress.door;
-
-    const prizeData = [
-        { name: "Fudgee Bar", img: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400" },
-        { name: "Pen and Paper", img: "https://images.unsplash.com/photo-1516962080544-eac695c93791?w=400" },
-        { name: "Nova", img: "https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400" },
-        { name: "Combi", img: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400" },
-        { name: "Piattos", img: "https://images.unsplash.com/photo-1613919113166-796cae8d27de?w=400" }
-    ];
 
     let spinning = false;
 
@@ -186,18 +221,19 @@
         if(spinning) return;
         spinning = true;
 
-        const wheel = document.getElementById('wheel');
+        const wheel = document.getElementById('wheel-wrapper');
         const btn = document.getElementById('spin-btn');
         const spinSfx = document.getElementById('spin-sound');
         
         btn.disabled = true;
         spinSfx.play();
 
-        const deg = Math.floor(Math.random() * 360) + 3600; 
-        wheel.style.transform = `rotate(${deg}deg)`;
+        const randomSpin = Math.floor(Math.random() * 360);
+        const totalDeg = 3600 + randomSpin;
+        wheel.style.transform = `rotate(${totalDeg}deg)`;
 
         setTimeout(() => {
-            const actualDeg = deg % 360;
+            const actualDeg = totalDeg % 360;
             const index = Math.floor((360 - actualDeg) / 72) % 5;
             const win = prizeData[index];
 
@@ -211,7 +247,6 @@
 
     function closeModal() { location.reload(); }
 
-    // Confetti
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
