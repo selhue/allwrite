@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllWrite Rewards</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #58cc02;
+            --secondary: #1cb0f6;
+            --bg: #f7f7f7;
+            --text: #4b4b4b;
+            --border: #e5e5e5;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Redirect Overlay */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-card {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        /* Wheel Styles */
+        .wheel-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid #4b4b4b;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            background: conic-gradient(
+                #ff4b4b 0deg 72deg, 
+                #f7a600 72deg 144deg, 
+                #58cc02 144deg 216deg, 
+                #1cb0f6 216deg 288deg, 
+                #ce82ff 288deg 360deg
+            );
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #4b4b4b;
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 10;
+        }
+
+        .btn-spin {
+            margin-top: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 0 #46a302;
+            cursor: pointer;
+        }
+
+        .btn-spin:disabled {
+            background: #ccc;
+            box-shadow: 0 5px 0 #999;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+
+<div class="header-card">
+    <h2 id="welcome-msg">Hi, User!</h2>
+    <div class="stats">
+        <div>
+            <small>Doors</small>
+            <div id="door-count" style="font-weight: bold; font-size: 1.2rem;">0</div>
+        </div>
+        <div>
+            <small>Questions</small>
+            <div style="font-weight: bold; font-size: 1.2rem;">125</div>
+        </div>
+    </div>
+</div>
+
+<div class="wheel-container">
+    <div class="wheel-pointer"></div>
+    <div id="wheel"></div>
+</div>
+
+<button class="btn-spin" onclick="spinWheel()" id="spin-btn">SPIN TO CLAIM</button>
+
+<div id="result" style="margin-top: 20px; font-weight: bold; color: var(--secondary);"></div>
+
+<script>
+    // 1. Data Validation & Redirect
+    const userName = localStorage.getItem('user_name');
+    const progressData = localStorage.getItem('allwrite_progress');
+
+    if (!userName || !progressData) {
+        window.location.href = "https://allwrite-sh.vercel.app/allow/new";
+    } else {
+        document.getElementById('loader').style.display = 'none';
+        const progress = JSON.parse(progressData);
+        
+        // 2. Set UI Data
+        document.getElementById('welcome-msg').innerText = `Hi, ${userName}!`;
+        document.getElementById('door-count').innerText = progress.door;
+    }
+
+    // 3. Wheel Logic
+    let isSpinning = false;
+
+    function spinWheel() {
+        if (isSpinning) return;
+        
+        isSpinning = true;
+        const btn = document.getElementById('spin-btn');
+        const wheel = document.getElementById('wheel');
+        const result = document.getElementById('result');
+        
+        btn.disabled = true;
+        result.innerText = "Spinning...";
+
+        // Random rotation (at least 5 full turns + random)
+        const randomDeg = Math.floor(Math.random() * 360) + 1800; 
+        wheel.style.transform = `rotate(${randomDeg}deg)`;
+
+        setTimeout(() => {
+            isSpinning = false;
+            btn.disabled = false;
+            
+            // Logic to pick reward based on landing angle
+            const rewards = ["Fudgee Bar", "Piattos", "Combi", "Nova", "Pen & Paper"];
+            const actualDeg = randomDeg % 360;
+            const prizeIndex = Math.floor((360 - actualDeg) / 72) % 5;
+            
+            result.innerText = `CONGRATS! You claimed: ${rewards[prizeIndex]}`;
+            
+            // Optional: Save claim to local storage
+            const claims = JSON.parse(localStorage.getItem('claimed_rewards') || "[]");
+            claims.push(rewards[prizeIndex]);
+            localStorage.setItem('claimed_rewards', JSON.stringify(claims));
+            
+        }, 4000);
+    }
+</script>
+
+</body>
+</html>
