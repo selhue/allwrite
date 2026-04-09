@@ -723,6 +723,233 @@
 </quest-ion>
 
 
+
+<game-system>
+  <style>
+    /* Blurred Background for Dialogs */
+    .duo-dialog {
+      border: none; padding: 0; margin: 0; 
+      width: 100vw; height: 100vh; max-width: none; max-height: none;
+      background: transparent; overflow: hidden;
+    }
+    .duo-dialog::backdrop {
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Character Picker UI (Netflix Style) */
+    .picker-content {
+      overflow-y: scroll;
+      height: 100%; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: 'Segoe UI', sans-serif; background: white;
+    }
+    .picker-content h1 { color: #3c3c3c; font-weight: 800; margin-bottom: 40px; font-size: 2rem; }
+    .profile-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .profile-card {
+      width: 90px;  padding: 20px; border: 3px solid #e5e5e5; border-bottom: 8px solid #e5e5e5;
+      border-radius: 24px; cursor: pointer; transition: 0.1s; text-align: center; background: #fff;
+    }
+    .profile-card:hover { transform: translateY(-5px); background: #f7f7f7; border-color: #1cb0f6; }
+    .profile-card:active { border-bottom-width: 3px; transform: translateY(2px); }
+    .profile-card img { width: 110px; height: 110px; object-fit: contain; pointer-events: none; }
+    .profile-card span { display: block; margin-top: 12px; font-weight: 800; color: #4b4b4b; font-size: 1.2rem; }
+
+    /* Dialogue UI */
+    #dialogue-overlay {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end; padding-bottom: 40px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .char-box { position: relative; margin-bottom: -45px; z-index: 10; pointer-events: none; }
+    .char-img { width: 220px; height: 220px; object-fit: contain; }
+    .bubble {
+      background: white; border: 4px solid #e5e5e5; border-radius: 28px;
+      width: 90%; max-width: 500px; padding: 45px 25px 25px;
+      box-shadow: 0 10px 0 #e5e5e5; position: relative;
+    }
+    .name-tag {
+      position: absolute; top: -20px; left: 30px; background: #58cc02; color: white;
+      padding: 8px 24px; border-radius: 14px; font-weight: 900; text-transform: uppercase;
+      border-bottom: 4px solid #46a302; font-size: 1rem;
+    }
+    .msg { font-size: 1.4rem; color: #3c3c3c; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
+    .btns { display: flex; flex-direction: column; gap: 12px; }
+    .d-btn {
+      width: 100%; border: 2px solid transparent; padding: 18px; border-radius: 20px;
+      font-weight: 800; cursor: pointer; text-align: center; transition: 0.1s;
+      text-transform: uppercase; font-size: 1rem; letter-spacing: 0.5px;
+    }
+    .d-btn:active { border-bottom-width: 0 !important; transform: translateY(4px); }
+  </style>
+
+  <div id="ui-root">
+    <dialog id="picker-dialog" class="duo-dialog">
+      <div class="picker-content">
+        <h1>CHOOSE YOUR FRIEND</h1>
+        <div id="profile-grid" class="profile-grid"></div>
+      </div>
+    </dialog>
+
+    <dialog id="game-dialogue-ui" class="duo-dialog">
+      <div id="dialogue-overlay">
+        <div class="char-box"><img id="diag-char" class="char-img" src=""></div>
+        <div class="bubble">
+          <div id="diag-name" class="name-tag"></div>
+          <div id="diag-text" class="msg"></div>
+          <div id="diag-btns" class="btns"></div>
+        </div>
+      </div>
+    </dialog>
+  </div>
+<script>
+  const MATERIALS = {
+    'Spella': [
+        { topic: 'Spelling Rules', info: 'Common words like "friend" often follow the "i before e except after c" rule.' },
+        { topic: 'Proper Names', info: 'Always capitalize the first letter of names (Carlo) and places (Cagayan).' },
+        { topic: 'The Pronoun "I"', info: 'The word "I" is always written as a capital letter when referring to yourself.' }
+    ],
+    'Canix': [
+        { topic: 'The Period (.)', info: 'Use a period to end a statement or a complete thought.' },
+        { topic: 'Question Mark (?)', info: 'Place this at the end of every sentence that asks something.' },
+        { topic: 'Exclamation Point (!)', info: 'Use this to show strong feelings like excitement or surprise.' }
+    ],
+    'Vocaby': [
+        { topic: 'Context Clues', info: 'Look at the words around a new word to guess its meaning (e.g., Scientist -> examine).' },
+        { topic: 'Action Words', info: 'Verbs describe what someone is doing, like "growing" or "healing".' }
+    ],
+    'Gramix': [
+        { topic: 'Subject-Verb Agreement', info: 'Singular subjects (The dog) need singular verbs (barks). Plural subjects (The girls) need plural verbs (are).' },
+        { topic: 'Sentence Structure', info: 'A standard English sentence usually follows: Subject + Verb + Object.' }
+    ],
+    'Finale': [
+        { topic: 'Sentence Expansion', info: 'Make sentences better by adding "where" or "when" details.' },
+        { topic: 'Connecting Ideas', info: 'Use "and" to join similar ideas, and "but" for different ideas.' }
+    ]
+};
+
+</script>
+  <script><!-- REPLACE the entire second <script> block inside <game-system> with this -->
+(function() {
+  const BASE_URL = "https://allwrite-sh.vercel.app/";
+  const DUO_PALETTE = {
+    green:  { bg: '#58cc02', shadow: '#46a302', text: '#fff' },
+    blue:   { bg: '#1cb0f6', shadow: '#1899d6', text: '#fff' },
+    red:    { bg: '#ff4b4b', shadow: '#cc3c3c', text: '#fff' },
+    white:  { bg: '#ffffff', shadow: '#e5e5e5', text: '#4b4b4b' },
+    gold:   { bg: '#ffc800', shadow: '#e5a500', text: '#fff' },
+    purple: { bg: '#ce82ff', shadow: '#a560d6', text: '#fff' }
+  };
+
+  const CHAR_MAP = [
+    { id: 'a', name: 'Lynzie', defaultPose: 'smile' },
+    { id: 'b', name: 'Kenjie', defaultPose: 'thumbs' },
+    { id: 'c', name: 'Cris',   defaultPose: 'sweet' },
+    { id: 'd', name: 'Delo',   defaultPose: 'smile' }
+  ];
+
+  const pDialog = document.getElementById('picker-dialog');
+  const dDialog = document.getElementById('game-dialogue-ui');
+  const pGrid   = document.getElementById('profile-grid');
+
+  // --- Picker ---
+  CHAR_MAP.forEach(char => {
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.innerHTML = `<img src="${BASE_URL}${char.id}-${char.defaultPose}.png"><span>${char.name}</span>`;
+    card.onclick = () => {
+      localStorage.setItem('game_char_id', char.id);
+      localStorage.setItem('game_char_name', char.name);
+      pDialog.close();
+      const userName = localStorage.getItem('user_name') || 'there';
+      window.Dialogue.open([
+        { pose: 'wave', text: `Hi, ${userName}! I'm ${char.name}. I'll be your writing buddy!` },
+        { pose: 'smile', text: `Each door has levels to complete. Finish all levels to unlock the next door.`, options: [{ label: "LET'S GO!", color: 'green' }] }
+      ]);
+    };
+    pGrid.appendChild(card);
+  });
+
+  window.addEventListener('load', () => {
+    if (!localStorage.getItem('game_char_id')) pDialog.showModal();
+  });
+
+  // --- Dialogue engine ---
+  let _queue = [], _idx = 0, _onDone = null;
+
+  window.Dialogue = {
+    open(dataArray, onDone) {
+      _queue = dataArray;
+      _idx = 0;
+      _onDone = onDone || null;
+      dDialog.showModal();
+      this.render();
+    },
+    render() {
+      const step = _queue[_idx];
+      const charId = step.charId || localStorage.getItem('game_char_id') || 'a';
+      const name   = step.name   || localStorage.getItem('game_char_name') || 'Friend';
+
+      document.getElementById('diag-char').src = `${BASE_URL}${charId}-${step.pose}.png`;
+      document.getElementById('diag-name').innerText = name;
+      document.getElementById('diag-text').innerText = step.text;
+
+      const bList = document.getElementById('diag-btns');
+      bList.innerHTML = '';
+
+      const options = step.options || [{ label: 'CONTINUE', color: 'blue' }];
+      options.forEach(opt => {
+        const b = document.createElement('button');
+        const theme = DUO_PALETTE[opt.color] || DUO_PALETTE.blue;
+        b.className = 'd-btn';
+        b.innerText = opt.label;
+        b.style.backgroundColor = theme.bg;
+        b.style.color = theme.text;
+        b.style.borderBottom = `6px solid ${theme.shadow}`;
+        if (opt.color === 'white') b.style.border = '2px solid #e5e5e5';
+        b.onclick = () => {
+          if (opt.action) opt.action();
+          window.Dialogue.next();
+        };
+        bList.appendChild(b);
+      });
+    },
+    next() {
+      _idx++;
+      if (_idx < _queue.length) {
+        this.render();
+      } else {
+        dDialog.close();
+        if (_onDone) { _onDone(); _onDone = null; }
+      }
+    }
+  };
+
+  // --- Door intro — called by showLevelList ---
+  window.triggerDoorIntro = function(doorIdx, doorLabel, isRevisit, onDone) {
+    const userName = localStorage.getItem('user_name') || 'there';
+    const mats = (typeof MATERIALS !== 'undefined') ? MATERIALS[doorLabel] : null;
+
+    let steps;
+
+    if (!isRevisit) {
+      steps = [
+        { pose: 'wave', text: `Hi, ${userName}! Welcome to ${doorLabel}! This door will sharpen your writing skills. Complete each level to move forward.` },
+        { pose: 'smile', text: `Here's what you'll practice in ${doorLabel}:${mats ? '\n\n' + mats.map(m => `• ${m.topic}: ${m.info}`).join('\n') : ''}`, options: [{ label: 'GOT IT!', color: 'green' }] },
+        { pose: 'point', text: `Let's begin! You can do this!`, options: [{ label: 'START!', color: 'gold' }] }
+      ];
+    } else {
+      steps = [
+        { pose: 'smile', text: `Welcome back to ${doorLabel}, ${userName}!${mats ? '\n\nQuick review:\n' + mats.map(m => `• ${m.topic}: ${m.info}`).join('\n') : ' Keep going and finish all the levels!'}`, options: [{ label: "LET'S GO!", color: 'blue' }] }
+      ];
+    }
+
+    window.Dialogue.open(steps, onDone);
+  };
+
+})();
+</script></script>
+</game-system>
 <game>
   <script>
 const DUO_PALETTE = {
@@ -753,7 +980,7 @@ const GameEngine = {
     this.startAFKTracker();
   },
 
-  async fetchData() {
+async fetchData() {
     try {
       const res = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
       const text = await res.text();
@@ -763,18 +990,19 @@ const GameEngine = {
       // Inject "Test!" level into every door — all questions forced to input type
       this.data.doors.forEach(door => {
         const allQuestions = door.levels.flatMap(l => l.questions);
-        const testQuestions = allQuestions.map(q => {
-          // Strip original question down to the core subject, prefix with "Write: "
-          const stripped = q.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
-          const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
-          return {
-            ...q,
-            type: 'input',
-            question: writePrompt,
-            answer: 'ANY',
-            contains: q.contains || []
-          };
-        });
+        const testQuestions = allQuestions
+          .filter(q => !q.question.toLowerCase().startsWith('identify'))
+          .map(q => {
+            const stripped = q.question.replace(/^(write|rewrite|type|input|list)[^a-z]*/i, '').trim();
+            const writePrompt = `Write: ${stripped.charAt(0).toUpperCase() + stripped.slice(1)}`;
+            return {
+              ...q,
+              type: 'input',
+              question: writePrompt,
+              answer: 'ANY',
+              contains: q.contains || []
+            };
+          });
         door.levels.push({ title: "Test!", questions: testQuestions });
       });
 
@@ -905,27 +1133,46 @@ const GameEngine = {
     }, 200);
   },
 
-  showLevelList(doorIdx) {
+showLevelList(doorIdx) {
     this.currentDoor = doorIdx;
     const door = this.data.doors[doorIdx];
     const prog = this.getProgress();
-    this.toggleScreen('list');
-    const levelButtons = door.levels.map((l, i) => {
-      const isTest = l.title === "Test!";
-      const isLocked = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
-      const isCurrent = (doorIdx === prog.door && i === prog.level);
-      // Test level uses purple theme if unlocked
-      const theme = isLocked ? DUO_PALETTE.white : (isTest ? DUO_PALETTE.purple : DUO_PALETTE.gold);
-      return {
-        label: isLocked ? '🔒 Locked' : (isCurrent && prog.q > 0 ? `Lvl ${i+1} (Resume)` : `Lvl ${i+1}: ${l.title}`),
-        color: theme.bg, shadow: theme.shadow, textColor: isLocked ? DUO_PALETTE.gray.bg : theme.text,
-        action: isLocked ? null : () => this.startLesson(i)
-      };
-    });
-    levelButtons.unshift({ label: '← BACK', color: DUO_PALETTE.white.bg, shadow: DUO_PALETTE.white.shadow, textColor: DUO_PALETTE.white.text, action: () => this.renderMap() });
-    window.renderList('list-co', levelButtons);
-  },
+    const seenKey = `allwrite_door_seen_${doorIdx}`;
+    const isRevisit = !!localStorage.getItem(seenKey);
+    // door contentLabel is the material key (Spella, Canix, etc.)
+    const doorLabel = door.name.split(':')[1]?.trim() || door.name;
 
+    const renderList = () => {
+      this.toggleScreen('list');
+      const levelButtons = door.levels.map((l, i) => {
+        const isTest   = l.title === "Test!";
+        const isLocked = (doorIdx > prog.door) || (doorIdx === prog.door && i > prog.level);
+        const isCurrent = (doorIdx === prog.door && i === prog.level);
+        const theme = isLocked ? DUO_PALETTE.white : (isTest ? DUO_PALETTE.purple : DUO_PALETTE.gold);
+        return {
+          label: isLocked ? '🔒 Locked' : (isCurrent && prog.q > 0 ? `Lvl ${i+1} (Resume)` : `Lvl ${i+1}: ${l.title}`),
+          color: theme.bg, shadow: theme.shadow,
+          textColor: isLocked ? DUO_PALETTE.gray.bg : theme.text,
+          action: isLocked ? null : () => this.startLesson(i)
+        };
+      });
+      levelButtons.unshift({
+        label: '← BACK',
+        color: DUO_PALETTE.white.bg, shadow: DUO_PALETTE.white.shadow, textColor: DUO_PALETTE.white.text,
+        action: () => this.renderMap()
+      });
+      window.renderList('list-co', levelButtons);
+    };
+
+    // Always show dialogue when entering a door
+    if (window.triggerDoorIntro) {
+      if (!isRevisit) localStorage.setItem(seenKey, 'true');
+      this.toggleScreen('map'); // backdrop stays as map while dialogue is open
+      window.triggerDoorIntro(doorIdx, doorLabel, isRevisit, renderList);
+    } else {
+      renderList(); // fallback if game-system not loaded
+    }
+  },
   startLesson(levelIdx) {
     this.currentLevel = levelIdx;
     const prog = this.getProgress();
