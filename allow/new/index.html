@@ -988,12 +988,26 @@
         });
     </script>
 <script>
-  // 1. Create the Audio Object
+
 const bgm = new Audio('https://cdn.pixabay.com/download/audio/2026/02/11/audio_1c5f7e241c.mp3?filename=idoberg-fun-indie-game-type-jazz-music-483446.mp3');
 bgm.loop = true;
-bgm.volume = 0.4; // 40% volume (so it's not too loud)
+bgm.volume = 0.4;
+ let savedVolume = 0.4;
 
-// 2. The "Unlocker" Function
+const bgmTog = () => {
+
+  if (bgm.volume > 0) {
+    document.querySelector('#tgM').classList="fa-solid fa-toggle-off";
+    savedVolume = bgm.volume;
+    bgm.volume = 0;
+    console.log("Muted");
+  } else {
+    
+    document.querySelector('#tgM').classList="fa-solid fa-toggle-on";
+    bgm.volume = savedVolume || 0.4;
+    console.log("Unmuted");
+  }
+};
 const startBGM = () => {
     bgm.play()
         .then(() => {
@@ -1005,11 +1019,9 @@ const startBGM = () => {
         .catch(err => console.log("Waiting for user interaction..."));
 };
 
-// 3. Listen for the first interaction to trigger play
 window.addEventListener('click', startBGM);
 window.addEventListener('keydown', startBGM);
 
-// 4. (Optional) Control functions for your game logic
 const stopMusic = () => bgm.pause();
 const setVolume = (val) => bgm.volume = val;
 </script>
@@ -1375,12 +1387,48 @@ updateHomeNav() {
   });
 
   // Check if user has reached Door 5
-  let rewardBtn = '';
+  let btnSt = '';
   if (prog.door >= 5) {
-    rewardBtn = `
+    btnSt = `
+    
+    
       <button class="duo-btn-reward" onclick="window.location.href='https://allwrite-sh.vercel.app/allow/rewards'">
         <i class="fa-solid fa-medal"></i>
         <span>REWARDS</span>
+      </button>
+
+    `;
+  }
+
+  statsContainer.innerHTML = `
+    ${btnSt}
+
+        <button class="duo-btn-reward duo-wr" onclick="bgmTog()">
+        <i id="tgM" class="fa-solid fa-toggle-on"></i>
+        <span>BGM</span>
+      </button>
+      
+        <button class="duo-btn-reward duo-wr" onclick="window.openSheet({
+  title: 'Reset Progress?',
+  body: '<p>This will erase your saved progress.</p>',
+  buttons: [
+    {
+      text: 'Cancel',
+      color: 'gold',
+      action: () => console.log('Canceled')
+    },
+    {
+      text: 'Reset',
+      color: 'white',
+      action: () => {
+        localStorage.setItem('allwrite_progress', '');
+        console.log('Progress reset');
+      }
+    }
+  ]
+});">
+  
+      <i class="fa-solid fa-gear"></i>
       </button>
       <style>
         .duo-btn-reward {
@@ -1401,16 +1449,16 @@ updateHomeNav() {
           margin-right: 10px;
           font-size: 12px;
         }
+          .duo-btn-reward.duo-wr {
+          background-color:#ffffff; 
+            border-bottom: 4px solid #e5e5e5; color: #4b4b4b;
+          }
         .duo-btn-reward:active {
           border-bottom-width: 0px;
           transform: translateY(4px);
         }
       </style>
-    `;
-  }
-
-  statsContainer.innerHTML = `
-    ${rewardBtn}
+    
     <span style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
       <i class="fa-solid fa-check"></i> ${totalLvl}
     </span>
@@ -1450,7 +1498,12 @@ updateHomeNav() {
       const hNav = document.createElement('div');
       hNav.id = "home-top-nav";
       hNav.style = `position:fixed; top:0; left:0; width:100%; height:60px; background:transparent; z-index:900; display:flex; align-items:center; justify-content:space-between; padding:0 20px; box-sizing:border-box;`;
-      hNav.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span></div><div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>`;
+      hNav.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px;"><span style="color:${DUO_PALETTE.gold.bg}; font-weight:800; font-size:18px; letter-spacing:1px;">ALLWRITE</span></div>
+      
+      <div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>
+      
+      `;
       document.body.appendChild(hNav);
     }
     if (!document.getElementById('game-top-nav')) {
@@ -1474,6 +1527,7 @@ updateHomeNav() {
       bNav.style = `position:fixed; bottom:0; left:0; width:100%; height:80px; display:none; align-items:center; justify-content:center; background:transparent; z-index:1000; padding:0 30px; box-sizing:border-box;`;
       bNav.innerHTML = `
         <div style="display:flex; justify-content:space-between; width:100%; max-width:600px;">
+          
           <button id="nav-prev" style="width:50px; height:50px; border-radius:50%; border:none; background:transparent; color:#afafaf; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-arrow-left"></i></button>
           <button id="nav-next" style="width:50px; height:50px; border-radius:50%; border:none; background:transparent; color:${DUO_PALETTE.gold.bg}; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-arrow-right"></i></button>
         </div>
