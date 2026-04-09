@@ -1134,7 +1134,7 @@ const GameEngine = {
 
 async fetchData() {
     try {
-      const res = await fetch('https://takamuratomokii-debug.github.io/t-js/api/data.js');
+      const res = await fetch('http://allwrite-sh.vercel.app/data.js');
       const text = await res.text();
       const json = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
       this.data = JSON.parse(json);
