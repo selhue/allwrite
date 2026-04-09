@@ -698,6 +698,7 @@
           }
 
           playSound(ok ? 'correct' : 'error');
+
           fb.textContent = ok ? "Excellent!" : failMsg;
           fb.style.color = ok ? "#58cc02" : "#ff4b4b";
 
@@ -705,7 +706,8 @@
           btnTarget.classList.add(ok ? 'correct' : 'wrong');
 
           if (ok) {
-            setTimeout(() => { this.classList.add('fade-out'); if (data.onCorrect) data.onCorrect(); }, 1000);
+         
+            setTimeout(() => {    nice();this.classList.add('fade-out'); if (data.onCorrect) data.onCorrect(); }, 1000);
           } else {
             setTimeout(() => { btnTarget.classList.remove('wrong'); fb.textContent = ""; }, 1800);
           }
@@ -829,8 +831,9 @@
 };
 
 </script>
-  <script><!-- REPLACE the entire second <script> block inside <game-system> with this -->
-(function() {
+  <script>
+
+      (function() {
   const BASE_URL = "https://allwrite-sh.vercel.app/";
   const DUO_PALETTE = {
     green:  { bg: '#58cc02', shadow: '#46a302', text: '#fff' },
@@ -951,7 +954,37 @@
 </script></script>
 </game-system>
 <game>
+   <style>
+    .confetti {
+      position: fixed;
+      top: -50px;
+      user-select: none;
+      pointer-events: none;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); }
+    }
+  </style>
   <script>
+
+const emojis = ['✨', '🎉', '🎊', '🎈', '⭐'];
+
+window.nice = () => {
+  for (let i = 0; i < 50; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    
+    el.style.left = Math.random() * 120 + 'vw';
+    el.style.fontSize = (Math.random() * 25 + 20) + 'px';
+    el.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    el.style.opacity = Math.random();
+
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+};
 const DUO_PALETTE = {
   green:  { bg: '#58cc02', shadow: '#46a302', text: '#ffffff' },
   blue:   { bg: '#1cb0f6', shadow: '#1899d6', text: '#ffffff' },
@@ -1183,6 +1216,7 @@ showLevelList(doorIdx) {
   },
 
   completeLevel() {
+    nice()
     const door = this.data.doors[this.currentDoor];
     let nDoor = this.currentDoor, nLvl = this.currentLevel + 1;
     if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
