@@ -1195,6 +1195,122 @@ const setVolume = (val) => bgm.volume = val;
   })();
 </script>
 </get-spin>
+
+<get-book>
+
+<div id="pdf-modal" class="pdf-modal">
+  <div class="modal-header">
+    <span id="modal-title">Document</span>
+    <button class="close-btn" onclick="closePdf()">×</button>
+  </div>
+  <div class="pdf-container">
+    <embed id="pdf-frame" src="" type="application/pdf" width="100%" height="100%">
+  </div>
+</div>
+
+<style>
+  /* PDF Modal Styling */
+  .pdf-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 1000;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e5e5e5;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    color: #4b4b4b;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: #afafaf;
+    line-height: 1;
+  }
+
+  .pdf-container {
+    flex-grow: 1;
+    background: #555;
+  }
+
+  /* Base Styles for Sheet buttons */
+  [sheet-btn] {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    border: 2px solid #e5e5e5;
+    background: white;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  // Your OpenSheet Flow
+  function openFilePicker() {
+    window.openSheet({
+      title: 'Select Module',
+      body: `
+        Read Materials.
+      `,
+       buttons: [
+      { text: 'Spella', color: 'grey', action: () => viewFile('spella') },
+
+      { text: 'Canix', color: 'grey', action: () => viewFile('canix') },
+
+      { text: 'Vocaby', color: 'grey', action: () => viewFile('vocaby') },
+
+      
+      { text: 'Gramix', color: 'grey', action: () => viewFile('gramix') },
+      
+      { text: 'Finale', color: 'grey', action: () => viewFile('finale') },
+        { text: 'Cancel', color: 'white', action: () => console.log('Closed') }
+      ]
+    });
+  }
+
+  function viewFile(name) {
+    const modal = document.getElementById('pdf-modal');
+    const frame = document.getElementById('pdf-frame');
+    const title = document.getElementById('modal-title');
+    
+    // Set source and title
+    title.innerText = name.toUpperCase() + '.PDF';
+    frame.src = `http://allwrite-sh.vercel.app/${name}.pdf`; 
+    
+    // Show Modal
+    modal.style.display = 'flex';
+  }
+
+  function closePdf() {
+    document.getElementById('pdf-modal').style.display = 'none';
+    document.getElementById('pdf-frame').src = ""; // Stop loading
+  }
+
+  // Mocking your openSheet global if not already present
+  if (!window.openSheet) {
+    window.openSheet = function(config) {
+      console.log("Opening Sheet:", config.title);
+      // This would trigger your existing bottom-sheet UI
+    };
+  }
+</script>
+</get-book>
    <style>
     .confetti {
       position: fixed;
@@ -1393,7 +1509,7 @@ const checkAllComplete=()=> {
   const prog = GameEngine.getProgress();
   const totalDoors = GameEngine.data.doors.length;
   if (prog.door >= totalDoors) {
-    const userName = localStorage.getItem("user_name") || "Player"
+  
 
 const subject = encodeURIComponent("GAME COMPLETE - ALLWRITE")
 
@@ -1404,7 +1520,10 @@ I completed the game - ALLWRITE.
 
 It was a great experience and I have successfully finished all required parts.
 
-Player name: ${userName}
+Player name: ${localStorage.getItem("user_name") || "Player"}
+
+I won these.
+${JSON.parse(localStorage.getItem("allwrite_prizes") || "[]")}
 
 Please confirm my completion and let me know the next steps for any certificate or rewards.
 
@@ -1844,8 +1963,13 @@ updateHomeNav() {
         </div>
       
       <div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>
-      <div style="position:fixed;bottom:0;left:0;right:0;display:flex;max-width:599px;margin:0 auto;">
-        <button class="duo-btn-reward duo-wr" onmousedown="bgmTog()">
+      <div style="position:fixed;bottom:0;left:0;right:0;display:flex;max-width:599px;padding:0.2in;margin:0 auto;">
+         <button class="duo-btn-reward duo-wr" onmousedown="openFilePicker()">
+        <i class="fa-solid fa-book "></i>
+  <span>Booklets</span>
+      </button>
+      
+      <button class="duo-btn-reward duo-wr" onmousedown="bgmTog()">
         <i id="tgM" class="fa-solid fa-volume-high "></i>
   
       </button>
