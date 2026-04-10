@@ -10,7 +10,11 @@
 </head>
 
 <style>
-    body {    
+    body {   
+      height: 100dvh;
+      margin: auto; 
+      justify-content: center;
+      align-items: center;
       background-image: url('https://raw.githubusercontent.com/selhue/allwrite/refs/heads/main/bg.png'); 
       background-size: cover; background-position: center;
       font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif; 
@@ -1535,15 +1539,7 @@ updateHomeNav() {
   statsContainer.innerHTML = `
     ${btnSt}
 
-        <button class="duo-btn-reward duo-wr" onmousedown="bgmTog()">
-        <i id="tgM" class="fa-solid fa-volume-high "></i>
-  
-      </button>
-      
-        <button class="duo-btn-reward duo-wr" onmousedown="resetAll();">
-  
-      <i class="fa-solid fa-gear"></i>
-      </button>
+
       <style>
         .duo-btn-reward {
           display: inline-flex;
@@ -1573,6 +1569,7 @@ updateHomeNav() {
         }
       </style>
     
+      
     <button style="background:#fff9e6cc; padding:4px 10px; border-radius:8px; border:1px solid ${DUO_PALETTE.gold.bg}; color:${DUO_PALETTE.gold.shadow};">
       <i class="fa-solid fa-check"></i> ${totalLvl}
     </button>
@@ -1627,7 +1624,17 @@ updateHomeNav() {
         </div>
       
       <div id="home-stats" style="display:flex; gap:12px; font-weight:700; font-size:14px;"></div>
+      <div style="position:fixed;bottom:0;left:0;right:0;display:flex;max-width:599px;margin:0 auto;">
+        <button class="duo-btn-reward duo-wr" onmousedown="bgmTog()">
+        <i id="tgM" class="fa-solid fa-volume-high "></i>
+  
+      </button>
       
+        <button class="duo-btn-reward duo-wr" onmousedown="resetAll();">
+  
+      <i class="fa-solid fa-gear"></i>
+      </button>
+</div>
       `;
       document.body.appendChild(hNav);
     }
