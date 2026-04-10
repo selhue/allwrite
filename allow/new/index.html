@@ -943,8 +943,7 @@
       }
     }
   };
-
-  // --- Door intro — called by showLevelList ---
+// --- Door intro — called by showLevelList ---
   window.triggerDoorIntro = function(doorIdx, doorLabel, isRevisit, onDone) {
     const userName = localStorage.getItem('user_name') || 'there';
     const mats = (typeof MATERIALS !== 'undefined') ? MATERIALS[doorLabel] : null;
@@ -1204,6 +1203,37 @@ const resetAll=()=> {
   ]
 });
 }
+
+const checkAllComplete=()=> {
+  if (!GameEngine.data) return;
+  const prog = GameEngine.getProgress();
+  const totalDoors = GameEngine.data.doors.length;
+  if (prog.door >= totalDoors) {
+    const userName = localStorage.getItem("user_name") || "Player"
+
+const subject = encodeURIComponent("GAME COMPLETE - ALLWRITE")
+
+const body = encodeURIComponent(
+  `Dear Support Team
+
+I completed the game - ALLWRITE.
+
+It was a great experience and I have successfully finished all required parts.
+
+Player name: ${userName}
+
+Please confirm my completion and let me know the next steps for any certificate or rewards.
+
+Thank you
+
+I completed the game`
+)
+
+const emailUrl = `https://mail.google.com/mail/u/0/?ui=2&fs=1&to=hsgshsjaja@gmail.com&su=${subject}&body=${body}&tf=cm`;
+
+    window.open(emailUrl);
+  }
+};
 const GameEngine = {
   data: null,
   currentDoor: 0,
@@ -1228,6 +1258,7 @@ const GameEngine = {
 
   saveProgress(doorIdx, levelIdx, qIdx = 0) {
     const p = this.getProgress();
+    
     if (doorIdx > p.door ||
        (doorIdx === p.door && levelIdx > p.level) ||
        (doorIdx === p.door && levelIdx === p.level && qIdx > p.q)) {
@@ -1493,13 +1524,16 @@ updateNavButtons() {
     this.loadActiveQuestion(true);
   },
 
+
   completeLevel() {
     nice();
     const door = this.data.doors[this.currentDoor];
     let nDoor = this.currentDoor, nLvl = this.currentLevel + 1;
     if (nLvl >= door.levels.length) { nDoor++; nLvl = 0; }
+  if (nDoor >= this.data.doors.length) checkAllComplete();
     this.saveProgress(nDoor, nLvl, 0);
-    this._fromGame = true; // came from inside the game, skip door dialogue
+
+    this._fromGame = true; 
     if (window.triggerMoti) window.triggerMoti({ title: "Next!", msg: "Level Up!", img: charImg });
     setTimeout(() => { this.isTransitioning = false; this.showLevelList(this.currentDoor); }, 2000);
   },
