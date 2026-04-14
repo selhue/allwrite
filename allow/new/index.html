@@ -687,12 +687,21 @@
             else if (!isCapitalized) { failMsg = "Start with a capital letter!"; ok = false; }
             else if (!hasPunctuation) { failMsg = "End with . ! ? or ,"; ok = false; }
             else if (!noDoubleSpace) { failMsg = "No double spaces!"; ok = false; }
-            else if (isAny) {
-              const mustContain = data.contains || [];
-              const missing = mustContain.filter(word => !input.includes(word));
-              if (missing.length > 0) { failMsg = `Include the word: "${missing[0]}"`; ok = false; }
-              else { ok = true; }
-            }
+           else if (isAny || target.toUpperCase() === 'ANY23') {
+  const mustContain = data.contains || [];
+  const missing = mustContain.filter(w => !input.includes(w));
+  if (target.toUpperCase() === 'ANY23') {
+    const sentenceCount = input.split(/(?<=[.!?])\s+(?=[A-Z])/).filter(s => s.trim().length > 0).length;
+    if (sentenceCount < 2) { failMsg = "Write at least 2 sentences!"; ok = false; }
+    else if (sentenceCount > 3) { failMsg = "Keep it to 3 sentences max!"; ok = false; }
+    else if (missing.length > 0) { failMsg = `Include the word: "${missing[0]}"`; ok = false; }
+    else ok = true;
+  } else {
+    if (missing.length > 0) { failMsg = `Include the word: "${missing[0]}"`; ok = false; }
+    else ok = true;
+  }
+} 
+      
             else {
               ok = input === target;
               if (!ok) failMsg = "Not quite right";
